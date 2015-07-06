@@ -1,0 +1,38 @@
+extends layout
+
+block headers
+	title New Site Configuration
+
+block content
+	.container
+		.row
+			.col-xs-12
+				.jumbotron
+					if state === "unconfigured"
+						h1 New Site Configuration
+						p
+							| Congratulations! Your site is up and running. You just need to do some quick configuration to get everything
+							| up and running. 
+						p
+							strong However,
+							|  please keep in mind that "Cards Against Humanity" and the CAH logos are trademarks of Cards Against Humanity
+							| LLC. You must use your own name and logos; please do not try to steal theirs.
+					else if state === "configuring"
+						h1 Busy Configuring
+						p Sorry, the site is busy being configured. Try refreshing in a moment when configuration is done.
+					else if state === "configured"
+						h1 Configuration done!
+						p Your server has been configured and is ready to use. Restart the server to apply the new configuration.
+	div(style='margin: 20px;')
+		form(class='form-horizontal')
+			.form-group
+				label(for='site_name_input', class='control-label col-xs-2') Site Name
+				.col-xs-10
+					input(type='text', class='form-control', id='site_name_input', name='site_name', placeholder='Site Name')
+			.form-group
+				label(for='card_icon_input', class='control-label col-xs-2') Card Icon Filename
+				.col-xs-10
+					input(type='text', class='form-control', id='card_icon_input', name='card_icon', placeholder='Filename')
+					span(class='help-block')
+						| The card icon must be placed in the public/images directory. Keep in mind that cards are 300px tall by 200px
+						| wide and must also contain the card text. A good size for this icon might be 35px high by 55px wide.
