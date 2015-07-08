@@ -9,7 +9,9 @@ var session = require('express-session');
 var passport = require('passport');
 var local_strategy = require('passport-local').Strategy;
 var flash = require('connect-flash');
-var config = require('./configuration');
+var express_validator = require('express-validator');
+
+var config = require(path.join(__dirname, 'configuration'));
 
 var app = express();
 
@@ -25,8 +27,29 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Handle Express Sessions
 //app.use(session({
-//
+//	secret: 'secret',
+//	saveUninitialized: true,
+//	resave: true
 //}));
+
+// From example code in documentation
+app.use(express_validator({
+	errorFormatter: function(param, msg, value) {
+			var namespace = param.split('.');
+			var root      = namespace.shift();
+			var formParam = root;
+
+		while(namespace.length)
+			formParam += '[' + namespace.shift() + ']';
+
+		return {
+			param : formParam,
+			msg   : msg,
+			value : value
+		};
+	},
+	customValidators: require('./custom_validators')
+}));
 
 app.use(cookieParser());
 
@@ -51,12 +74,18 @@ app.use(stylus.middleware(stylus_options));
 // Static routes
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(flash());
+app.use(function (req, res, next) {
+	res.locals.messages = require('express-messages')(req, res);
+	next();
+});
+
 // Routing - If the site is not configured yet, route configuration
 // page rather than regular website
 if (config.is_configured)
 {
-	app.use('/', require('./routes/index'));
-	app.use('/user', require('./routes/user'));
+	app.use('/', require(path.join(__dirname, 'routes', 'index')));
+	app.use('/user', require(path.join(__dirname, 'routes', 'user')));
 
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {
@@ -65,7 +94,7 @@ if (config.is_configured)
 		next(err);
 	});
 } else {
-	app.use('/configuration', require('./routes/configuration'));
+	app.use('/configuration', require(path.join(__dirname, 'routes', 'configuration')));
 
 	// In configuration mode, route all requests that
 	// are not to configuration to configuration
