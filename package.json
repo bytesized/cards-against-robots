@@ -16,9 +16,11 @@
 		"stylus": "0.42.3",
 		"connect-flash": "*",
 		"express-validator": "*",
+		"validator": "*",
 		"express-session": "*",
 		"express-messages": "*",
 		"passport": "*",
-		"passport-local": "*"
+		"passport-local": "*",
+		"mysql": "*"
 	}
 }
