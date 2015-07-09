@@ -1,32 +1,28 @@
 var path = require('path');
 var validator = require('validator');
-var configuration = require(path.normalize(path.join(__dirname, 'configuration')));
+var config = require(path.normalize(path.join(__dirname, 'configuration')));
 var database = require(path.normalize(path.join(__dirname, 'database')));
 
 // Creates tables necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
 // the Promise will be fulfilled if the database and tables already exist)
-// Uses the passed configuration data in place of the regular configuration data,
-// since initialization typically means `config.is_configured == false`.
-var init_db = function(config, connection)
+var init_db = function()
 {
-	return init_card_table(config, connection).then(function()
+	return init_card_table().then(function()
 	{
-		return init_deck_list(config, connection);
+		return init_deck_list();
 	}).then(function()
 	{
-		return init_deck_descriptions(config, connection);
+		return init_deck_descriptions();
 	})
 }
 
 // Creates a table necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
 // the Promise will be fulfilled if the database and tables already exist)
-// Uses the passed configuration data in place of the regular configuration data,
-// since initialization typically means `config.is_configured == false`.
-var init_card_table = function(config, connection)
+var init_card_table = function()
 {
-	return connection.queryAsync("SHOW TABLES LIKE 'cards';").then(function(result)
+	return database.pool.queryAsync("SHOW TABLES LIKE 'cards';").then(function(result)
 	{
 		if (result[0].length == 0)
 		{
@@ -52,7 +48,7 @@ var init_card_table = function(config, connection)
 					"win_ratio                FLOAT NOT NULL DEFAULT 0, " +
 					"INDEX(win_ratio)" +
 				") ENGINE InnoDB;";
-			return connection.queryAsync(query);
+			return database.pool.queryAsync(query);
 		}
 	});
 }
@@ -60,11 +56,9 @@ var init_card_table = function(config, connection)
 // Creates a table necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
 // the Promise will be fulfilled if the database and tables already exist)
-// Uses the passed configuration data in place of the regular configuration data,
-// since initialization typically means `config.is_configured == false`.
-var init_deck_list = function(config, connection)
+var init_deck_list = function()
 {
-	return connection.queryAsync("SHOW TABLES LIKE 'deck_list';").then(function(result)
+	return database.pool.queryAsync("SHOW TABLES LIKE 'deck_list';").then(function(result)
 	{
 		if (result[0].length == 0)
 		{
@@ -83,7 +77,7 @@ var init_deck_list = function(config, connection)
 					"play_count               INT UNSIGNED NOT NULL DEFAULT 0, " +
 					"INDEX(play_count)" +
 				") ENGINE InnoDB;";
-			return connection.queryAsync(query);
+			return database.pool.queryAsync(query);
 		}
 	});
 }
@@ -91,11 +85,9 @@ var init_deck_list = function(config, connection)
 // Creates a table necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
 // the Promise will be fulfilled if the database and tables already exist)
-// Uses the passed configuration data in place of the regular configuration data,
-// since initialization typically means `config.is_configured == false`.
-var init_deck_descriptions = function(config, connection)
+var init_deck_descriptions = function()
 {
-	return connection.queryAsync("SHOW TABLES LIKE 'deck_descriptions';").then(function(result)
+	return database.pool.queryAsync("SHOW TABLES LIKE 'deck_descriptions';").then(function(result)
 	{
 		if (result[0].length == 0)
 		{
@@ -110,7 +102,7 @@ var init_deck_descriptions = function(config, connection)
 					// with InnoDB (default engine) FOREIGN KEY's are indexed anyways. Rather than
 					// creating an index, I will just force use of the InnoDB engine.
 				") ENGINE InnoDB;";
-			return connection.queryAsync(query);
+			return database.pool.queryAsync(query);
 		}
 	});
 }

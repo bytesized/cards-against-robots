@@ -99,7 +99,7 @@ app.use(function (req, res, next)
 
 // Routing - If the site is not configured yet, route configuration
 // page rather than regular website
-if (config.is_configured)
+if (config.properties.is_configured)
 {
 	app.use('/', require(path.join(__dirname, 'routes', 'index')));
 	app.use('/user', require(path.join(__dirname, 'routes', 'user')));

@@ -80,6 +80,26 @@ function get_config(request)
 	return config;
 }
 
+// Sets each config value
+function set_config(config)
+{
+	configuration.methods.set('site_name', config.site_name);
+	configuration.methods.set('card_icon_filename', config.card_icon_filename);
+	configuration.methods.set('card_icon_height', config.card_icon_height);
+	configuration.methods.set('card_icon_width', config.card_icon_width);
+	configuration.methods.set('mysql.host', config.mysql.host);
+	configuration.methods.set('mysql.port', config.mysql.port);
+	configuration.methods.set('mysql.database', config.mysql.database);
+	configuration.methods.set('mysql.username', config.mysql.username);
+	configuration.methods.set('mysql.password', config.mysql.password);
+	configuration.methods.set('mysql.connection_limit', config.mysql.connection_limit);
+	configuration.methods.set('invitations_required', config.invitations_required);
+	configuration.methods.set('token_length', config.token_length);
+	configuration.methods.set('username_length', config.username_length);
+	configuration.methods.set('deck_name_length', config.deck_name_length);
+	configuration.methods.set('card_text_length', config.card_text_length);
+}
+
 /* POST configure request */
 router.post('/', function(req, res, next)
 {
@@ -133,16 +153,19 @@ router.post('/', function(req, res, next)
 			return;
 	}
 
+	// Configuration looks good. Set this as the current configuration so we can try to use it
+	set_config(config);
+
 	// Initialize the tables in the database. This doubles as validating the MYSQL config data
 	// (If the connection fails, the MYSQL configuration is wrong)
-	database.init(config).then(function()
+	database.init().then(function()
 	{
 		// No MYSQL errors! That was the last config check. Write out the config file
 		// and render the page
 		var errors = null;
 		try
 		{
-			fs.writeFileSync(configuration.filename, JSON.stringify(config, null, 4));
+			configuration.methods.save_sync();
 			state = states.configured;
 		} catch (err) 
 		{

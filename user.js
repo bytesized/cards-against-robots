@@ -1,16 +1,14 @@
 var path = require('path');
 var validator = require('validator');
-var configuration = require(path.normalize(path.join(__dirname, 'configuration')));
+var config = require(path.normalize(path.join(__dirname, 'configuration')));
 var database = require(path.normalize(path.join(__dirname, 'database')));
 
 // Creates tables necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
 // the Promise will be fulfilled if the database and tables already exist)
-// Uses the passed configuration data in place of the regular configuration data,
-// since initialization typically means `config.is_configured == false`.
-var init_db = function(config, connection)
+var init_db = function()
 {
-	return connection.queryAsync("SHOW TABLES LIKE 'users';").then(function(result)
+	return database.pool.queryAsync("SHOW TABLES LIKE 'users';").then(function(result)
 	{
 		if (result[0].length == 0)
 		{
@@ -30,10 +28,10 @@ var init_db = function(config, connection)
 					"last_seen  TIMESTAMP NULL, " +
 					"locked     BOOL NOT NULL" +
 				") ENGINE InnoDB;";
-			return connection.queryAsync(query);
+			return database.pool.queryAsync(query);
 		}
 	});
-}
+};
 
 module.exports = {
 	init_db : init_db
