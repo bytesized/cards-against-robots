@@ -21,6 +21,8 @@
 		"express-messages": "*",
 		"passport": "*",
 		"passport-local": "*",
-		"mysql": "*"
+		"mysql": "*",
+		"crypto": "*",
+		"bluebird": "*"
 	}
 }
