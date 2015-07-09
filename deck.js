@@ -1,3 +1,4 @@
+"use strict";
 var path = require('path');
 var validator = require('validator');
 var config = require(path.normalize(path.join(__dirname, 'configuration')));

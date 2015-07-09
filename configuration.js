@@ -1,3 +1,4 @@
+"use strict";
 var fs = require('fs');
 var path = require('path');
 
@@ -11,15 +12,15 @@ var filename = path.join(__dirname, 'configuration.json');
 // Ex: set('mysql.host', 'localhost')
 var set = function(option, value)
 {
-	tokens = option.split('.');
-	attribute = tokens.pop();
+	var tokens = option.split('.');
+	var attribute = tokens.pop();
 
 	// Resolve the option object specified
 	// (Ex: if option == 'mysql.host', option_object = config_object.mysql)
 	var option_object = config_object;
 	while(tokens.length > 0)
 	{
-		token = tokens.shift();
+		var token = tokens.shift();
 		if (!option_object[token])
 			option_object[token] = {};
 		option_object = option_object[token];

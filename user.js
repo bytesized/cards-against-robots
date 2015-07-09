@@ -1,3 +1,4 @@
+"use strict";
 var path = require('path');
 var validator = require('validator');
 var config = require(path.normalize(path.join(__dirname, 'configuration')));
@@ -33,6 +34,13 @@ var init_db = function()
 	});
 };
 
+// Returns a Promise that will be fulfilled if the user name is valid or rejected if not
+var valid_username = function(candidate)
+{
+	// FIXME
+};
+
 module.exports = {
-	init_db : init_db
+	init_db        : init_db,
+	valid_username : valid_username
 };
