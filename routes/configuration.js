@@ -106,7 +106,7 @@ router.post('/', function(req, res, next)
 {
 	if (state != states.unconfigured)
 	{
-		res.render('configure', {state: state, form_data: form_data, errors: errors});
+		res.render('configure', {state: state, form_data: form_data});
 		return;
 	}
 	// If state IS unconfigured, configure now
@@ -117,7 +117,8 @@ router.post('/', function(req, res, next)
 	req.checkBody('card_icon', 'Card Icon Filename is required').notEmpty();
 	req.checkBody('card_icon_height', 'Card Icon Height must be a positive integer').custom_int({positive: true});
 	req.checkBody('card_icon_width', 'Card Icon Width must be a positive integer').custom_int({positive: true});
-	// MYSQL host, database, username and password will be validated by connecting to the database. No need to do it here
+	// MYSQL host, username and password will be validated by connecting to the database. No need to do it here
+	req.checkBody('mysql_database', 'MYSQL database is required').notEmpty();
 	req.checkBody('mysql_connection_limit', 'MYSQL connection limit must be a positive integer').custom_int({positive: true});
 	req.checkBody('mysql_port', 'MYSQL port must be a positive integer').custom_int({positive: true});
 	req.checkBody('token_length', 'Token Length must be a positive even integer').custom_int({positive: true, even: true});
@@ -147,7 +148,10 @@ router.post('/', function(req, res, next)
 		fs.readFileSync(card_icon_path);
 	} catch (err)
 	{
-			var errors = [{param: '', msg: 'When reading card icon file, got "' + err + '"', value: ''}];
+			var errors = [{
+				param : 'card_icon',
+				msg   : 'Error opening card icon: ' + err.message,
+				value : ''}];
 
 			state = states.unconfigured;
 			res.render('configure', {state: state, form_data: form_data, errors: errors});
@@ -171,13 +175,42 @@ router.post('/', function(req, res, next)
 		} catch (err) 
 		{
 			state = states.unconfigured;
-			var errors = [{param: '', msg: 'When writing configuration file, got "' + err + '"', value: ''}];
+			var errors = [{
+				param : '',
+				msg   : 'Error writing configuration file: ' + err.message,
+				value : ''
+			}];
 		}
 		res.render('configure', {state: state, form_data: form_data, errors: errors});
 	}, function(err)
 	{
 		// On MYSQL error
-		var errors = [{param: '', msg: 'When creating MYSQL tables, got "' + err + '"', value: ''}];
+		var errors;
+		if (err.code == 'ER_ACCESS_DENIED_ERROR' || err.code == 'ER_DBACCESS_DENIED_ERROR')
+		{
+			errors = [{
+				param : ['mysql_username', 'mysql_password'],
+				msg   : 'MYSQL Authentication Unsuccessful (Access Denied)',
+				value : ''}];
+		} else if (err.code == 'ENOTFOUND')
+		{
+			errors = [{
+				param : ['mysql_host', 'mysql_port'],
+				msg   : 'MYSQL host not found',
+				value : ''}];
+		} else if (err.code == 'ECONNREFUSED')
+		{
+			errors = [{
+				param : ['mysql_host', 'mysql_port'],
+				msg   : 'MYSQL connection refused',
+				value : ''}];
+		} else
+		{
+			errors = [{
+				param : ['mysql_host', 'mysql_port', 'mysql_username', 'mysql_password'],
+				msg   : 'MYSQL Error: ' + err.message,
+				value : ''}];
+		}
 
 		state = states.unconfigured;
 		res.render('configure', {state: state, form_data: form_data, errors: errors});

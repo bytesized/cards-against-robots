@@ -1,5 +1,4 @@
 "use strict";
-
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -49,24 +48,18 @@ app.use(session({
 	resave: true
 }));
 
-// From example code in documentation
 app.use(express_validator({
 	errorFormatter: function(param, msg, value)
 	{
-			var namespace = param.split('.');
-			var root      = namespace.shift();
-			var formParam = root;
-
-		while(namespace.length)
-			formParam += '[' + namespace.shift() + ']';
-
+		// Return the param value in an array so that when we emulate this error structure for other errors,
+		// we can specify that there is a problem with multiple parameters and safely iterate over them
 		return {
-			param : formParam,
+			param : [param],
 			msg   : msg,
 			value : value
 		};
 	},
-	customValidators: require('./custom_validators')
+	customValidators: require(path.join(__dirname, 'custom_validators'))
 }));
 
 app.use(cookieParser());
