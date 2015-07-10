@@ -4,6 +4,17 @@ var validator = require('validator');
 var config = require(path.normalize(path.join(__dirname, 'configuration')));
 var database = require(path.normalize(path.join(__dirname, 'database')));
 
+function deck_error(message)
+{
+  var error = Error.call(this, message);
+
+  this.name = 'deck_error';
+  this.message = error.message;
+  this.stack = error.stack;
+}
+deck_error.prototype = Object.create(Error.prototype);
+deck_error.prototype.constructor = deck_error;
+
 // Creates tables necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
 // the Promise will be fulfilled if the database and tables already exist)
@@ -31,7 +42,7 @@ var init_card_table = function()
 			// SQL statement, so make double sure
 			var card_text_length = validator.toInt(config.card_text_length, 10);
 			if (isNaN(card_text_length))
-				throw new Error('Configuration setting \'card_text_length\' is not an integer.');
+				throw new deck_error('Configuration setting \'card_text_length\' is not an integer.');
 
 			var query = 
 				"CREATE TABLE cards (" +
@@ -67,7 +78,7 @@ var init_deck_list = function()
 			// SQL statement, so make double sure
 			var deck_name_length = validator.toInt(config.deck_name_length, 10);
 			if (isNaN(deck_name_length))
-				throw new Error('Configuration setting \'deck_name_length\' is not an integer.');
+				throw new deck_error('Configuration setting \'deck_name_length\' is not an integer.');
 
 			var query = 
 				"CREATE TABLE deck_list (" +
@@ -109,5 +120,6 @@ var init_deck_descriptions = function()
 }
 
 module.exports = {
-	init_db: init_db
+	init_db : init_db,
+	error   : deck_error
 };

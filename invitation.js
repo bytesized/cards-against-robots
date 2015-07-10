@@ -4,6 +4,17 @@ var validator = require('validator');
 var config = require(path.normalize(path.join(__dirname, 'configuration')));
 var database = require(path.normalize(path.join(__dirname, 'database')));
 
+function invitation_error(message)
+{
+  var error = Error.call(this, message);
+
+  this.name = 'invitation_error';
+  this.message = error.message;
+  this.stack = error.stack;
+}
+invitation_error.prototype = Object.create(Error.prototype);
+invitation_error.prototype.constructor = invitation_error;
+
 // Creates tables necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
 // the Promise will be fulfilled if the database and tables already exist)
@@ -17,7 +28,7 @@ var init_db = function()
 			// SQL statement, so make double sure
 			var token_length = validator.toInt(config.token_length, 10);
 			if (isNaN(token_length))
-				throw new Error('Configuration setting \'token_length\' is not an integer.');
+				throw new invitation_error('Configuration setting \'token_length\' is not an integer.');
 
 			var query = 
 				"CREATE TABLE invitations (" +
@@ -36,5 +47,6 @@ var init_db = function()
 }
 
 module.exports = {
-	init_db : init_db
+	init_db : init_db,
+	error   : invitation_error
 };
