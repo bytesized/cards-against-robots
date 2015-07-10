@@ -1,6 +1,8 @@
 "use strict";
 var validator = require('validator');
 
+// Specifically for passing to the customValidator option of
+// express-validator
 module.exports = {
 	custom_int: function(param, options)
 	{
