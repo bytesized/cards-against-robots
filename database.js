@@ -3,15 +3,6 @@ var Promise = require('bluebird');
 var path = require('path');
 var mysql = require('mysql');
 var config = require(path.join(__dirname, 'configuration'));
-var pool;
-
-if (config.properties.is_configured)
-{
-	create_pool();
-} else
-{
-	pool = null;
-}
 
 // Creates the database and tables necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
@@ -47,7 +38,7 @@ var init = function()
 
 var create_pool = function()
 {
-	pool = mysql.createPool({
+	module.exports.pool = mysql.createPool({
 		connectionLimit : config.mysql.connection_limit,
 		host            : config.mysql.host,
 		port            : config.mysql.port,
@@ -56,10 +47,14 @@ var create_pool = function()
 		database        : config.mysql.database,
 		timezone        : 'UTC'
 	});
-	module.exports.pool = pool;
-}
-
-module.exports = {
-	pool: pool,
-	init: init
 };
+
+// Set module
+module.exports = {
+	pool : null,
+	init : init
+};
+if (config.properties.is_configured)
+{
+	create_pool();
+}
