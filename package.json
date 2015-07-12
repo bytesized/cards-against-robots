@@ -23,6 +23,7 @@
 		"passport-local": "*",
 		"mysql": "*",
 		"crypto": "*",
-		"bluebird": "*"
+		"bluebird": "*",
+		"bcrypt": "*"
 	}
 }

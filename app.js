@@ -13,9 +13,11 @@ var flash = require('connect-flash');
 var express_validator = require('express-validator');
 var crypto = require('crypto');
 
+// Promisification (only needs to be done once)
 var Promise = require("bluebird");
 Promise.promisifyAll(require("mysql/lib/Connection").prototype);
 Promise.promisifyAll(require("mysql/lib/Pool").prototype);
+Promise.promisifyAll(require('bcrypt'));
 
 var config = require(path.join(__dirname, 'configuration'));
 

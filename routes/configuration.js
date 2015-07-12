@@ -5,18 +5,90 @@ var database = require(path.normalize(path.join(__dirname, '..', 'database')));
 var fs = require('fs');
 var Promise = require('bluebird');
 var configuration = require(path.normalize(path.join(__dirname, '..', 'configuration')));
+var user = require(path.normalize(path.join(__dirname, '..', 'user')));
 var router = express.Router();
+
 var states = {
 	unconfigured: 'unconfigured',
 	configuring:  'configuring',
 	configured:   'configured'
 };
 var state = states.unconfigured;
-var form_data = {};
+// Form data is constant across all users (if there is more than one)
+var form_data = {}; 
 
 router.get('/', function(req, res, next)
 {
 	res.render('configure', {state: state, form_data: form_data});
+});
+
+/* POST configure request */
+router.post('/', function(req, res, next)
+{
+	if (state != states.unconfigured)
+	{
+		res.render('configure', {state: state, form_data: form_data});
+		return;
+	}
+	// If state IS unconfigured, configure now
+	state = states.configuring;
+	
+	// Get data to return to repopulate the form when we send the page back
+	form_data = get_form_data(req);
+
+	var errors = validate_input(req);
+	if (errors)
+	{
+		configuration_error(res, errors);
+		return;
+	}
+
+	// Configuration looks good. Set this as the current configuration so we can try to use it
+	var config = get_config(req);
+	set_config(config);
+
+	// Try to read the card image to make sure that it is there
+	var card_icon_path = path.normalize(path.join(__dirname, '..', 'public', 'images', config.card_icon_filename));
+	var error = check_file(card_icon_path)
+	if (error)
+	{
+		var errors = [{
+			param : ['card_icon'],
+			msg   : 'Error opening card icon: ' + error.message,
+			value : ''}];
+
+		configuration_error(res, errors);
+		return;
+	}
+
+	// Initialize the tables in the database. This doubles as validating the MYSQL config data
+	// (If the connection fails, the MYSQL configuration is wrong)
+	database.init().then(function()
+	{
+		// Now that database and tables exist, create the primary super user.
+		return user.create_primary_superuser(req.body.super_user_name, req.body.super_user_password);
+	}).then(function()
+	{
+		// No MYSQL errors!
+		on_configuration_complete(res);
+	}).catch(user.error, function(err)
+	{
+		// Got an error sent from the user module
+		if (err.code == 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
+		{
+			// If the only error is that the primary super user already exists, the configuration is complete,
+			// just warn the user that no new user was created
+			on_configuration_complete(res, ["Primary Superuser already exists and so was not created"]);
+		} else {
+			var errors = interpret_user_error(err);
+
+			configuration_error(res, errors);
+		}
+	}).catch(function(err)
+	{
+		var errors = interpret_mysql_error(err);
+		configuration_error(res, errors);
+	});
 });
 
 // Gets the data from a submitted form specifically for sending
@@ -49,6 +121,27 @@ function get_form_data(request)
 	// Omit super user password
 
 	return data;
+}
+
+function validate_input(req)
+{
+	req.checkBody('site_name', 'Site Name is required').notEmpty();
+	req.checkBody('site_name', 'I JUST told you. That name is a registered trademark').is_not('Cards Against Humanity', true);
+	req.checkBody('card_icon', 'Card Icon Filename is required').notEmpty();
+	req.checkBody('card_icon_height', 'Card Icon Height must be a positive integer').custom_int({positive: true});
+	req.checkBody('card_icon_width', 'Card Icon Width must be a positive integer').custom_int({positive: true});
+	// MYSQL host, username and password will be validated by connecting to the database. No need to do it here
+	req.checkBody('mysql_database', 'MYSQL database is required').notEmpty();
+	req.checkBody('mysql_connection_limit', 'MYSQL connection limit must be a positive integer').custom_int({positive: true});
+	req.checkBody('mysql_port', 'MYSQL port must be a positive integer').custom_int({positive: true});
+	req.checkBody('token_length', 'Token Length must be a positive even integer').custom_int({positive: true, even: true});
+	req.checkBody('username_length', 'Username Length must be a positive integer').custom_int({positive: true});
+	req.checkBody('deck_name_length', 'Deck Name Length must be a positive integer').custom_int({positive: true});
+	req.checkBody('card_text_length', 'Card Text Length must be a positive integer').custom_int({positive: true});
+	req.checkBody('super_user_password_confirm', 'Super User passwords do not match').equals(req.body.super_user_password);
+	// Super User username and password will be validated by trying to create the user
+
+	return req.validationErrors();
 }
 
 // Gets the configuration data from a submitted request.
@@ -101,72 +194,69 @@ function set_config(config)
 	configuration.methods.set('card_text_length', config.card_text_length);
 }
 
-/* POST configure request */
-router.post('/', function(req, res, next)
+// Makes sure file exists and is readable (by reading it). Returns error
+function check_file(filename)
 {
-	if (state != states.unconfigured)
+	try
 	{
-		res.render('configure', {state: state, form_data: form_data});
-		return;
+		fs.readFileSync(filename);
+		return false;
+	} catch (err)
+	{
+			return err;
 	}
-	// If state IS unconfigured, configure now
-	state = states.configuring;
-	// Input Validation
-	req.checkBody('site_name', 'Site Name is required').notEmpty();
-	req.checkBody('site_name', 'I JUST told you. That name is a registered trademark').is_not('Cards Against Humanity', true);
-	req.checkBody('card_icon', 'Card Icon Filename is required').notEmpty();
-	req.checkBody('card_icon_height', 'Card Icon Height must be a positive integer').custom_int({positive: true});
-	req.checkBody('card_icon_width', 'Card Icon Width must be a positive integer').custom_int({positive: true});
-	// MYSQL host, username and password will be validated by connecting to the database. No need to do it here
-	req.checkBody('mysql_database', 'MYSQL database is required').notEmpty();
-	req.checkBody('mysql_connection_limit', 'MYSQL connection limit must be a positive integer').custom_int({positive: true});
-	req.checkBody('mysql_port', 'MYSQL port must be a positive integer').custom_int({positive: true});
-	req.checkBody('token_length', 'Token Length must be a positive even integer').custom_int({positive: true, even: true});
-	req.checkBody('username_length', 'Username Length must be a positive integer').custom_int({positive: true});
-	req.checkBody('deck_name_length', 'Deck Name Length must be a positive integer').custom_int({positive: true});
-	req.checkBody('card_text_length', 'Card Text Length must be a positive integer').custom_int({positive: true});
-	// FIXME: Validate username and password
+}
 
-	var errors = req.validationErrors();
-
-	// Get data to return to repopulate the form when we send the page back
-	form_data = get_form_data(req);
-
-	if (errors)
-	{
+function configuration_error(res, errors)
+{
 		state = states.unconfigured;
 		res.render('configure', {state: state, form_data: form_data, errors: errors});
 		return;
+}
+
+function interpret_mysql_error(err)
+{
+	var errors;
+	if (err.code == 'ER_ACCESS_DENIED_ERROR' || err.code == 'ER_DBACCESS_DENIED_ERROR')
+	{
+		errors = [{
+			param : ['mysql_username', 'mysql_password'],
+			msg   : 'MYSQL Authentication Unsuccessful (Access Denied)',
+			value : ''}];
+	} else if (err.code == 'ENOTFOUND')
+	{
+		errors = [{
+			param : ['mysql_host', 'mysql_port'],
+			msg   : 'MYSQL host not found',
+			value : ''}];
+	} else if (err.code == 'ECONNREFUSED')
+	{
+		errors = [{
+			param : ['mysql_host', 'mysql_port'],
+			msg   : 'MYSQL connection refused',
+			value : ''}];
+	} else
+	{
+		errors = [{
+			param : ['mysql_host', 'mysql_port', 'mysql_username', 'mysql_password'],
+			msg   : 'MYSQL Error: ' + err.message,
+			value : ''}];
 	}
+	return errors;
+}
 
-	var config = get_config(req);
+function interpret_user_error(err)
+{
+	var errors = [{param: ['super_user_name', 'super_user_password'], msg: err.message, value: ''}];
+	if (err.code == 'BAD_USERNAME')
+		errors[0].param = ['super_user_name'];
+	else if (err.code == 'BAD_PASSWORD')
+		errors[0].param = ['super_user_password'];
+	return errors;
+}
 
-	// Try to read the card image to make sure that it is there
-	var card_icon_path = path.normalize(path.join(__dirname, '..', 'public', 'images', config.card_icon_filename));
-	try
-	{
-		fs.readFileSync(card_icon_path);
-	} catch (err)
-	{
-			var errors = [{
-				param : 'card_icon',
-				msg   : 'Error opening card icon: ' + err.message,
-				value : ''}];
-
-			state = states.unconfigured;
-			res.render('configure', {state: state, form_data: form_data, errors: errors});
-			return;
-	}
-
-	// Configuration looks good. Set this as the current configuration so we can try to use it
-	set_config(config);
-
-	// Initialize the tables in the database. This doubles as validating the MYSQL config data
-	// (If the connection fails, the MYSQL configuration is wrong)
-	database.init().then(function()
-	{
-		// No MYSQL errors! That was the last config check. Write out the config file
-		// and render the page
+function on_configuration_complete(res, messages)
+{
 		var errors = null;
 		try
 		{
@@ -176,46 +266,13 @@ router.post('/', function(req, res, next)
 		{
 			state = states.unconfigured;
 			var errors = [{
-				param : '',
+				param : [],
 				msg   : 'Error writing configuration file: ' + err.message,
 				value : ''
 			}];
 		}
-		res.render('configure', {state: state, form_data: form_data, errors: errors});
-	}, function(err)
-	{
-		// On MYSQL error
-		var errors;
-		if (err.code == 'ER_ACCESS_DENIED_ERROR' || err.code == 'ER_DBACCESS_DENIED_ERROR')
-		{
-			errors = [{
-				param : ['mysql_username', 'mysql_password'],
-				msg   : 'MYSQL Authentication Unsuccessful (Access Denied)',
-				value : ''}];
-		} else if (err.code == 'ENOTFOUND')
-		{
-			errors = [{
-				param : ['mysql_host', 'mysql_port'],
-				msg   : 'MYSQL host not found',
-				value : ''}];
-		} else if (err.code == 'ECONNREFUSED')
-		{
-			errors = [{
-				param : ['mysql_host', 'mysql_port'],
-				msg   : 'MYSQL connection refused',
-				value : ''}];
-		} else
-		{
-			errors = [{
-				param : ['mysql_host', 'mysql_port', 'mysql_username', 'mysql_password'],
-				msg   : 'MYSQL Error: ' + err.message,
-				value : ''}];
-		}
-
-		state = states.unconfigured;
-		res.render('configure', {state: state, form_data: form_data, errors: errors});
-	});
-});
+		res.render('configure', {state: state, form_data: form_data, errors: errors, messages: messages});
+}
 
 module.exports = router;
 

@@ -64,10 +64,13 @@ block content
 								| However, do not edit any of the length properties (such as Token Length or Username Length). These properties
 								| are used to create MYSQL tables to set the length of the fields. Changing them will not change the lengths of
 								| the MYSQL fields
-					if errors
-						ul.list-group
+					ul.list-group
+						if errors
 							each error in errors
 								li.list-group-item.list-group-item-danger #{error.msg}
+						if messages
+							each message in messages
+								li.list-group-item.list-group-item-info #{message}
 	div(style='margin: 20px;')
 		form(class='form-horizontal', method='POST')
 			.form-group(class=input_status.site_name)
@@ -145,11 +148,15 @@ block content
 				label(for='super_user_name_input', class='control-label col-xs-2') Username
 				.col-xs-10
 					input(type='text', class='form-control', id='super_user_name_input', name='super_user_name', placeholder='Username', value=form_data.super_user_name, readonly=inputs_disabled)
-					span(class='help-block') The username to create for you. This user will be the Primary Super User.
+					span(class='help-block') The username to create for you. This user will be the "primary super user"
 			.form-group(class=input_status.super_user_password)
 				label(for='super_user_password_input', class='control-label col-xs-2') Password
 				.col-xs-10
 					input(type='password', class='form-control', id='super_user_password_input', name='super_user_password', placeholder='Password', value='', readonly=inputs_disabled)
+			.form-group(class=input_status.super_user_password_confirm)
+				label(for='super_user_password_confirm_input', class='control-label col-xs-2') Confirm Password
+				.col-xs-10
+					input(type='password', class='form-control', id='super_user_password_confirm_input', name='super_user_password_confirm', placeholder='Password', value='', readonly=inputs_disabled)
 			.form-group
 				.col-xs-offset-2.col-xs-10
 					button(type='submit', class='btn btn-primary', disabled=inputs_disabled) Configure Site
