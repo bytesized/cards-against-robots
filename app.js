@@ -50,6 +50,9 @@ app.use(session({
 	resave: true
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express_validator({
 	errorFormatter: function(param, msg, value)
 	{
@@ -70,12 +73,29 @@ app.use(cookieParser());
 // /stylus to /public/stylesheets, we also want to define some
 // global variables by passing them in during the compile function
 // with the define() function
-var stylus_compile = function(str, path)
+var stylus_compile;
+if (config.properties.is_configured)
 {
-	return stylus(str)
-		.set('filename', path)
-		.set('compress', true)
-		.define('card_image_width', '55px');
+	stylus_compile = function(str, path)
+	{
+		return stylus(str)
+			.set('filename', path)
+			.set('compress', true)
+			.define('card_image_height', config.card_icon.height)
+			.define('card_image_width', config.card_icon.width);
+	}
+} else
+{
+	// If we do not have a configuration yet, just define _something_
+	// so there are no errors. The card_image
+	stylus_compile = function(str, path)
+	{
+		return stylus(str)
+			.set('filename', path)
+			.set('compress', true)
+			.define('card_image_height', '35px')
+			.define('card_image_width', '55px');
+	}
 }
 var stylus_options = {
 	src: path.join(__dirname, 'stylus'),

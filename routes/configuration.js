@@ -48,7 +48,7 @@ router.post('/', function(req, res, next)
 	set_config(config);
 
 	// Try to read the card image to make sure that it is there
-	var card_icon_path = path.normalize(path.join(__dirname, '..', 'public', 'images', config.card_icon_filename));
+	var card_icon_path = path.normalize(path.join(__dirname, '..', 'public', 'images', config.card_icon.filename));
 	var error = check_file(card_icon_path)
 	if (error)
 	{
@@ -99,9 +99,10 @@ function get_form_data(request)
 	var data = {};
 
 	data.site_name              = request.body.site_name;
-	data.card_icon_filename     = request.body.card_icon;
-	data.card_icon_height       = request.body.card_icon_height;
-	data.card_icon_width        = request.body.card_icon_width;
+	data.card_icon              = {};
+	data.card_icon.filename     = request.body.card_icon;
+	data.card_icon.height       = request.body.card_icon.height;
+	data.card_icon.width        = request.body.card_icon.width;
 	data.mysql                  = {};
 	data.mysql.host             = request.body.mysql_host;
 	data.mysql.port             = request.body.mysql_port;
@@ -152,9 +153,10 @@ function get_config(request)
 	var config = {};
 
 	config.site_name              = request.sanitize('site_name').trim();
-	config.card_icon_filename     = request.sanitize('card_icon').trim();
-	config.card_icon_height       = request.sanitize('card_icon_height').toInt(10);
-	config.card_icon_width        = request.sanitize('card_icon_width').toInt(10);
+	config.card_icon              = {};
+	config.card_icon.filename     = request.sanitize('card_icon').trim();
+	config.card_icon.height       = request.sanitize('card_icon_height').toInt(10);
+	config.card_icon.width        = request.sanitize('card_icon_width').toInt(10);
 	config.mysql                  = {};
 	config.mysql.host             = request.sanitize('mysql_host').trim();
 	config.mysql.port             = request.sanitize('mysql_port').toInt(10);
@@ -178,9 +180,9 @@ function get_config(request)
 function set_config(config)
 {
 	configuration.methods.set('site_name', config.site_name);
-	configuration.methods.set('card_icon_filename', config.card_icon_filename);
-	configuration.methods.set('card_icon_height', config.card_icon_height);
-	configuration.methods.set('card_icon_width', config.card_icon_width);
+	configuration.methods.set('card_icon.filename', config.card_icon.filename);
+	configuration.methods.set('card_icon.height', config.card_icon.height);
+	configuration.methods.set('card_icon.width', config.card_icon.width);
 	configuration.methods.set('mysql.host', config.mysql.host);
 	configuration.methods.set('mysql.port', config.mysql.port);
 	configuration.methods.set('mysql.database', config.mysql.database);
