@@ -31,7 +31,11 @@ var set = function(option, value)
 
 var save_sync = function()
 {
-	fs.writeFileSync(filename, JSON.stringify(config_object, null, 4));
+	fs.writeFileSync(filename, JSON.stringify(config_object, function(key, val)
+	{
+		if (key !== 'methods' && key !== 'properties')
+			return val;
+	}, 4));
 }
 
 // Load configuration if it exists
