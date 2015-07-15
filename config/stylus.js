@@ -6,7 +6,7 @@
 // with the define() function
 var path = require('path');
 var stylus = require('stylus');
-var config = require(path.join(__dirname, 'configuration'));
+var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 
 var compile;
 if (config.properties.is_configured)

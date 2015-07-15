@@ -48,7 +48,7 @@ require(path.join(__dirname, 'config', 'passport'));
 
 app.use(express_validator(require(path.join(__dirname, 'config', 'validator'))));
 app.use(cookieParser());
-app.use(stylus.middleware(stylus_options));
+app.use(stylus.middleware(require(path.join(__dirname, 'config', 'stylus'))));
 
 // Static routes
 app.use(express.static(path.join(__dirname, 'public')));
@@ -58,9 +58,9 @@ app.use(flash());
 // Routing - If the site is not configured yet, route configuration
 // page rather than regular website
 if (config.properties.is_configured)
-	require(path.join(__dirname, 'config', 'routes'));
+	require(path.join(__dirname, 'config', 'routes'))(app);
 else
-	require(path.join(__dirname, 'config', 'config_routes'));
+	require(path.join(__dirname, 'config', 'config_routes'))(app);
 
 // error handlers
 

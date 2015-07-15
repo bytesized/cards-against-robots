@@ -3,8 +3,8 @@
 var path = require('path');
 var passport = require('passport');
 var local_strategy = require('passport-local').Strategy;
-var user = require(path.join(__dirname, 'user'));
-var config = require(path.join(__dirname, 'configuration'));
+var user = require(path.normalize(path.join(__dirname, '..', 'user')));
+var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 
 passport.serializeUser(function(user, done)
 {
