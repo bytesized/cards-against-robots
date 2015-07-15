@@ -1,9 +1,9 @@
 "use strict";
+// Returns a configuration object for express-validator
+var path = require('path');
 var validator = require('validator');
 
-// Specifically for passing to the customValidator option of
-// express-validator
-module.exports = {
+var custom_validators = {
 	custom_int: function(param, options)
 	{
 		param = validator.toInt(param, 10);
@@ -27,4 +27,18 @@ module.exports = {
 		else
 			return true;
 	}
+};
+
+module.exports = {
+	errorFormatter: function(param, msg, value)
+	{
+		// Return the param value in an array so that when we emulate this error structure for other errors,
+		// we can specify that there is a problem with multiple parameters and safely iterate over them
+		return {
+			param : [param],
+			msg   : msg,
+			value : value
+		};
+	},
+	customValidators: custom_validators
 };

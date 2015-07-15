@@ -14,7 +14,7 @@
 		"morgan": "~1.5.3",
 		"serve-favicon": "~2.2.1",
 		"stylus": "0.42.3",
-		"connect-flash": "*",
+		"express-flash": "*",
 		"express-validator": "*",
 		"validator": "*",
 		"express-session": "*",

@@ -11,6 +11,17 @@ html
 			if config && config.site_name
 				title= config.site_name
 	body
+		if messages
+			ul.list-group
+				if messages.error
+					each text in messages.error
+						li.list-group-item.list-group-item-danger #{text}
+				if messages.success
+					each text in messages.success
+						li.list-group-item.list-group-item-success #{text}
+				if messages.info
+					each text in messages.info
+						li.list-group-item.list-group-item-info #{text}
 		block content
 		script(src='/javascripts/jquery-1.11.3.min.js')
 		script(src='/javascripts/bootstrap.min.js')
