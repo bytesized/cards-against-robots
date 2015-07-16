@@ -26,6 +26,14 @@ var custom_validators = {
 			return false;
 		else
 			return true;
+	},
+	custom_fn: function(param, fn)
+	{
+		var result = fn(param);
+		if (result)
+			return true;
+		else
+			return false;
 	}
 };
 

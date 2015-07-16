@@ -40,7 +40,7 @@ var init_card_table = function()
 		{
 			// This should definitely already be integer type, but it is going in an
 			// SQL statement, so make double sure
-			var card_text_length = validator.toInt(config.card_text_length, 10);
+			var card_text_length = validator.toInt(config.field_sizes.card_text, 10);
 			if (isNaN(card_text_length))
 				throw new deck_error('Configuration setting \'card_text_length\' is not an integer.');
 
@@ -76,7 +76,7 @@ var init_deck_list = function()
 		{
 			// This should definitely already be integer type, but it is going in an
 			// SQL statement, so make double sure
-			var deck_name_length = validator.toInt(config.deck_name_length, 10);
+			var deck_name_length = validator.toInt(config.field_sizes.deck_name, 10);
 			if (isNaN(deck_name_length))
 				throw new deck_error('Configuration setting \'deck_name_length\' is not an integer.');
 

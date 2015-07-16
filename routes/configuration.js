@@ -22,6 +22,154 @@ router.get('/', function(req, res, next)
 	res.render('configure', {state: state, form_data: form_data});
 });
 
+// Configuration fields to be set by website configuration
+// Format:
+//   name           - The key to insert the value into the config and form_data objects as (REQUIRED)
+//   form_name      - The name of the form input to get the data from (REQUIRED)
+//   omit_form_data - Boolean. If true, this field will not be passed to the jade page in form_data
+//   omit_config    - Boolean. If true, this field will not go into the configuration
+//   validate       - A function that should perform validation. The request and `form_name`,
+//                    respectively, will be passed to it
+//   sanitize       - A function that should return the sanitized variable
+//                    (REQUIRED unless omit_config is `true`)
+//                    The request and `form_name`, respectively, will be passed to it
+//   is_checkbox    - Boolean, If true, this field's input will be parsed as a checkbox rather than text
+var config_fields =
+[
+	{
+		name: 'site_name',
+		form_name: 'site_name',
+		validate: function(req, name)
+		{
+			req.checkBody(name, 'Site Name is required').notEmpty();
+			req.checkBody(name, 'I JUST told you. That name is a registered trademark').is_not('Cards Against Humanity', true);
+		},
+		sanitize: function(req, name) { return req.sanitize(name).trim(); }
+	},
+	{
+		name: 'card_icon.filename',
+		form_name: 'card_icon',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Card Icon Filename is required').notEmpty(); },
+		sanitize: function(req, name) { return req.sanitize(name).trim(); }
+	},
+	{
+		name: 'card_icon.height',
+		form_name: 'card_icon_height',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Card Icon Height must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'card_icon.width',
+		form_name: 'card_icon_width',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Card Icon Width must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'mysql.host',
+		form_name: 'mysql_host',
+		sanitize: function(req, name)
+			{ return req.sanitize(name).trim(); }
+	},
+	{
+		name: 'mysql.port',
+		form_name: 'mysql_port',
+		validate: function(req, name)
+			{ req.checkBody(name, 'MYSQL port must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'mysql.database',
+		form_name: 'mysql_database',
+		validate: function(req, name)
+			{ req.checkBody(name, 'MYSQL database is required').notEmpty(); },
+		sanitize: function(req, name) { return req.sanitize(name).trim(); }
+	},
+	{
+		name: 'mysql.username',
+		form_name: 'mysql_username',
+		sanitize: function(req, name) { return req.sanitize(name).trim(); }
+	},
+	{
+		name: 'mysql.password',
+		form_name: 'mysql_password',
+		sanitize: function(req, name) { return req.body.mysql_password },
+		omit_form_data: true
+	},
+	{
+		name: 'mysql.connection_limit',
+		form_name: 'mysql_connection_limit',
+		validate: function(req, name)
+			{ req.checkBody(name, 'MYSQL connection limit must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'invitations_required',
+		form_name: 'invitations_required',
+		sanitize: function(req, name)
+		{
+			if (req.body[name])
+				return true;
+			else
+				return false;
+		},
+		is_checkbox: true
+	},
+	{
+		name: 'field_sizes.token',
+		form_name: 'token_length',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Token Length must be a positive even integer').custom_int({positive: true, even: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'field_sizes.username',
+		form_name: 'username_length',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Username Length must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'field_sizes.deck_name',
+		form_name: 'deck_name_length',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Deck Name Length must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'field_sizes.card_text',
+		form_name: 'card_text_length',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Card Text Length must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'super_user_name',
+		form_name: 'super_user_name',
+		validate: function(req, name)
+			{ user.validate_username_field(req, 'super_user_name'); },
+		omit_config: true
+	},
+	{
+		name: 'super_user_password',
+		form_name: 'super_user_password',
+		validate: function(req, name)
+			{ user.validate_password_field(req, 'super_user_password'); },
+		omit_config: true,
+		omit_form_data: true
+	},
+	{
+		name: 'super_user_password_confirm',
+		form_name: 'super_user_password_confirm',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Super User passwords do not match').equals(req.body.super_user_password); },
+		omit_config: true,
+		omit_form_data: true
+	}
+];
+
 /* POST configure request */
 router.post('/', function(req, res, next)
 {
@@ -66,7 +214,10 @@ router.post('/', function(req, res, next)
 	database.init().then(function()
 	{
 		// Now that database and tables exist, create the primary super user.
-		return user.create_primary_superuser(req.body.super_user_name, req.body.super_user_password);
+		var new_user = new user.user_object;
+		new_user.username = req.body.super_user_name;
+		new_user.password = req.body.super_user_password
+		return user.create_primary_superuser(new_user);
 	}).then(function()
 	{
 		// No MYSQL errors!
@@ -98,49 +249,34 @@ function get_form_data(request)
 {
 	var data = {};
 
-	data.site_name              = request.body.site_name;
-	data.card_icon              = {};
-	data.card_icon.filename     = request.body.card_icon;
-	data.card_icon.height       = request.body.card_icon.height;
-	data.card_icon.width        = request.body.card_icon.width;
-	data.mysql                  = {};
-	data.mysql.host             = request.body.mysql_host;
-	data.mysql.port             = request.body.mysql_port;
-	data.mysql.database         = request.body.mysql_database;
-	data.mysql.username         = request.body.mysql_username;
-	// Omit MYSQL password
-	data.mysql.connection_limit = request.body.mysql_connection_limit;
-	if (request.body.invitations_required)
-		data.invitations_required = true;
-	else
-		data.invitations_required = false;
-	data.token_length           = request.body.token_length;
-	data.username_length        = request.body.username_length;
-	data.deck_name_length       = request.body.deck_name_length;
-	data.card_text_length       = request.body.card_text_length;
-	data.super_user_name        = request.body.super_user_name;
-	// Omit super user password
+	for (var i = 0; i < config_fields.length; i++)
+	{
+		if (!config_fields[i].omit_form_data)
+		{
+			var data_value;
+			if (config_fields[i].is_checkbox)
+			{
+				if (request.body[config_fields[i].form_name])
+					data_value = true;
+				else
+					data_value = false;
+			} else {
+				data_value = request.body[config_fields[i].form_name];
+			}
+			set_object_attribute(data, config_fields[i].name, data_value);
+		}
+	}
 
 	return data;
 }
 
 function validate_input(req)
 {
-	req.checkBody('site_name', 'Site Name is required').notEmpty();
-	req.checkBody('site_name', 'I JUST told you. That name is a registered trademark').is_not('Cards Against Humanity', true);
-	req.checkBody('card_icon', 'Card Icon Filename is required').notEmpty();
-	req.checkBody('card_icon_height', 'Card Icon Height must be a positive integer').custom_int({positive: true});
-	req.checkBody('card_icon_width', 'Card Icon Width must be a positive integer').custom_int({positive: true});
-	// MYSQL host, username and password will be validated by connecting to the database. No need to do it here
-	req.checkBody('mysql_database', 'MYSQL database is required').notEmpty();
-	req.checkBody('mysql_connection_limit', 'MYSQL connection limit must be a positive integer').custom_int({positive: true});
-	req.checkBody('mysql_port', 'MYSQL port must be a positive integer').custom_int({positive: true});
-	req.checkBody('token_length', 'Token Length must be a positive even integer').custom_int({positive: true, even: true});
-	req.checkBody('username_length', 'Username Length must be a positive integer').custom_int({positive: true});
-	req.checkBody('deck_name_length', 'Deck Name Length must be a positive integer').custom_int({positive: true});
-	req.checkBody('card_text_length', 'Card Text Length must be a positive integer').custom_int({positive: true});
-	req.checkBody('super_user_password_confirm', 'Super User passwords do not match').equals(req.body.super_user_password);
-	// Super User username and password will be validated by trying to create the user
+	for (var i = 0; i < config_fields.length; i++)
+	{
+		if (config_fields[i].validate)
+			config_fields[i].validate(req, config_fields[i].form_name);
+	}
 
 	return req.validationErrors();
 }
@@ -148,30 +284,18 @@ function validate_input(req)
 // Gets the configuration data from a submitted request.
 // Data is sanitized and returned as a config object
 // Super user data is omitted because that is not actually part of the config data
-function get_config(request)
+function get_config(req)
 {
 	var config = {};
 
-	config.site_name              = request.sanitize('site_name').trim();
-	config.card_icon              = {};
-	config.card_icon.filename     = request.sanitize('card_icon').trim();
-	config.card_icon.height       = request.sanitize('card_icon_height').toInt(10);
-	config.card_icon.width        = request.sanitize('card_icon_width').toInt(10);
-	config.mysql                  = {};
-	config.mysql.host             = request.sanitize('mysql_host').trim();
-	config.mysql.port             = request.sanitize('mysql_port').toInt(10);
-	config.mysql.database         = request.sanitize('mysql_database').trim();
-	config.mysql.username         = request.sanitize('mysql_username').trim();
-	config.mysql.password         = request.body.mysql_password;
-	config.mysql.connection_limit = request.sanitize('mysql_connection_limit').toInt(10);
-	if (request.body.invitations_required)
-		config.invitations_required = true;
-	else
-		config.invitations_required = false;
-	config.token_length           = request.sanitize('token_length').toInt(10);
-	config.username_length        = request.sanitize('username_length').toInt(10);
-	config.deck_name_length       = request.sanitize('deck_name_length').toInt(10);
-	config.card_text_length       = request.sanitize('card_text_length').toInt(10);
+	for (var i = 0; i < config_fields.length; i++)
+	{
+		if (!config_fields[i].omit_config)
+		{
+			var config_value = config_fields[i].sanitize(req, config_fields[i].form_name);
+			set_object_attribute(config, config_fields[i].name, config_value);
+		}
+	}
 
 	return config;
 }
@@ -179,21 +303,16 @@ function get_config(request)
 // Sets each config value
 function set_config(config)
 {
-	configuration.methods.set('site_name', config.site_name);
-	configuration.methods.set('card_icon.filename', config.card_icon.filename);
-	configuration.methods.set('card_icon.height', config.card_icon.height);
-	configuration.methods.set('card_icon.width', config.card_icon.width);
-	configuration.methods.set('mysql.host', config.mysql.host);
-	configuration.methods.set('mysql.port', config.mysql.port);
-	configuration.methods.set('mysql.database', config.mysql.database);
-	configuration.methods.set('mysql.username', config.mysql.username);
-	configuration.methods.set('mysql.password', config.mysql.password);
-	configuration.methods.set('mysql.connection_limit', config.mysql.connection_limit);
-	configuration.methods.set('invitations_required', config.invitations_required);
-	configuration.methods.set('token_length', config.token_length);
-	configuration.methods.set('username_length', config.username_length);
-	configuration.methods.set('deck_name_length', config.deck_name_length);
-	configuration.methods.set('card_text_length', config.card_text_length);
+	for (var i = 0; i < config_fields.length; i++)
+	{
+		if (!config_fields[i].omit_config)
+		{
+			var config_value = get_object_attribute(config, config_fields[i].name);
+
+			configuration.methods.set(config_fields[i].name, config_value);
+		}
+	}
+	configuration.properties.is_configured = true;
 }
 
 // Makes sure file exists and is readable (by reading it). Returns error
@@ -211,11 +330,15 @@ function check_file(filename)
 
 function configuration_error(res, errors)
 {
-		state = states.unconfigured;
-		res.render('configure', {state: state, form_data: form_data, errors: errors});
-		return;
+	state = states.unconfigured;
+	configuration.properties.is_configured = false;
+	res.render('configure', {state: state, form_data: form_data, errors: errors});
+	return;
 }
 
+// Normally, MYSQL errors will not be explicitly shown to the user, but for configuration it
+// is less important to conceal these from the user (since the user is actually the website admin)
+// and the user needs to know why their MYSQL configuration is not working.
 function interpret_mysql_error(err)
 {
 	var errors;
@@ -259,21 +382,56 @@ function interpret_user_error(err)
 
 function on_configuration_complete(res, messages)
 {
-		var errors = null;
-		try
-		{
-			configuration.methods.save_sync();
-			state = states.configured;
-		} catch (err) 
-		{
-			state = states.unconfigured;
-			var errors = [{
-				param : [],
-				msg   : 'Error writing configuration file: ' + err.message,
-				value : ''
-			}];
-		}
-		res.render('configure', {state: state, form_data: form_data, errors: errors, messages: messages});
+	var errors = null;
+	try
+	{
+		configuration.methods.save_sync();
+		state = states.configured;
+	} catch (err) 
+	{
+		state = states.unconfigured;
+		var errors = [{
+			param : [],
+			msg   : 'Error writing configuration file: ' + err.message,
+			value : ''
+		}];
+	}
+	res.render('configure', {state: state, form_data: form_data, errors: errors, messages: messages});
+}
+
+// Sets object attribute, for example,
+//    var data = {};
+//    set_object_attribute(data, 'mysql.host', 'localhost')
+// Results in `data == { mysql: { host: 'localhost' } }`
+function set_object_attribute(object, attribute, value)
+{
+	// Resolve the data object specified
+	// (Ex: if attribute == 'mysql.host', data_object = object.mysql)
+	var tokens = attribute.split('.');
+	attribute = tokens.pop();
+	var data_object = object;
+	while(tokens.length > 0)
+	{
+		var token = tokens.shift();
+		if (!data_object[token])
+			data_object[token] = {};
+		data_object = data_object[token];
+	}
+	data_object[attribute] = value;
+	return data_object;
+}
+
+// Gets the object attribute, for example,
+//    data = { mysql: { host: 'localhost' } }
+//    get_object_attribute(data, 'mysql.host')
+// Returns 'localhost'
+function get_object_attribute(object, attribute)
+{
+	var tokens = attribute.split('.');
+	var data_value = object;
+	while(tokens.length > 0)
+		data_value = data_value[tokens.shift()];
+	return data_value;
 }
 
 module.exports = router;

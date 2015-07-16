@@ -26,7 +26,7 @@ var init_db = function()
 		{
 			// This should definitely already be integer type, but it is going in an
 			// SQL statement, so make double sure
-			var token_length = validator.toInt(config.token_length, 10);
+			var token_length = validator.toInt(config.field_sizes.token, 10);
 			if (isNaN(token_length))
 				throw new invitation_error('Configuration setting \'token_length\' is not an integer.');
 
