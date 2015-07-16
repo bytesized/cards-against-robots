@@ -17,7 +17,7 @@ function user_error(message, code)
 {
   var error = Error.call(this, message);
 
-  this.name = 'User Error';
+  this.name = 'UserError';
   this.message = error.message;
   this.stack = error.stack;
   this.code = code;
@@ -216,6 +216,7 @@ var create_user = function(user, override_invitation)
 		return bcrypt.hashAsync(user.password, salt);
 	}).then(function(password_hash)
 	{
+		user.password = password_hash;
 		return database.pool.queryAsync(
 			"INSERT INTO users (username,  password,  admin,  superuser,  locked) " +
 			           "VALUES (       ?,         ?,      ?,          ?,       ?);",
@@ -223,7 +224,7 @@ var create_user = function(user, override_invitation)
 	}).catch(function (err)
 	{
 		if (err.code == 'ER_DUP_ENTRY')
-			throw new user_error('That username is in use', 'BAD_USERNAME');
+			throw new user_error('That username is in use', 'DUP_USERNAME');
 		else
 			throw err;
 	});

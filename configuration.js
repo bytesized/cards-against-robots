@@ -1,6 +1,7 @@
 "use strict";
 var fs = require('fs');
 var path = require('path');
+var object_attribute = require(path.normalize(path.join(__dirname, 'common', 'object_attribute')));
 
 // The configuration itself. Will be set when reload() is called
 var config_object;
@@ -12,21 +13,7 @@ var filename = path.join(__dirname, 'configuration.json');
 // Ex: set('mysql.host', 'localhost')
 var set = function(option, value)
 {
-	var tokens = option.split('.');
-	var attribute = tokens.pop();
-
-	// Resolve the option object specified
-	// (Ex: if option == 'mysql.host', option_object = config_object.mysql)
-	var option_object = config_object;
-	while(tokens.length > 0)
-	{
-		var token = tokens.shift();
-		if (!option_object[token])
-			option_object[token] = {};
-		option_object = option_object[token];
-	}
-
-	option_object[attribute] = value;
+	object_attribute.set(config_object, option, value);
 };
 
 var save_sync = function()
