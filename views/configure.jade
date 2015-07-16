@@ -28,12 +28,6 @@ block content
 	- if (typeof form_data.super_user_name === 'undefined')         form_data.super_user_name        = '';
 	//- Omit super user password
 
-	//- Find inputs with errors and add the class 'has-error'
-	- input_status = {}
-	if errors
-		each error in errors
-			each param in error.param
-				- input_status[param] = 'has-error';
 	//- If either of the card icon's dimensions have an error, show the error also for the label
 	if input_status.card_icon_height || input_status.card_icon_width
 		- input_status.card_dimensions = 'text-danger';
@@ -67,12 +61,10 @@ block content
 								| are used to create MYSQL tables to set the length of the fields. Changing them will not change the lengths of
 								| the MYSQL fields
 					ul.list-group
-						if errors
-							each error in errors
-								li.list-group-item.list-group-item-danger #{error.msg}
-						if messages
-							each message in messages
-								li.list-group-item.list-group-item-info #{message}
+						+flash_messages
+					ul.list-group
+						+validation_errors
+						+messages('list-group-item-info', messages)
 	div(style='margin: 20px;')
 		form(class='form-horizontal', method='POST')
 			.form-group(class=input_status.site_name)

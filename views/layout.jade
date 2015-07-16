@@ -11,17 +11,30 @@ html
 			if config && config.site_name
 				title= config.site_name
 	body
-		if messages
-			ul.list-group
-				if messages.error
-					each text in messages.error
-						li.list-group-item.list-group-item-danger #{text}
-				if messages.success
-					each text in messages.success
-						li.list-group-item.list-group-item-success #{text}
-				if messages.info
-					each text in messages.info
-						li.list-group-item.list-group-item-info #{text}
+		//- Takes a bootstrap `list-group-item-*` class and an array of messages
+		//- Should be explictly put in a ul.list-group like this:
+		//-     ul.list-group
+		//-         +messages('list-group-item-danger', message_list)
+		mixin messages(group_class, message_list)
+			if message_list
+				each message in message_list
+					li.list-group-item(class=group_class) #{message}
+		//- Should be explictly put in a ul.list-group like this:
+		//-     ul.list-group
+		//-         +flash_messages
+		mixin flash_messages
+			if flash_message_list
+				+messages('list-group-item-danger', flash_message_list.error)
+				+messages('list-group-item-success', flash_message_list.success)
+				+messages('list-group-item-info', flash_message_list.info)
+		//- For express-validator errors
+		//- Should be explictly put in a ul.list-group like this:
+		//-     ul.list-group
+		//-         +validation_errors
+		mixin validation_errors
+			if validation_error_list
+				each error in validation_error_list
+					li.list-group-item.list-group-item-danger #{error.msg}
 		block content
 		script(src='/javascripts/jquery-1.11.3.min.js')
 		script(src='/javascripts/bootstrap.min.js')

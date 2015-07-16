@@ -14,10 +14,19 @@ var bodyParser = require('body-parser');
 var stylus = require('stylus');
 var session = require('express-session');
 var passport = require('passport');
-var flash = require('express-flash');
+var flash = require('connect-flash');
 var express_validator = require('express-validator');
-var secret = require(path.join(__dirname, 'secret'));
+var secret = require(path.join(__dirname, 'common', 'secret'));
 var config = require(path.join(__dirname, 'configuration'));
+var app_config = {};
+app_config.validator = require(path.join(__dirname, 'config', 'validator'));
+app_config.passport = require(path.join(__dirname, 'config', 'passport'));
+app_config.stylus = require(path.join(__dirname, 'config', 'stylus'));
+app_config.routes = require(path.join(__dirname, 'config', 'routes'));
+app_config.config_routes = require(path.join(__dirname, 'config', 'config_routes'));
+app_config.flash = require(path.join(__dirname, 'config', 'flash'));
+app_config.configuration = require(path.join(__dirname, 'config', 'configuration'));
+
 
 var app = express();
 
@@ -43,24 +52,29 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-// Just including this will configure passport
-require(path.join(__dirname, 'config', 'passport'));
+app_config.passport();
 
-app.use(express_validator(require(path.join(__dirname, 'config', 'validator'))));
+
+app.use(express_validator(app_config.validator.options));
+app.use(app_config.validator.middleware);
 app.use(cookieParser());
-app.use(stylus.middleware(require(path.join(__dirname, 'config', 'stylus'))));
+app.use(stylus.middleware(app_config.stylus));
 
 // Static routes
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(flash());
+app.use(app_config.flash);
+
+// Sets `res.locals.config`
+app.use(app_config.configuration);
 
 // Routing - If the site is not configured yet, route configuration
 // page rather than regular website
 if (config.properties.is_configured)
-	require(path.join(__dirname, 'config', 'routes'))(app);
+	app_config.routes(app);
 else
-	require(path.join(__dirname, 'config', 'config_routes'))(app);
+	app_config.config_routes(app);
 
 // error handlers
 

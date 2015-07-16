@@ -4,9 +4,10 @@ var path = require('path');
 var database = require(path.normalize(path.join(__dirname, '..', 'database')));
 var fs = require('fs');
 var Promise = require('bluebird');
+var router = express.Router();
 var configuration = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var user = require(path.normalize(path.join(__dirname, '..', 'user')));
-var router = express.Router();
+var object_attribute = require(path.normalize(path.join(__dirname, '..', 'common', 'object_attribute')));
 
 var states = {
 	unconfigured: 'unconfigured',
@@ -263,7 +264,7 @@ function get_form_data(request)
 			} else {
 				data_value = request.body[config_fields[i].form_name];
 			}
-			set_object_attribute(data, config_fields[i].name, data_value);
+			object_attribute.set(data, config_fields[i].name, data_value);
 		}
 	}
 
@@ -293,7 +294,7 @@ function get_config(req)
 		if (!config_fields[i].omit_config)
 		{
 			var config_value = config_fields[i].sanitize(req, config_fields[i].form_name);
-			set_object_attribute(config, config_fields[i].name, config_value);
+			object_attribute.set(config, config_fields[i].name, config_value);
 		}
 	}
 
@@ -307,7 +308,7 @@ function set_config(config)
 	{
 		if (!config_fields[i].omit_config)
 		{
-			var config_value = get_object_attribute(config, config_fields[i].name);
+			var config_value = object_attribute.get(config, config_fields[i].name);
 
 			configuration.methods.set(config_fields[i].name, config_value);
 		}
@@ -332,7 +333,8 @@ function configuration_error(res, errors)
 {
 	state = states.unconfigured;
 	configuration.properties.is_configured = false;
-	res.render('configure', {state: state, form_data: form_data, errors: errors});
+	res.set_validation_errors(errors);
+	res.render('configure', {state: state, form_data: form_data});
 	return;
 }
 
@@ -362,6 +364,7 @@ function interpret_mysql_error(err)
 			value : ''}];
 	} else
 	{
+		throw err;
 		errors = [{
 			param : ['mysql_host', 'mysql_port', 'mysql_username', 'mysql_password'],
 			msg   : 'MYSQL Error: ' + err.message,
@@ -373,7 +376,7 @@ function interpret_mysql_error(err)
 function interpret_user_error(err)
 {
 	var errors = [{param: ['super_user_name', 'super_user_password'], msg: err.message, value: ''}];
-	if (err.code == 'BAD_USERNAME')
+	if (err.code == 'BAD_USERNAME' || err.code == 'DUP_USERNAME')
 		errors[0].param = ['super_user_name'];
 	else if (err.code == 'BAD_PASSWORD')
 		errors[0].param = ['super_user_password'];
@@ -396,42 +399,8 @@ function on_configuration_complete(res, messages)
 			value : ''
 		}];
 	}
-	res.render('configure', {state: state, form_data: form_data, errors: errors, messages: messages});
-}
-
-// Sets object attribute, for example,
-//    var data = {};
-//    set_object_attribute(data, 'mysql.host', 'localhost')
-// Results in `data == { mysql: { host: 'localhost' } }`
-function set_object_attribute(object, attribute, value)
-{
-	// Resolve the data object specified
-	// (Ex: if attribute == 'mysql.host', data_object = object.mysql)
-	var tokens = attribute.split('.');
-	attribute = tokens.pop();
-	var data_object = object;
-	while(tokens.length > 0)
-	{
-		var token = tokens.shift();
-		if (!data_object[token])
-			data_object[token] = {};
-		data_object = data_object[token];
-	}
-	data_object[attribute] = value;
-	return data_object;
-}
-
-// Gets the object attribute, for example,
-//    data = { mysql: { host: 'localhost' } }
-//    get_object_attribute(data, 'mysql.host')
-// Returns 'localhost'
-function get_object_attribute(object, attribute)
-{
-	var tokens = attribute.split('.');
-	var data_value = object;
-	while(tokens.length > 0)
-		data_value = data_value[tokens.shift()];
-	return data_value;
+	res.set_validation_errors(errors);
+	res.render('configure', {state: state, form_data: form_data, messages: messages});
 }
 
 module.exports = router;
