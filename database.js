@@ -49,7 +49,7 @@ var create_pool = function()
 	});
 };
 
-// Set module
+// Set module exports
 module.exports = {
 	pool : null,
 	init : init
