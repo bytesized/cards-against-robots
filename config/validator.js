@@ -60,7 +60,7 @@ var middleware = function(req, res, next)
 	// or:
 	//     .input-group(class=input_status.form_input_name)
 	res.locals.input_status = {};
-	// This is used by the jade `validation_errors mixin` (in layout.jade)
+	// This is used by the jade `validation_errors` mixin (in layout.jade)
 	res.locals.validation_error_list = {};
 	// This `res` method sets `res.locals.input_status` properties to 'has-error' if they are in
 	// the error array given. The intended usage of this function is:
