@@ -23,6 +23,18 @@ var save_sync = function()
 		if (key !== 'methods' && key !== 'properties')
 			return val;
 	}, 4));
+};
+
+// This function is run if there is no configuration file. It sets two possible types
+// of configuration settings: ones that are not exposed to the user in the configuration
+// jade page, and default values for ones that are (to be overridden by user input)
+var set_default_config = function()
+{
+	config_object = {};
+	// Set card icon defaults so that stylus will properly generate stylesheets during config
+	config_object.card_icon.filename = 'dummy.png';
+	config_object.card_icon.height = 35;
+	config_object.card_icon.width = 35;
 }
 
 // Load configuration if it exists
@@ -37,7 +49,7 @@ var reload = function()
 	{
 		if (error.code === 'ENOENT') // File not found -> No existing configuration
 		{
-			config_object = {};
+			set_default_config();
 			is_configured = false;
 		} else
 		{
