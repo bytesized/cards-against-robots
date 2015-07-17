@@ -1,0 +1,30 @@
+extends layout
+
+block headers
+	title Login - #{config.site_name}
+
+block content
+	.container
+		.row
+			.col-xs-12
+				.jumbotron.jumbotron-short
+					h1(style='text-align: center;') Login
+					ul.list-group
+						+flash_messages
+					ul.list-group
+						+validation_errors
+	div(style='margin: 20px;')
+		form(method='POST')
+			.form-group
+				label.control-label(for='username_input') Username
+				input.form-control(type='text', id='username_input', name='username', placeholder='Username', value=form_data.username)
+			.form-group
+				label.control-label(for='password_input') Password
+				input.form-control(type='password', id='password_input', name='password', placeholder='Password', value='')
+			.container-fluid
+				.row
+					.col-xs-4
+						button.btn.btn-primary(type='submit') Login
+					.col-xs-offset-4.col-xs-4(style='text-align: right;')
+						if !config.invitations_required
+							a(href='/user/register') Create an account

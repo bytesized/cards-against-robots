@@ -1,0 +1,37 @@
+extends layout
+
+block headers
+	title Register - #{config.site_name}
+
+block content
+	.container
+		.row
+			.col-xs-12
+				.jumbotron.jumbotron-short
+					h1(style='text-align: center;') Register
+					if config.invitations_required && !invitation
+						ul.list-group
+							+messages('list-group-item-danger', ['An invitation is required to create an account'])
+					ul.list-group
+						+flash_messages
+					ul.list-group
+						+validation_errors
+	if !config.invitations_required || invitation
+		div(style='margin: 20px;')
+			form(method='POST')
+				.form-group(class=input_status.username)
+					label.control-label(for='username_input') Username
+					input.form-control(type='text', id='username_input', name='username', placeholder='Username', value=form_data.username)
+				.form-group(class=input_status.password)
+					label.control-label(for='password_input') Password
+					input.form-control(type='password', id='password_input', name='password', placeholder='Password', value='')
+					span(class='help-block')
+							| Please note that at present time, no password retrieval mechanism exists. If you forget your password,
+							| it cannot be retrieved or reset.
+				.form-group(class=input_status.password_confirm)
+					label.control-label(for='password_confirm_input') Confirm Password
+					input.form-control(type='password', id='password_confirm_input', name='password_confirm', placeholder='Password', value='')
+				.container-fluid
+					.row
+						.col-xs-4
+							button.btn.btn-primary(type='submit') Register

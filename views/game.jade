@@ -1,0 +1,14 @@
+extends layout
+
+block headers
+	title #{config.site_name}
+
+block content
+	.container
+		.row
+			.col-xs-12
+				.jumbotron(style='padding-top: 5px; padding-bottom: 5px;')
+					h1(style='text-align: center;') #{config.site_name}
+					ul.list-group
+						+flash_messages
+	p Welcome #{user.username}
