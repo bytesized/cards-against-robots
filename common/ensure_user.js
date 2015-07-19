@@ -12,7 +12,7 @@ var ensure_authentication = function(req, res, next)
 	}
 
 	// Allows the user to be redirected back to this page after authentication
-	req.session.redirect_url = req.url;
+	req.session.redirect_url = req.originalUrl;
 	res.redirect('/user/login');
 }
 
