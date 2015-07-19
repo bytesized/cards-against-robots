@@ -21,10 +21,10 @@ block content
 	- if (typeof form_data.mysql.connection_limit === 'undefined')  form_data.mysql.connection_limit = '100';
 	- if (typeof form_data.invitations_required === 'undefined')    form_data.invitations_required   = true;
 	- if (!form_data.field_sizes) form_data.field_sizes = {};
-	- if (typeof form_data.field_sizes.token === 'undefined')            form_data.field_sizes.token           = '50';
-	- if (typeof form_data.field_sizes.username === 'undefined')         form_data.field_sizes.username        = '63';
-	- if (typeof form_data.field_sizes.deck_name === 'undefined')        form_data.field_sizes.deck_name       = '63';
-	- if (typeof form_data.field_sizes.card_text === 'undefined')        form_data.field_sizes.card_text       = '500';
+	- if (typeof form_data.field_sizes.token === 'undefined')       form_data.field_sizes.token           = '50';
+	- if (typeof form_data.field_sizes.username === 'undefined')    form_data.field_sizes.username        = '63';
+	- if (typeof form_data.field_sizes.deck_name === 'undefined')   form_data.field_sizes.deck_name       = '63';
+	- if (typeof form_data.field_sizes.card_text === 'undefined')   form_data.field_sizes.card_text       = '500';
 	- if (typeof form_data.super_user_name === 'undefined')         form_data.super_user_name        = '';
 	//- Omit super user password
 
