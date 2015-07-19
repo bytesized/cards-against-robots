@@ -7,7 +7,10 @@ var router = express.Router();
 
 router.get('/login', function(req, res, next)
 {
-	res.render('login', {form_data: {}});
+	if (req.isAuthenticated())
+		res.redirect('/');
+	else
+		res.render('login', {form_data: {}});
 });
 
 router.post('/login', 
@@ -69,6 +72,12 @@ router.post('/register', function(req, res, next)
 			}
 		});
 	}
+});
+
+router.get('/logout', function(req, res, next)
+{
+	req.logout();
+	res.redirect('/');
 });
 
 module.exports = router;
