@@ -26,7 +26,10 @@ app_config.routes = require(path.join(__dirname, 'config', 'routes'));
 app_config.config_routes = require(path.join(__dirname, 'config', 'config_routes'));
 app_config.flash = require(path.join(__dirname, 'config', 'flash'));
 app_config.configuration = require(path.join(__dirname, 'config', 'configuration'));
-
+// Some modules should be initialized when the server starts, but aren't actually needed
+// in this file
+require(path.join(__dirname, 'common', 'words'));
+require(path.join(__dirname, 'common', 'room_name'));
 
 var app = express();
 
