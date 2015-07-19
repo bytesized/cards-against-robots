@@ -11,4 +11,9 @@ block content
 					h1(style='text-align: center;') #{config.site_name}
 					ul.list-group
 						+flash_messages
-	p Welcome #{user.username}
+	.container
+		+game_navbar
+	.container
+		.row
+			.col-xs-12
+				p Welcome #{user.username}

@@ -11,6 +11,7 @@ html
 			if config && config.site_name
 				title= config.site_name
 	body
+		- if (!user) user = {};
 		//- Takes a bootstrap `list-group-item-*` class and an array of messages
 		//- Should be explictly put in a ul.list-group like this:
 		//-     ul.list-group
@@ -35,6 +36,31 @@ html
 			if validation_error_list
 				each error in validation_error_list
 					li.list-group-item.list-group-item-danger #{error.msg}
+		mixin game_navbar
+			nav.navbar.navbar-inverse(role='navigation')
+				.navbar-header
+					button.navbar-toggle.collapsed(type='button', data-toggle='collapse', data-target='#navbar')
+						span.sr-only Toggle Navigation
+						span.icon-bar
+						span.icon-bar
+						span.icon-bar
+				.collapse.navbar-collapse(id='navbar')
+					ul.nav.navbar-nav
+						form.navbar-form.navbar-left
+							.form-group
+								.input-group
+									span.input-group-addon
+										span.glyphicon.glyphicon-user
+									input.form-control(type='text', placeholder='Display Name', value='')
+						li
+							a(href='/game/list') Join a Game
+						li
+							a(href='/game/create') Create Game
+					ul.nav.navbar-nav.navbar-right
+						li
+							a(href='/user/logout') Logout
 		block content
 		script(src='/javascripts/jquery-1.11.3.min.js')
 		script(src='/javascripts/bootstrap.min.js')
+		block scripts
+
