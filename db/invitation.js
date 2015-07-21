@@ -1,7 +1,7 @@
 "use strict";
 var path = require('path');
 var validator = require('validator');
-var config = require(path.join(__dirname, 'configuration'));
+var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var database = require(path.join(__dirname, 'database'));
 
 function invitation_error(message)

@@ -2,7 +2,7 @@
 var Promise = require('bluebird');
 var path = require('path');
 var mysql = require('mysql');
-var config = require(path.join(__dirname, 'configuration'));
+var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 
 // Creates the database and tables necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,

@@ -4,7 +4,7 @@ var path = require('path');
 var Promise = require('bluebird');
 var validator = require('validator');
 var bcrypt = require('bcrypt');
-var config = require(path.join(__dirname, 'configuration'));
+var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var database = require(path.join(__dirname, 'database'));
 
 // module.exports will include this message object. Reasoning: some functions

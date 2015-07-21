@@ -2,7 +2,7 @@
 var express = require('express');
 var path = require('path');
 var passport = require('passport');
-var user = require(path.normalize(path.join(__dirname, '..', 'user')));
+var user = require(path.normalize(path.join(__dirname, '..', 'db', 'user')));
 var router = express.Router();
 
 router.get('/login', function(req, res, next)

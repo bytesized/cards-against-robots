@@ -1,12 +1,12 @@
 "use strict";
 var express = require('express');
 var path = require('path');
-var database = require(path.normalize(path.join(__dirname, '..', 'database')));
+var database = require(path.normalize(path.join(__dirname, '..', 'db', 'database')));
 var fs = require('fs');
 var Promise = require('bluebird');
 var router = express.Router();
 var configuration = require(path.normalize(path.join(__dirname, '..', 'configuration')));
-var user = require(path.normalize(path.join(__dirname, '..', 'user')));
+var user = require(path.normalize(path.join(__dirname, '..', 'db', 'user')));
 var object_attribute = require(path.normalize(path.join(__dirname, '..', 'common', 'object_attribute')));
 
 var states = {

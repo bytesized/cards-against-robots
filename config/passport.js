@@ -3,14 +3,14 @@
 var path = require('path');
 var passport = require('passport');
 var local_strategy = require('passport-local').Strategy;
-var user = require(path.normalize(path.join(__dirname, '..', 'user')));
+var user = require(path.normalize(path.join(__dirname, '..', 'db', 'user')));
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 
 module.exports = function()
 {
-	passport.serializeUser(function(user, done)
+	passport.serializeUser(function(user_info, done)
 	{
-		done(null, user.id);
+		done(null, user_info.id);
 	});
 
 	passport.deserializeUser(function(id, done)
