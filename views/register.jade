@@ -3,6 +3,13 @@ extends layout
 block headers
 	title Register - #{config.site_name}
 
+block scripts
+	script(src='/javascripts/validate_user.js')
+	script
+		| validate_user.username.set_input('#username_input');
+		| validate_user.password.set_input('#password_input');
+		| validate_user.password_confirm.set_input('#password_confirm_input', '#password_input');
+
 block content
 	.container
 		.row
@@ -16,11 +23,14 @@ block content
 						+flash_messages
 					ul.list-group
 						+validation_errors
-	if !config.invitations_required || invitation=
+	if !config.invitations_required || invitation
 		form(method='POST')
 			.form-group(class=input_status.username)
 				label.control-label(for='username_input') Username
-				input.form-control(type='text', id='username_input', name='username', placeholder='Username', value=form_data.username)
+				.input-group
+					input.form-control(type='text', id='username_input', name='username', placeholder='Username', value=form_data.username)
+					span.input-group-addon
+						span.glyphicon.glyphicon-remove-circle
 			.form-group(class=input_status.password)
 				label.control-label(for='password_input') Password
 				input.form-control(type='password', id='password_input', name='password', placeholder='Password', value='')
