@@ -32,6 +32,7 @@ var set_default_config = function()
 {
 	config_object = {};
 	// Set card icon defaults so that stylus will properly generate stylesheets during config
+	config_object.card_icon = {};
 	config_object.card_icon.filename = 'dummy.png';
 	config_object.card_icon.height = 35;
 	config_object.card_icon.width = 35;
