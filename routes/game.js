@@ -10,4 +10,9 @@ router.get('/', ensure_user.authenticated, function(req, res, next)
 	res.render('game', {});
 });
 
+router.get('/create', ensure_user.authenticated, function(req, res, next)
+{
+	res.render('create_game', {form_data: {}});
+});
+
 module.exports = router;
