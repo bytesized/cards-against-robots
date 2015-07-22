@@ -4,6 +4,7 @@ var path = require('path');
 var passport = require('passport');
 var user = require(path.normalize(path.join(__dirname, '..', 'db', 'user')));
 var router = express.Router();
+var Promise = require("bluebird");
 
 router.get('/login', function(req, res, next)
 {
@@ -57,8 +58,13 @@ router.post('/register', function(req, res, next)
 	{
 		user.create(new_user).then(function()
 		{
-			req.flash('success', 'User Created!');
-			res.redirect('/user/login');
+			// This is the only time we need promisification of the passport library.
+			req.loginAsync = Promise.promisify(req.login);
+			return req.loginAsync(new_user);
+		}).then(function()
+		{
+			req.flash('success', 'User Created! You are now logged in');
+			res.redirect('/');
 		}, function(err)
 		{
 			// The only error did not handle was the "that username already exists" error.
