@@ -43,6 +43,12 @@ validate_user.username.do_validation = function(selector)
 	$(selector).closest('.input-group').removeClass('has-error');
 	$(selector).closest('.input-group').removeClass('has-success');
 
+	if (username.length == 0)
+	{
+		$(selector).closest('.input-group').addClass('has-error');
+		return;
+	}
+
 	if (username.length < 4)
 	{
 		$(selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-remove-circle');
@@ -156,6 +162,12 @@ validate_user.password.do_validation = function(selector)
 	$(selector).closest('.form-group').removeClass('has-error');
 	$(selector).closest('.form-group').removeClass('has-success');
 
+	if (password.length == 0)
+	{
+		$(selector).closest('.form-group').addClass('has-error');
+		return;
+	}
+
 	if (password.length < 3)
 	{
 		$(selector).data(
@@ -208,6 +220,12 @@ validate_user.password_confirm.do_validation = function(confirm_selector, passwo
 	var password = $(password_selector).val();
 	$(confirm_selector).closest('.form-group').removeClass('has-error');
 	$(confirm_selector).closest('.form-group').removeClass('has-success');
+
+	if ($(confirm_selector).val().length == 0)
+	{
+		$(selector).closest('.input-group').addClass('has-error');
+		return;
+	}
 
 	if ($(password_selector).val() !== $(confirm_selector).val())
 	{
