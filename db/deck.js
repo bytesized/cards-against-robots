@@ -6,11 +6,11 @@ var database = require(path.join(__dirname, 'database'));
 
 function deck_error(message)
 {
-  var error = Error.call(this, message);
+	var error = Error.call(this, message);
 
-  this.name = 'deck_error';
-  this.message = error.message;
-  this.stack = error.stack;
+	this.name = 'deck_error';
+	this.message = error.message;
+	this.stack = error.stack;
 }
 deck_error.prototype = Object.create(Error.prototype);
 deck_error.prototype.constructor = deck_error;
@@ -27,7 +27,7 @@ var init_db = function()
 	{
 		return init_deck_descriptions();
 	})
-}
+};
 
 // Creates a table necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
@@ -63,7 +63,7 @@ var init_card_table = function()
 			return database.pool.queryAsync(query);
 		}
 	});
-}
+};
 
 // Creates a table necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
@@ -87,12 +87,13 @@ var init_deck_list = function()
 					"creator                  INT UNSIGNED NOT NULL, " +
 					"FOREIGN KEY(creator)     REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE, " +
 					"play_count               INT UNSIGNED NOT NULL DEFAULT 0, " +
+					"card_count               INT UNSIGNED NOT NULL DEFAULT 0, " +
 					"INDEX(play_count)" +
 				") ENGINE InnoDB;";
 			return database.pool.queryAsync(query);
 		}
 	});
-}
+};
 
 // Creates a table necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
@@ -117,9 +118,38 @@ var init_deck_descriptions = function()
 			return database.pool.queryAsync(query);
 		}
 	});
-}
+};
+
+// Returns a Promise. If the Promise is fulfilled, the deck has been created
+var create_deck = function(creator_id, name)
+{
+//	return new Promise(function(resolve, reject)
+//	{
+//		check_user(user);
+//		resolve();
+//	})
+//	database.pool.queryAsync('INSERT INTO deck_list (name, creator) VALUES (?, ?);',
+//		[name, creator_id]);
+};
+
+var create_card = function(creator_id, text, color)
+{
+
+};
+
+// Returns a Promise. If the Promise is fulfilled, it will yield an array of all deck
+// objects belonging to the specified user
+var get_decks_by_user_id = function(id)
+{
+	return database.pool.queryAsync('SELECT * FROM deck_list WHERE creator = ? ;', [id]).then(function(results)
+	{
+		console.info(results[0]);
+		return results[0];
+	});
+};
 
 module.exports = {
-	init_db : init_db,
-	error   : deck_error
+	init_db              : init_db,
+	error                : deck_error,
+	get_decks_by_user_id : get_decks_by_user_id
 };
