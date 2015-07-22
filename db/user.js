@@ -221,6 +221,10 @@ var create_user = function(user, override_invitation)
 			"INSERT INTO users (username,  password,  admin,  superuser,  locked) " +
 			           "VALUES (       ?,         ?,      ?,          ?,       ?);",
 			[user.username, password_hash, user.admin, user.superuser, user.locked]);
+	}).then(function(result)
+	{
+		user.id = result[0].insertId;
+		return user;
 	}).catch(function (err)
 	{
 		if (err.code == 'ER_DUP_ENTRY')
