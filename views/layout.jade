@@ -73,17 +73,10 @@ html
 		if config
 			script
 				| var config = {};
-				| config.card_icon = {};
-				| config.card_icon.filename = !{JSON.stringify(config.card_icon.filename)};
-				| config.card_icon.height = !{JSON.stringify(config.card_icon.height)};
-				| config.card_icon.width = !{JSON.stringify(config.card_icon.width)};
+				| config.card_icon = !{JSON.stringify(config.card_icon)};
 				| config.site_name = !{JSON.stringify(config.site_name)};
 				| config.invitations_required = !{JSON.stringify(config.invitations_required)};
-				| config.field_sizes = {};
-				| config.field_sizes.token = !{JSON.stringify(config.field_sizes.token)};
-				| config.field_sizes.username = !{JSON.stringify(config.field_sizes.username)};
-				| config.field_sizes.deck_name = !{JSON.stringify(config.field_sizes.deck_name)};
-				| config.field_sizes.card_text = !{JSON.stringify(config.field_sizes.card_text)};
+				| config.field_sizes = !{JSON.stringify(config.field_sizes)};
 		script(src='/javascripts/jquery-1.11.3.min.js')
 		script(src='/javascripts/bootstrap.min.js')
 		block scripts
