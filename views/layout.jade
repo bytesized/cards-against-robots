@@ -37,32 +37,33 @@ html
 				each error in validation_error_list
 					li.list-group-item.list-group-item-danger #{error.msg}
 		mixin game_navbar(active_button)
-			nav.navbar.navbar-inverse(role='navigation')
-				.navbar-header
-					button.navbar-toggle(type='button', data-toggle='collapse', data-target='#navbar')
-						span.sr-only Toggle Navigation
-						span.icon-bar
-						span.icon-bar
-						span.icon-bar
-				.collapse.navbar-collapse(id='navbar')
-					form.navbar-form.navbar-left
-						.form-group
-							.input-group
-								span.input-group-addon
-									span.glyphicon.glyphicon-user
-								input.form-control(type='text', placeholder='Display Name', value='')
-					ul.nav.navbar-nav
-						li(class=(active_button == 'home' ? 'active' : ''))
-							a(href='/game') Home
-						li(class=(active_button == 'join' ? 'active' : ''))
-							a(href='/game/list') Join a Game
-						li(class=(active_button == 'create' ? 'active' : ''))
-							a(href='/game/create') Create Game
-						li(class=(active_button == 'deck editor' ? 'active' : ''))
-							a(href='/deck/edit') Deck Editor
-					ul.nav.navbar-nav.navbar-right
-						li
-							a(href='/user/logout') Logout
+			.container
+				nav.navbar.navbar-inverse(role='navigation')
+					.navbar-header
+						button.navbar-toggle(type='button', data-toggle='collapse', data-target='#navbar')
+							span.sr-only Toggle Navigation
+							span.icon-bar
+							span.icon-bar
+							span.icon-bar
+					.collapse.navbar-collapse(id='navbar')
+						form.navbar-form.navbar-left
+							.form-group
+								.input-group
+									span.input-group-addon
+										span.glyphicon.glyphicon-user
+									input.form-control(type='text', placeholder='Display Name', value='')
+						ul.nav.navbar-nav
+							li(class=(active_button == 'home' ? 'active' : ''))
+								a(href='/game') Home
+							li(class=(active_button == 'join' ? 'active' : ''))
+								a(href='/game/list') Join a Game
+							li(class=(active_button == 'create' ? 'active' : ''))
+								a(href='/game/create') Create Game
+							li(class=(active_button == 'deck editor' ? 'active' : ''))
+								a(href='/deck/edit') Deck Editor
+						ul.nav.navbar-nav.navbar-right
+							li
+								a(href='/user/logout') Logout
 		div(style='margin: 20px;')
 			block content
 
