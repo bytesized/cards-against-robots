@@ -8,7 +8,7 @@ function invitation_error(message)
 {
   var error = Error.call(this, message);
 
-  this.name = 'invitation_error';
+  this.name = 'InvitationError';
   this.message = error.message;
   this.stack = error.stack;
 }

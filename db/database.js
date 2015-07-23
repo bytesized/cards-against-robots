@@ -27,6 +27,10 @@ var init = function()
 		return user.init_db();
 	}).then(function()
 	{
+		var card = require(path.join(__dirname, 'card'));
+		return card.init_db();
+	}).then(function()
+	{
 		var deck = require(path.join(__dirname, 'deck'));
 		return deck.init_db();
 	}).then(function()

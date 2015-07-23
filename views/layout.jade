@@ -77,6 +77,14 @@ html
 				| config.site_name = !{JSON.stringify(config.site_name)};
 				| config.invitations_required = !{JSON.stringify(config.invitations_required)};
 				| config.field_sizes = !{JSON.stringify(config.field_sizes)};
+				| config.properties = {};
+				| config.properties.is_configured = !{JSON.stringify(config.properties.is_configured)};
+		else
+			script
+				| var config = {};
+				| config.properties = {};
+				| config.properties.is_configured = false;
+
 		script(src='/javascripts/jquery-1.11.3.min.js')
 		script(src='/javascripts/bootstrap.min.js')
 		block scripts

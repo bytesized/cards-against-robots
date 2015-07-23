@@ -1,4 +1,5 @@
 // Used to validate username and password within the page
+// Requires common/user.js
 // Assumptions: Username input will be a `form-control` inside an `input-group` a `form-group`
 //              The `input-group` should contain the username control and a subsequent
 //              `input-group-addon` which should be a `span.glyphicon.glyphicon-remove-circle`
@@ -49,32 +50,13 @@ validate_user.username.do_validation = function(selector)
 		return;
 	}
 
-	if (username.length < 4)
+	try
+	{
+		user.check_username(username);
+	} catch(err)
 	{
 		$(selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-remove-circle');
-		$(selector).data(
-			'validate_user.username.error',
-			'Username cannot be less than 4 characters');
-		$(selector).popover('show');
-		$(selector).closest('.input-group').addClass('has-error');
-		return;
-	}
-	if (username.length > config.field_sizes.username)
-	{
-		$(selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-remove-circle');
-		$(selector).data(
-			'validate_user.username.error',
-			'Username cannot contain more than ' + config.field_sizes.username + ' characters');
-		$(selector).popover('show');
-		$(selector).closest('.input-group').addClass('has-error');
-		return;
-	}
-	if (username.match(/^[-a-zA-Z0-9_+=:().]*$/) == null)
-	{
-		$(selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-remove-circle');
-		$(selector).data(
-			'validate_user.username.error',
-			'Username may only contain letters, numbers, and these special characters: -,_,+,=,:,(,),.');
+		$(selector).data('validate_user.username.error', err.message);
 		$(selector).popover('show');
 		$(selector).closest('.input-group').addClass('has-error');
 		return;
@@ -168,11 +150,12 @@ validate_user.password.do_validation = function(selector)
 		return;
 	}
 
-	if (password.length < 3)
+	try
 	{
-		$(selector).data(
-			'validate_user.password.error',
-			'Password cannot be less than 3 characters');
+		user.check_password(password);
+	} catch(err)
+	{
+		$(selector).data('validate_user.password.error', err.message);
 		$(selector).popover('show');
 		$(selector).closest('.form-group').addClass('has-error');
 		return;

@@ -6,40 +6,7 @@ var validator = require('validator');
 var bcrypt = require('bcrypt');
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var database = require(path.join(__dirname, 'database'));
-
-// module.exports will include this message object. Reasoning: some functions
-// such as check_username throw their error message. These functions may be used
-// by express-validator (as a custom validator). Since express-validator intends
-// for the caller to provide the error message 
-var messages = {};
-
-function user_error(message, code)
-{
-  var error = Error.call(this, message);
-
-  this.name = 'UserError';
-  this.message = error.message;
-  this.stack = error.stack;
-  this.code = code;
-}
-user_error.prototype = Object.create(Error.prototype);
-user_error.prototype.constructor = user_error;
-
-var user_object = (function() {
-	// Constructor. Make sure all properties are defined and admin, superuser, and locked
-	// are set to their default values.
-	function user_object()
-	{
-		this.id        = -1;
-		this.username  = '';
-		this.password  = '';
-		this.admin     = false;
-		this.superuser = false;
-		this.last_seen = null;
-		this.locked    = false;
-	};
-	return user_object;
-})();
+var user_common = require(path.normalize(path.join(__dirname, '..', 'public', 'javascripts', 'common', 'user')));
 
 // Creates tables necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
@@ -54,7 +21,7 @@ var init_db = function()
 			// SQL statement, so make double sure
 			var username_length = validator.toInt(config.field_sizes.username, 10);
 			if (isNaN(username_length))
-				throw new user_error('Configuration setting \'username_length\' is not an integer.');
+				throw new user_common.error('Configuration setting \'username_length\' is not an integer.');
 
 			var query = 
 				"CREATE TABLE users (" +
@@ -71,125 +38,18 @@ var init_db = function()
 	});
 };
 
-// Internal Validation functions. By specifying the validation functions in this manner,
-// they can be used with express-validation, which does not support validation functions
-// returning error messages.
-var username_validation_fns =
-[
-	{
-		fn: function(username)
-		{
-			if (username.length < 4)
-				return false;
-			else if (config.properties.is_configured && username.length > config.field_sizes.username)
-				return false;
-			else
-				return true;
-		},
-		msg: function(username)
-		{
-			if (config.properties.is_configured)
-				return "Username must be 4-" + config.field_sizes.username + " characters long";
-			else
-				return "Username must be more than 4 characters long";
-		}
-	},
-	{
-		fn: function(username)
-		{
-			if (username.match(/^[-a-zA-Z0-9_+=:().]*$/) == null)
-				return false;
-			else
-				return true;
-		},
-		msg: function(username)
-		{
-			return "Username may only contain letters, numbers, and these special characters: -,_,+,=,:,(,),.";
-		}
-	}
-];
-
-var password_validation_fns = 
-[
-	{
-		fn: function(password)
-		{
-			if (password.length < 3)
-				return false;
-			else
-				return true;
-		},
-		msg: function(password)
-		{
-			return "Password must be at least 3 characters long";
-		}
-	}
-];
-
-// Does not test if user exists and does not include the
-// username and password validation above
-var user_validation_fns = 
-[
-	{
-		fn: function(user)
-		{
-			if (user.admin && !user.superuser)
-				return false;
-			else
-				return true;
-		},
-		msg: function(user)
-		{
-			return "User cannot be a Super User without being an Administrator";
-		}
-	}
-];
-
-// Throws an error if the username is invalid
-// Does not check if the username exists
-var check_username = function(candidate)
-{
-	for (var i = 0; i < username_validation_fns.length; i++)
-	{
-		if (!username_validation_fns[i].fn(candidate))
-			throw new user_error(username_validation_fns[i].msg(candidate), 'BAD_USERNAME');
-	}
-};
-
 // Validates the username field of the given request
 var validate_username_field = function(req, field)
 {
-	for (var i = 0; i < username_validation_fns.length; i++)
-		req.checkBody(field, username_validation_fns[i].msg(req.body[field])).custom_fn(username_validation_fns[i].fn);
+	for (var i = 0; i < user_common.username_validation_fns.length; i++)
+		req.checkBody(field, user_common.username_validation_fns[i].msg(req.body[field])).custom_fn(user_common.username_validation_fns[i].fn);
 }
-
-// Throws an error if the password given is invalid
-var check_password = function(candidate)
-{
-	for (var i = 0; i < password_validation_fns.length; i++)
-	{
-		if (!password_validation_fns[i].fn(candidate))
-			throw new user_error(password_validation_fns[i].msg(candidate), 'BAD_PASSWORD');
-	}
-};
 
 // Validates the password field of the given request
 var validate_password_field = function(req, field)
 {
-	for (var i = 0; i < password_validation_fns.length; i++)
-		req.checkBody(field, password_validation_fns[i].msg(req.body[field])).custom_fn(password_validation_fns[i].fn);
-};
-
-// Throws an error if the user is invalid. Includes username and password validity checks
-var check_user = function(candidate)
-{
-	for (var i = 0; i < user_validation_fns.length; i++)
-	{
-		if (!user_validation_fns[i].fn(candidate))
-			throw new user_error(user_validation_fns[i].msg(candidate), 'BAD_USER_ATTRIBUTES');
-	}
-	check_username(candidate.username);
-	check_password(candidate.password);
+	for (var i = 0; i < user_common.password_validation_fns.length; i++)
+		req.checkBody(field, user_common.password_validation_fns[i].msg(req.body[field])).custom_fn(user_common.password_validation_fns[i].fn);
 };
 
 // Returns a Promise which will be fulfilled if the user is created and rejected if it is not
@@ -205,8 +65,8 @@ var create_user = function(user, override_invitation)
 	return new Promise(function(resolve, reject)
 	{
 		if (config.invitations_required && !override_invitation)
-			throw new user_error('Attempt to create user without an invitation', 'INTERNAL_ERROR');
-		check_user(user);
+			throw new user_common.error('Attempt to create user without an invitation', 'INTERNAL_ERROR');
+		user_common.check_user(user);
 		resolve();
 	}).then(function()
 	{
@@ -228,7 +88,7 @@ var create_user = function(user, override_invitation)
 	}).catch(function (err)
 	{
 		if (err.code == 'ER_DUP_ENTRY')
-			throw new user_error('That username is in use', 'DUP_USERNAME');
+			throw new user_common.error('That username is in use', 'DUP_USERNAME');
 		else
 			throw err;
 	});
@@ -244,7 +104,7 @@ var create_primary_superuser = function(user)
 	user.superuser = true;
 	return new Promise(function(resolve, reject)
 	{
-		check_user(user);
+		user_common.check_user(user);
 		resolve();
 	}).then(function()
 	{
@@ -264,9 +124,9 @@ var create_primary_superuser = function(user)
 		if (err.code == 'ER_DUP_ENTRY')
 		{
 			if (err.message == 'ER_DUP_ENTRY: Duplicate entry \'1\' for key \'PRIMARY\'')
-				throw new user_error('Primary Super User already exists', 'BAD_REQUEST');
+				throw new user_common.error('Primary Super User already exists', 'BAD_REQUEST');
 			else
-				throw new user_error('That username is in use', 'BAD_USERNAME');
+				throw new user_common.error('That username is in use', 'BAD_USERNAME');
 		} else {
 			throw err;
 		}
@@ -323,13 +183,14 @@ var verify_password = function(hash, password)
 };
 
 module.exports = {
-	error                    : user_error,
-	user_object              : user_object,
+	error                    : user_common.error,
+	user_object              : user_common.user_object,
 	init_db                  : init_db,
-	check_username           : check_username,
+	check_username           : user_common.check_username,
 	validate_username_field  : validate_username_field,
-	check_password           : check_password,
+	check_password           : user_common.check_password,
 	validate_password_field  : validate_password_field,
+	check_user               : user_common.check_user,
 	create                   : create_user,
 	create_primary_superuser : create_primary_superuser,
 	get_by_id                : get_user_by_id,

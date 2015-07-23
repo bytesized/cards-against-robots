@@ -4,6 +4,7 @@ block headers
 	title Register - #{config.site_name}
 
 block scripts
+	script(src='/javascripts/common/user.js')
 	script(src='/javascripts/validate_user.js')
 	script
 		| validate_user.username.set_input('#username_input');
