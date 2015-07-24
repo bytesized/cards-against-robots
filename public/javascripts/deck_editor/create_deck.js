@@ -20,6 +20,7 @@ $(document).ready(function()
 			return $(create_deck.input_selector).data('create_deck.message');
 		},
 		placement: 'auto',
+		container: 'body',
 		animation: true,
 		trigger: 'manual'
 	});
@@ -60,6 +61,7 @@ create_deck.validate = function(deck_name)
 		$(create_deck.input_selector).data('create_deck.message', err.message);
 		$(create_deck.input_selector).popover('show');
 		$(create_deck.input_selector).closest('.form-group').addClass('has-error');
+		$(create_deck.input_selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-remove-circle');
 		return false;
 	}
 
@@ -71,6 +73,8 @@ create_deck.send_request = function(deck_name, attempt)
 	if (!attempt)
 		attempt = 1;
 
+	$(create_deck.input_selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-transfer');
+
 	var request = $.post(create_deck.ajax_url, { name: deck_name }, null, "json");
 
 	request.success(function(data, text_status, jqXHR)
@@ -81,12 +85,14 @@ create_deck.send_request = function(deck_name, attempt)
 			$(create_deck.input_selector).data('create_deck.message', data.error);
 			$(create_deck.input_selector).popover('show');
 			$(create_deck.input_selector).closest('.form-group').addClass('has-error');
+			$(create_deck.input_selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-remove-circle');
 		} else
 		{
 			$(create_deck.input_selector).data('create_deck.message_title', 'Success');
 			$(create_deck.input_selector).data('create_deck.message', 'Deck Created');
 			$(create_deck.input_selector).popover('show');
 			$(create_deck.input_selector).closest('.form-group').addClass('has-success');
+			$(create_deck.input_selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-ok-circle');
 			load_deck.add_decks([data.deck]);
 		}
 	});
@@ -95,11 +101,13 @@ create_deck.send_request = function(deck_name, attempt)
 		if (attempt < create_deck.max_attempts)
 		{
 			create_deck.send_request(deck_name, attempt + 1);
+			$(create_deck.input_selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-repeat');
 		} else
 		{
 			$(create_deck.input_selector).data('create_deck.message_title', 'Error');
 			$(create_deck.input_selector).data('create_deck.message', 'Error contacting the server: ' + error_thrown);
 			$(create_deck.input_selector).popover('show');
+			$(create_deck.input_selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-warning-sign');
 		}
 	});
 };

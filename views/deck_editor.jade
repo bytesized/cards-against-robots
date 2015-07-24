@@ -38,7 +38,10 @@ block content
 				form.form-inline
 					.form-group
 						label.sr-only(for='create_deck-name_input' style='margin-right: 5px;') Make New Deck
-						input#create_deck-name_input.form-control(type='text' size='50' placeholder='New Deck Name')
+						.input-group(style='margin-right: 5px;')
+							input#create_deck-name_input.form-control(type='text' size='50' placeholder='New Deck Name')
+							span.input-group-addon
+								span.glyphicon.glyphicon-remove-circle
 					button#create_deck-button.btn.btn-default Create
 		.row
 			.col-xs-12
