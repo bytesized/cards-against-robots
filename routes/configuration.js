@@ -223,10 +223,10 @@ router.post('/', function(req, res, next)
 	{
 		// No MYSQL errors!
 		on_configuration_complete(res);
-	}).catch(user.error, function(err)
+	}).catch(function(err)
 	{
 		// Got an error sent from the user module
-		if (err.code == 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
+		if (err.name === 'UserError' && err.code === 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
 		{
 			// If the only error is that the primary super user already exists, the configuration is complete,
 			// just warn the user that no new user was created
@@ -236,10 +236,6 @@ router.post('/', function(req, res, next)
 
 			configuration_error(res, errors);
 		}
-	}).catch(function(err)
-	{
-		var errors = interpret_mysql_error(err);
-		configuration_error(res, errors);
 	});
 });
 
