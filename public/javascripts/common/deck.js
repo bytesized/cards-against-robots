@@ -8,9 +8,11 @@ var deck = {};
 
 deck.error = function(message, code)
 {
+	var error = Error.call(this, message);
+
 	this.name = 'DeckError';
-	this.message = message;
-	this.stack = Error.captureStackTrace(this, deck.error);
+	this.message = error.message;
+	this.stack = error.stack;
 	this.code = code;
 }
 deck.error.prototype = Object.create(Error.prototype);
