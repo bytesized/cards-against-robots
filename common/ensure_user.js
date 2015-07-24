@@ -14,8 +14,24 @@ var ensure_authentication = function(req, res, next)
 	// Allows the user to be redirected back to this page after authentication
 	req.session.redirect_url = req.originalUrl;
 	res.redirect('/user/login');
-}
+};
+
+// AJAX authentication is the same as regular authentication, but
+// if it fails, an error JSON is sent rather than redirecting to login
+var ensure_authentication_ajax = function(req, res, next)
+{
+	if (req.isAuthenticated())
+	{
+		res.locals.user = req.user;
+		return next();
+	}
+
+	res.json({ error: 'You are not logged in' });
+};
 
 module.exports = {
-	authenticated: ensure_authentication
+	authenticated : ensure_authentication,
+	ajax          : {
+	                	authenticated : ensure_authentication_ajax
+	                }
 };
