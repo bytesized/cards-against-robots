@@ -1,9 +1,53 @@
+//- A note about my conventions I will use in this file:
+//- All external javascript will create an object with the same name as the file containing
+//- all of the functionality for that file. I will refer to that object as the file's
+//- 'namespace'. Many of the external javascripts used by this page are specific to this page.
+//- Thus, to help keep things organized, element id's used in this file will use the namespace
+//- of the javascript that uses it. However, using a period in an id is possible, but
+//- problematic because selectors interpret an unescaped period as a class designator. 
+//- (i.e. `#load_deck.menu_toggle` means `id='load_deck' class='menu_toggle'`, rather than
+//- `id='load_deck.menu_toggle'`). To prevent this annoyance, the namespace separator for
+//- ids will be a hyphen (-). This is why there are weird looking ids with underscores and
+//- hyphens like `load_deck-menu_toggle`.
 extends layout
 
 block headers
 	title Deck Editor - #{config.site_name}
 
+block scripts
+	script(src='/javascripts/common/deck.js')
+	script(src='/javascripts/deck_editor/load_deck.js')
+	script
+		| load_deck.add_decks(!{JSON.stringify(user_decks)});
+	script(src='/javascripts/deck_editor/create_deck.js')
+
 block content
-	ul.list-group
-		+flash_messages
-	
+	.container
+		.row
+			.col-xs-12
+				ul.list-group
+					+flash_messages
+		.row
+			+game_navbar('deck editor')
+		.row
+			.col-xs-12
+				h1 Step 1 
+					small Choose a deck to edit
+		.row(style='margin-bottom: 10px;')
+			.col-xs-12
+				form.form-inline
+					.form-group
+						label.sr-only(for='create_deck-name_input' style='margin-right: 5px;') Make New Deck
+						input#create_deck-name_input.form-control(type='text' size='50' placeholder='New Deck Name')
+					button#create_deck-button.btn.btn-default Create
+		.row
+			.col-xs-12
+				form
+					.btn-group
+						button#load_deck-menu_toggle.btn.btn-default.dropdown-toggle(data-toggle='dropdown') Choose a deck 
+							span.caret
+						ul#load_deck-menu.dropdown-menu
+		.row
+			.col-xs-12
+				h1 Step 2 
+					small Edit chosen deck

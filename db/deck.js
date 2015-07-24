@@ -85,7 +85,7 @@ var create_deck = function(deck)
 		resolve();
 	}).then(function()
 	{
-		return database.pool.queryAsync('INSERT INTO deck_list (name, creator) VALUES (?, ?);', [name, creator_id]);
+		return database.pool.queryAsync('INSERT INTO deck_list (name, creator) VALUES (?, ?);', [deck.name, deck.creator]);
 	}).then(function(result)
 	{
 		deck.id = result[0].insertId
@@ -105,7 +105,6 @@ var get_decks_by_user_id = function(id)
 {
 	return database.pool.queryAsync('SELECT * FROM deck_list WHERE creator = ? ;', [id]).then(function(results)
 	{
-		console.info(results[0]);
 		return results[0];
 	});
 };

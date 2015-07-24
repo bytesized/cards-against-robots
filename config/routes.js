@@ -11,6 +11,7 @@ module.exports = function(app)
 	app.use('/ajax/user', require(path.join(__dirname, '..', 'routes', 'ajax', 'user')));
 	app.use('/game',      require(path.join(__dirname, '..', 'routes', 'game')));
 	app.use('/deck',      require(path.join(__dirname, '..', 'routes', 'deck')));
+	app.use('/ajax/deck', require(path.join(__dirname, '..', 'routes', 'ajax', 'deck')));
 
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next)
