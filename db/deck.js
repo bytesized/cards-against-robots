@@ -109,6 +109,17 @@ var get_decks_by_user_id = function(id)
 	});
 };
 
+// Returns a Promise. If the Promise is fulfilled, it will yield an array of cards in
+// the deck.
+// No error is given if the deck does not exist, an empty array is returned
+var get_cards = function(deck_id)
+{
+	return database.pool.queryAsync('SELECT * FROM deck_descriptions WHERE deck = ? ;', [deck_id]).then(function(results)
+	{
+		return results[0];
+	});
+};
+
 module.exports = {
 	init_db            : init_db,
 	error              : deck_common.error,
@@ -116,5 +127,6 @@ module.exports = {
 	check_deck_name    : deck_common.check_deck_name,
 	check_deck         : deck_common.check_deck,
 	get_all_by_user_id : get_decks_by_user_id,
-	create             : create_deck
+	create             : create_deck,
+	get_cards          : get_cards
 };

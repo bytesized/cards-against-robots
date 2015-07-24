@@ -16,9 +16,22 @@ block headers
 
 block scripts
 	script(src='/javascripts/common/deck.js')
+	script(src='/javascripts/two_state_machine.js')
+	//- According to HTTP 1.1 specification, section 8.1.4:
+	//- "A single-user client SHOULD NOT maintain more than 2 connections with any server"
+	//- For this page, we will have that mean that each of the two 'steps' on the page will
+	//- be allowed a single simultaneous connection
+	//- This will be enforced with these two state machines
+	//- (step 2 will actually have a request queue as well, but the state machine will
+	//- still be useful for maintaining the state of the page)
+	script
+		| var step1 = new two_state_machine();
+		| var step2 = new two_state_machine();
 	script(src='/javascripts/deck_editor/load_deck.js')
 	script
-		| load_deck.add_decks(!{JSON.stringify(user_decks)});
+		| $(document).ready(function() {
+		| 	load_deck.add_decks(!{JSON.stringify(user_decks)});
+		| });
 	script(src='/javascripts/deck_editor/create_deck.js')
 
 block content
