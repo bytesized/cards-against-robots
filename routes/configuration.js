@@ -364,7 +364,6 @@ function interpret_mysql_error(err)
 			value : ''}];
 	} else
 	{
-		throw err;
 		errors = [{
 			param : ['mysql_host', 'mysql_port', 'mysql_username', 'mysql_password'],
 			msg   : 'MYSQL Error: ' + err.message,
