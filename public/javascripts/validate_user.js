@@ -102,6 +102,7 @@ validate_user.username.server_validation = function(selector, attempt)
 		} else
 		{
 			$(selector).next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-warning-sign');
+			$(selector).closest('.input-group').addClass('has-error');
 			$(selector).data(
 				'validate_user.username.error',
 				'Could not contact the server to determine if that username is in use: ' + error_thrown);
