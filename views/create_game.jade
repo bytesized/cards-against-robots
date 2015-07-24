@@ -12,11 +12,14 @@ block content
 	- if (typeof form_data.max_players  === 'undefined') form_data.max_players  = 6;
 	- if (typeof form_data.redraws      === 'undefined') form_data.redraws      = 0;
 	.container
-		ul.list-group
-			+flash_messages
-		ul.list-group
-			+validation_errors
-		+game_navbar('create')
+		.row
+			.col-xs-12
+				ul.list-group
+					+flash_messages
+				ul.list-group
+					+validation_errors
+		.row
+			+game_navbar('create')
 		form.form-horizontal(method='POST')
 			.panel.panel-default
 				.panel-body

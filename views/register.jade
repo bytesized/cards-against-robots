@@ -13,14 +13,16 @@ block scripts
 
 block content
 	.container
-		h1(style='text-align: center;') Register
-		if config.invitations_required && !invitation
-			ul.list-group
-				+messages('list-group-item-danger', ['An invitation is required to create an account'])
-		ul.list-group
-			+flash_messages
-		ul.list-group
-			+validation_errors
+		.row
+			.col-xs-12
+				h1(style='text-align: center;') Register
+				if config.invitations_required && !invitation
+					ul.list-group
+						+messages('list-group-item-danger', ['An invitation is required to create an account'])
+				ul.list-group
+					+flash_messages
+				ul.list-group
+					+validation_errors
 		if !config.invitations_required || invitation
 			form(method='POST')
 				.form-group(class=input_status.username)
@@ -38,7 +40,6 @@ block content
 				.form-group(class=input_status.password_confirm)
 					label.control-label(for='password_confirm_input') Confirm Password
 					input.form-control(type='password', id='password_confirm_input', name='password_confirm', placeholder='Password', value='')
-				.container-fluid
-					.row
-						.col-xs-4
-							button.btn.btn-primary(type='submit') Register
+				.row
+					.col-xs-4
+						button.btn.btn-primary(type='submit') Register

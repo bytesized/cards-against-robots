@@ -5,10 +5,13 @@ block headers
 
 block content
 	.container
-		h1(style='text-align: center;') #{config.site_name}
-		ul.list-group
-			+flash_messages
-		+game_navbar('home')
+		.row
+			.col-xs-12
+				h1(style='text-align: center;') #{config.site_name}
+				ul.list-group
+					+flash_messages
+		.row
+			+game_navbar('home')
 		.row
 			.col-xs-12
 				p Welcome #{user.username}
