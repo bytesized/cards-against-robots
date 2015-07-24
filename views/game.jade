@@ -5,14 +5,10 @@ block headers
 
 block content
 	.container
-		.row
-			.col-xs-12
-				.jumbotron(style='padding-top: 5px; padding-bottom: 5px;')
-					h1(style='text-align: center;') #{config.site_name}
-					ul.list-group
-						+flash_messages
-	+game_navbar('home')
-	.container
+		h1(style='text-align: center;') #{config.site_name}
+		ul.list-group
+			+flash_messages
+		+game_navbar('home')
 		.row
 			.col-xs-12
 				p Welcome #{user.username}

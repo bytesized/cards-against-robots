@@ -5,15 +5,11 @@ block headers
 
 block content
 	.container
-		.row
-			.col-xs-12
-				.jumbotron.jumbotron-short
-					h1(style='text-align: center;') Login
-					ul.list-group
-						+flash_messages
-					ul.list-group
-						+validation_errors
-	.container
+		h1(style='text-align: center;') Login
+		ul.list-group
+			+flash_messages
+		ul.list-group
+			+validation_errors
 		form(method='POST')
 			.form-group
 				label.control-label(for='username_input') Username

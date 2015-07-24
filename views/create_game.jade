@@ -11,52 +11,52 @@ block content
 	- if (typeof form_data.hand_size    === 'undefined') form_data.hand_size    = 10;
 	- if (typeof form_data.max_players  === 'undefined') form_data.max_players  = 6;
 	- if (typeof form_data.redraws      === 'undefined') form_data.redraws      = 0;
-
-	ul.list-group
-		+flash_messages
-	ul.list-group
-		+validation_errors
-	+game_navbar('create')
-	form.form-horizontal(method='POST')
-		.panel.panel-default
-			.panel-body
-				.form-group(class=input_status.name)
-					label.control-label.col-xs-12.col-sm-2(for='name_input') Room Name
-					.col-xs-12.col-sm-10
-						input.form-control(type='text', id='name_input', name='name', placeholder='Room Name', value=form_data.name)
-				.form-group(class=input_status.public)
-					.col-xs-12.col-sm-offset-2.col-sm-10
-						.checkbox
-							label.checkbox
-								input(type='checkbox', name='public', checked=form_data.public)
-								| Publicly Listed Game
-				.form-group(class=input_status.password)
-					label.control-label.col-xs-12.col-sm-2(for='password_input') Room Password
-					.col-xs-12.col-sm-10
-						input.form-control(type='text', id='password_input', name='password', placeholder='Password', value=form_data.password)
-						span.help-block If password is blank, anyone may join the game
-		.panel.panel-default
-			.panel-body
-				.form-group(class=input_status.max_points)
-					label.control-label.col-xs-12.col-sm-2(for='max_points_input') Objective
-					.col-xs-12.col-sm-10
-						input.form-control(type='text', id='max_points_input', name='max_points', placeholder='Number of Points', value=form_data.max_points)
-						span.help-block Once a player has this many points, they win and the game ends
-				.form-group(class=input_status.max_points)
-					label.control-label.col-xs-12.col-sm-2(for='hand_size_input') Hand Size
-					.col-xs-12.col-sm-10
-						input.form-control(type='text', id='hand_size_input', name='hand_size', placeholder='Number of Cards', value=form_data.hand_size)
-						span.help-block Number of cards dealt to each player (up to 40 cards allowed)
-				.form-group(class=input_status.max_points)
-					label.control-label.col-xs-12.col-sm-2(for='max_players_input') Maximum Players
-					.col-xs-12.col-sm-10
-						input.form-control(type='text', id='max_players_input', name='max_players', placeholder='Number of Players', value=form_data.max_players)
-						span.help-block Number of players that can be in the game simultaneously (3 - 25)
-				.form-group(class=input_status.max_points)
-					label.control-label.col-xs-12.col-sm-2(for='redraws_input') Redraws
-					.col-xs-12.col-sm-10
-						input.form-control(type='text', id='redraws_input', name='redraws', placeholder='Number of Redraws', value=form_data.redraws)
-						span.help-block A redraw can be used during a player's turn to discard all cards and draw a new hand
-		.form-group
-			.col-xs-12.col-sm-offset-2.col-sm-10
-				button.btn.btn-primary(type='submit') Create Game
+	.container
+		ul.list-group
+			+flash_messages
+		ul.list-group
+			+validation_errors
+		+game_navbar('create')
+		form.form-horizontal(method='POST')
+			.panel.panel-default
+				.panel-body
+					.form-group(class=input_status.name)
+						label.control-label.col-xs-12.col-sm-2(for='name_input') Room Name
+						.col-xs-12.col-sm-10
+							input.form-control(type='text', id='name_input', name='name', placeholder='Room Name', value=form_data.name)
+					.form-group(class=input_status.public)
+						.col-xs-12.col-sm-offset-2.col-sm-10
+							.checkbox
+								label.checkbox
+									input(type='checkbox', name='public', checked=form_data.public)
+									| Publicly Listed Game
+					.form-group(class=input_status.password)
+						label.control-label.col-xs-12.col-sm-2(for='password_input') Room Password
+						.col-xs-12.col-sm-10
+							input.form-control(type='text', id='password_input', name='password', placeholder='Password', value=form_data.password)
+							span.help-block If password is blank, anyone may join the game
+			.panel.panel-default
+				.panel-body
+					.form-group(class=input_status.max_points)
+						label.control-label.col-xs-12.col-sm-2(for='max_points_input') Objective
+						.col-xs-12.col-sm-10
+							input.form-control(type='text', id='max_points_input', name='max_points', placeholder='Number of Points', value=form_data.max_points)
+							span.help-block Once a player has this many points, they win and the game ends
+					.form-group(class=input_status.max_points)
+						label.control-label.col-xs-12.col-sm-2(for='hand_size_input') Hand Size
+						.col-xs-12.col-sm-10
+							input.form-control(type='text', id='hand_size_input', name='hand_size', placeholder='Number of Cards', value=form_data.hand_size)
+							span.help-block Number of cards dealt to each player (up to 40 cards allowed)
+					.form-group(class=input_status.max_points)
+						label.control-label.col-xs-12.col-sm-2(for='max_players_input') Maximum Players
+						.col-xs-12.col-sm-10
+							input.form-control(type='text', id='max_players_input', name='max_players', placeholder='Number of Players', value=form_data.max_players)
+							span.help-block Number of players that can be in the game simultaneously (3 - 25)
+					.form-group(class=input_status.max_points)
+						label.control-label.col-xs-12.col-sm-2(for='redraws_input') Redraws
+						.col-xs-12.col-sm-10
+							input.form-control(type='text', id='redraws_input', name='redraws', placeholder='Number of Redraws', value=form_data.redraws)
+							span.help-block A redraw can be used during a player's turn to discard all cards and draw a new hand
+			.form-group
+				.col-xs-12.col-sm-offset-2.col-sm-10
+					button.btn.btn-primary(type='submit') Create Game
