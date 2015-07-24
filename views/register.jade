@@ -15,7 +15,7 @@ block content
 	.container
 		.row
 			.col-xs-12
-				h1(style='text-align: center;') Register
+				h1 Register
 				if config.invitations_required && !invitation
 					ul.list-group
 						+messages('list-group-item-danger', ['An invitation is required to create an account'])
