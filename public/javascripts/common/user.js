@@ -8,11 +8,9 @@ var user = {};
 
 user.error = function(message, code)
 {
-	var error = Error.call(this, message);
-
 	this.name = 'UserError';
 	this.message = error.message;
-	this.stack = error.stack;
+	this.stack = Error.captureStackTrace(this, user.error);
 	this.code = code;
 }
 user.error.prototype = Object.create(Error.prototype);

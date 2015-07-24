@@ -10,20 +10,20 @@ var card = {};
 card.black = true;
 card.white = false;
 
-card.error = function(message)
+card.error = function(message, code)
 {
 	var error = Error.call(this, message);
 
 	this.name = 'CardError';
 	this.message = error.message;
 	this.stack = error.stack;
+	this.code = code;
 }
 card.error.prototype = Object.create(Error.prototype);
 card.error.prototype.constructor = card.error;
 
 card.card_object = (function() {
-	// Constructor. Make sure all properties are defined and play_count and card_count
-	// are set to their default values
+	// Constructor. Make sure all properties are defined set to their default values
 	function card_object()
 	{
 		this.id         = -1;
