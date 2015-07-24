@@ -4,7 +4,7 @@ var create_deck = {};
 create_deck.input_selector = '#create_deck-name_input';
 create_deck.button_selector = '#create_deck-button';
 create_deck.ajax_url = '/ajax/deck/create';
-create_deck.max_attempts = 
+create_deck.max_attempts = 1;
 
 $(document).ready(function()
 {
