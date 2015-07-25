@@ -6,22 +6,24 @@ block headers
 block content
 	.container#login_container
 		.row
-			.col-xs-12
+			.col-xs-12.col-sm-offset-1.col-sm-10.col-md-offset-2.col-md-7.col-lg-6
 				h1 Login
 				ul.list-group
 					+flash_messages
 				ul.list-group
 					+validation_errors
-		form(method='POST')
+		form.form-horizontal(method='POST')
 			.form-group
-				label.control-label(for='username_input') Username
-				input.form-control(type='text', id='username_input', name='username', placeholder='Username', value=form_data.username)
+				label.control-label.col-xs-12.col-sm-offset-1.col-sm-2.col-md-offset-2(for='username_input') Username
+				.col-xs-12.col-sm-8.col-md-5.col-lg-4
+					input.form-control(type='text', id='username_input', name='username', placeholder='Username', value=form_data.username)
 			.form-group
-				label.control-label(for='password_input') Password
-				input.form-control(type='password', id='password_input', name='password', placeholder='Password', value='')
-			.row
-				.col-xs-4
+				label.control-label.col-xs-12.col-sm-offset-1.col-sm-2.col-md-offset-2(for='password_input') Password
+				.col-xs-12.col-sm-8.col-md-5.col-lg-4
+					input.form-control(type='password', id='password_input', name='password', placeholder='Password', value='')
+			.form-group
+				.col-xs-4.col-sm-offset-3.col-sm-2.col-md-offset-4
 					button.btn.btn-primary(type='submit') Login
-				.col-xs-offset-4.col-xs-4(style='text-align: right;')
-					if !config.invitations_required
-						a(href='/user/register') Create an account
+				if !config.invitations_required
+					.col-xs-offset-4.col-xs-4.col-sm-offset-2.col-md-offset-1.col-md-2.col-lg-offset-0(style='text-align: right;')
+							a(href='/user/register') Create an account

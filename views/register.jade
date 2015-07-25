@@ -14,7 +14,7 @@ block scripts
 block content
 	.container#register_container
 		.row
-			.col-xs-12
+			.col-xs-12.col-sm-offset-1.col-sm-10.col-md-offset-2.col-md-7.col-lg-6
 				h1 Register
 				if config.invitations_required && !invitation
 					ul.list-group
@@ -24,22 +24,26 @@ block content
 				ul.list-group
 					+validation_errors
 		if !config.invitations_required || invitation
-			form(method='POST')
+			form.form-horizontal(method='POST')
 				.form-group(class=input_status.username)
-					label.control-label(for='username_input') Username
-					.input-group
-						input.form-control(type='text', id='username_input', name='username', placeholder='Username', value=form_data.username)
-						span.input-group-addon
-							span.glyphicon.glyphicon-remove-circle
+					label.control-label.col-xs-12.col-sm-offset-1.col-sm-2.col-md-offset-2(for='username_input') Username
+					.col-xs-12.col-sm-8.col-md-5.col-lg-4
+						.input-group
+							input.form-control(type='text', id='username_input', name='username', placeholder='Username', value=form_data.username)
+							span.input-group-addon
+								span.glyphicon.glyphicon-remove-circle
 				.form-group(class=input_status.password)
-					label.control-label(for='password_input') Password
-					input.form-control(type='password', id='password_input', name='password', placeholder='Password', value='')
-					span(class='help-block')
-							| Please note that at present time, no password retrieval mechanism exists. If you forget your password,
-							| it cannot be retrieved or reset.
+					label.control-label.col-xs-12.col-sm-offset-1.col-sm-2.col-md-offset-2(for='password_input') Password
+					.col-xs-12.col-sm-8.col-md-5.col-lg-4
+						input.form-control(type='password', id='password_input', name='password', placeholder='Password', value='')
+						span(class='help-block')
+								| Please note that at present time, no password retrieval mechanism exists. If you forget your password,
+								| it cannot be retrieved or reset.
 				.form-group(class=input_status.password_confirm)
-					label.control-label(for='password_confirm_input') Confirm Password
-					input.form-control(type='password', id='password_confirm_input', name='password_confirm', placeholder='Password', value='')
-				.row
-					.col-xs-4
+					label.control-label.col-xs-12.col-sm-offset-1.col-sm-2.col-md-offset-2(for='password_confirm_input') Confirm Password
+					.col-xs-12.col-sm-8.col-md-5.col-lg-4
+						input.form-control(type='password', id='password_confirm_input', name='password_confirm', placeholder='Password', value='')
+				.form-group
+					.col-xs-4.col-sm-offset-3.col-md-offset-4
 						button.btn.btn-primary(type='submit') Register
+
