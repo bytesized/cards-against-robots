@@ -47,11 +47,8 @@ $(document).ready(function()
 	});
 });
 
-create_deck.on_click = function(event)
+create_deck.on_click = function()
 {
-	event = event || window.event;
-	event.preventDefault();
-
 	var deck_name = create_deck.name_input.val();
 	if (!create_deck.validate(deck_name))
 		return;
