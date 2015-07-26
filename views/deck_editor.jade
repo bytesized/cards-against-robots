@@ -13,9 +13,17 @@ extends layout
 
 block headers
 	title Deck Editor - #{config.site_name}
+	link(rel='stylesheet', href='/stylesheets/card.css')
+	style
+		| body
+		| {
+		| 	padding-bottom: 200px;
+		| }
 
 block scripts
+	script(src='/javascripts/client_common/html.js')
 	script(src='/javascripts/common/deck.js')
+	script(src='/javascripts/common/card.js')
 	script(src='/javascripts/two_state_machine.js')
 	//- According to HTTP 1.1 specification, section 8.1.4:
 	//- "A single-user client SHOULD NOT maintain more than 2 connections with any server"
@@ -27,6 +35,8 @@ block scripts
 	script
 		| var step1 = new two_state_machine();
 		| var step2 = new two_state_machine();
+		//- Start with step2 busy until step1 is finished
+		| step2.activate(); 
 	script(src='/javascripts/deck_editor/load_deck.js')
 	script
 		| $(document).ready(function() {
@@ -48,22 +58,79 @@ block content
 					small Choose a deck to edit
 		.row(style='margin-bottom: 10px;')
 			.col-xs-12
-				form.form-inline
+				.form-inline
 					.form-group
-						label.sr-only(for='create_deck-name_input' style='margin-right: 5px;') Make New Deck
+						label.sr-only(for='create_deck-name_input', style='margin-right: 5px;') Make New Deck
 						.input-group(style='margin-right: 5px;')
-							input#create_deck-name_input.form-control(type='text' size='50' placeholder='New Deck Name')
+							input#create_deck-name_input.form-control(type='text', size='50', placeholder='New Deck Name')
 							span.input-group-addon
 								span.glyphicon.glyphicon-remove-circle
 					button#create_deck-button.btn.btn-default Create
 		.row
 			.col-xs-12
-				form
-					.btn-group
-						button#load_deck-menu_toggle.btn.btn-default.dropdown-toggle(data-toggle='dropdown') Choose a deck 
-							span.caret
-						ul#load_deck-menu.dropdown-menu
+				.btn-group
+					button#load_deck-menu_toggle.btn.btn-default.dropdown-toggle(data-toggle='dropdown') Choose a deck 
+						span.caret
+					ul#load_deck-menu.dropdown-menu
 		.row
 			.col-xs-12
 				h2 Step 2 
 					small Edit chosen deck
+		ul#method_tabs.nav.nav-tabs(style='margin-bottom: 10px;')
+			li.active
+				a(data-toggle='tab', href='#view_deck-tab') View
+			li
+				a(data-toggle='tab', href='#add_card-tab') Add Cards
+			li
+				a(data-toggle='tab', href='#browse_cards-tab') Browse Cards
+			li
+				a(data-toggle='tab', href='#top_decks-tab') Top Decks
+			li
+				a(data-toggle='tab', href='#search-tab') Search
+		.tab-content(style='width: 100%;')
+			#view_deck-tab.tab-pane.fade.in.active
+				.row
+					.col-xs-12
+						h3 View Deck
+						p Under Development
+			#add_card-tab.tab-pane.fade(style='width: 100%;')
+				.col-xs-12.col-sm-8
+					.form-horizontal
+						.form-group
+							label.control-label.col-xs-12.col-sm-2 Card Text
+							.col-xs-12.col-sm-10
+								input#add_card-text_input.form-control(type='text', placeholder='Card Text')
+						.form-group
+							label.control-label.col-xs-4.col-sm-2 Quantity
+							.col-xs-8.col-sm-4
+								input#add_card-quantity.form-control(type='text', placeholder='Quantity', value='1')
+						.form-group
+							.col-xs-12.col-sm-6.col-sm-offset-2.col-md-4
+								.btn-group.btn-group-justified(data-toggle='buttons')
+									label#white_button.btn.btn-default.btn-lg.active
+										input(type='radio' name='add_card-color_radio' value='white')
+										| White
+									label#black_button.btn.btn-default.btn-lg
+										input(type='radio' name='add_card-color_radio' value='black')
+										| Black
+						.form-group
+							.col-xs-12.col-sm-6.col-sm-offset-2
+								button#add_card-button.btn.btn-primary.btn-lg
+									span(style='margin-left: 25px;margin-right: 25px;') Add
+				.hidden-xs.col-sm-4
+					.card.card_white
+			#browse_cards-tab.tab-pane.fade
+				.row
+					.col-xs-12
+						h3 Browse Cards
+						p Under Development
+			#top_decks-tab.tab-pane.fade
+				.row
+					.col-xs-12
+						h3 Top Decks
+						p Under Development
+			#search-tab.tab-pane.fade
+				.row
+					.col-xs-12
+						h3 Search
+						p Under Development

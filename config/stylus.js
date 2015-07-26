@@ -8,14 +8,18 @@ var path = require('path');
 var stylus = require('stylus');
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 
-var compile = function(str, path)
+var compile = function(str, stylus_path)
 {
+	console.info(stylus.nodes);
 	return stylus(str)
-		.set('filename', path)
+		.set('filename', stylus_path)
 		.set('compress', true)
-		.define('card_image_height', config.card_icon.height)
-		.define('card_image_width', config.card_icon.width);
-}
+		.define('card_height', new stylus.nodes.Unit(config.card.height, 'px'))
+		.define('card_width', new stylus.nodes.Unit(config.card.width, 'px'))
+		.define('card_icon_url', '/images/' + encodeURIComponent(config.card_icon.filename))
+		.define('card_icon_height', new stylus.nodes.Unit(config.card_icon.height, 'px'))
+		.define('card_icon_width', new stylus.nodes.Unit(config.card_icon.width, 'px'));
+};
 
 module.exports = {
 	src     : path.normalize(path.join(__dirname, '..', 'stylus')),

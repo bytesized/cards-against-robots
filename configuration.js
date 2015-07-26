@@ -36,7 +36,11 @@ var set_default_config = function()
 	config_object.card_icon.filename = 'dummy.png';
 	config_object.card_icon.height = 35;
 	config_object.card_icon.width = 35;
-}
+	// Card Size - Not exposed to the user. Changing its size may result in pages looking wrong
+	config_object.card = {};
+	config_object.card.width = 200;
+	config_object.card.height = 300;
+};
 
 // Load configuration if it exists
 var reload = function()

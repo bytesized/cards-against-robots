@@ -1,0 +1,61 @@
+prewrap_whitespace()
+	white-space : pre           /* CSS 2.0 */
+	white-space : pre-wrap      /* CSS 2.1 */
+	white-space : pre-line      /* CSS 3.0 */
+	white-space : -pre-wrap     /* Opera 4-6 */
+	white-space : -o-pre-wrap   /* Opera 7 */
+	white-space : -moz-pre-wrap /* Mozilla */
+	white-space : -hp-pre-wrap  /* HP Printers */
+	word-wrap   : break-word    /* IE 5+ */
+
+border_radius()
+	-moz-border-radius    : arguments
+	-webkit-border-radius : arguments
+	border-radius         : arguments
+
+card_padding = 5px
+.card
+	border_radius      : 5px
+	border             : 1px solid black
+	width              : card_width
+	height             : card_height
+	padding            : card_padding
+	position           : relative
+	overflow           : hidden
+	prewrap_whitespace
+
+.card_white
+	background : white
+	color      : black
+
+.card_black
+	background : black
+	color      : white
+
+card_icon_top_margin = 5px
+.card_icon
+	width        : card_icon_width
+	height       : card_icon_height
+	background   : url(card_icon_url)
+	float        : left
+	clear        : left
+	margin-right : 5px
+	margin-top   : card_icon_top_margin
+
+.card_spacer
+	height : (card_height - (2 * card_padding) - (card_icon_height + card_icon_top_margin))
+	width  : 0px
+	float  : left
+
+.deck_name
+	display          : none
+	position         : absolute
+	padding          : 4px
+	text-align       : center
+	background-color : #484848;
+	bottom           : (card_icon_height + card_icon_top_margin)
+	color            : white
+	left             : 0
+	right            : 0
+	margin-left      : auto
+	margin-right     : auto

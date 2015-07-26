@@ -1,3 +1,5 @@
+// Client-side requires: client_common/html.js
+//                       card.css
 if ((typeof module) !== 'undefined')
 {
 	var path = require('path');
@@ -106,10 +108,16 @@ card.card_validation_fns =
 	}
 ];
 
+// Used for blank count with:
+//     var matches = text.match(card.blank_regex);
+// and used for blank replacement with:
+//     card_object.text = card_object.text.replace(card.blank_regex, "$1_______");
+card.blank_regex = /(^|\W)_+(?=\W|$)/g;
+
 // Returns the number of blank spaces in the card text
 card.blank_count = function(text)
 {
-	var matches = text.match(/(^|\W)_+(?=\W|$)/g);
+	var matches = text.match(card.blank_regex);
 	if (matches === null)
 		return 0;
 	else
@@ -139,5 +147,54 @@ card.check_card = function(candidate)
 	card.check_card_text(candidate.text);
 };
 
-if ((typeof module) !== 'undefined')
+if ((typeof module) === 'undefined')
+{
+	// If this is client-side...
+
+	// Render a div as a card. If deck is null, deck text will indicate that no
+	// deck is set
+	jQuery.fn.render_card = function(card_object, deck)
+	{
+		if(card_object.color === card.black)
+		{
+			// If the card color is black, fix consecutive blanks and display them
+			// as 7 underscores
+			card_object.text = card_object.text.replace(card.blank_regex, "$1_______");
+			this.attr('class', 'card card_black');
+		} else {
+			this.attr('class', 'card card_white');
+		}
+
+		if (deck === null)
+			deck = '<i>No Deck</i>';
+		else
+			deck = html.encode(deck);
+
+		this.html("<div class='card_spacer'></div><div class='card_icon'></div>" +
+			"<div class='deck_name'>" + deck + "</div><span>" + 
+			html.encode(card_object.text) + "</span>");
+
+		var deck_name_div = this.find(".deck_name");
+		this.find(".card_icon").hover(function()
+		{
+			deck_name_div.show();
+		}, function()
+		{
+			deck_name_div.hide();
+		});
+	};
+
+	// On document ready, render all cards as blanks
+	$(document).ready(function()
+	{
+		var blank_card = new card.card_object();
+		blank_card.color = card.white;
+		$('.card_white').render_card(blank_card, null);
+		blank_card.color = card.black;
+		$('.card_black').render_card(blank_card, null);
+	});
+} else
+{
+	// If this is a node module...
 	module.exports = card;
+}
