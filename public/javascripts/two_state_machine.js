@@ -14,29 +14,47 @@ var two_state_machine = (function() {
 		this._activate_fns = [];
 		this._deactivate_fns = [];
 	};
+	// Pass a function to be called when entering the active state
+	// If state machine is currently in the active state, the function
+	// will be called immediately
 	two_state_machine.prototype.on_activate = function(fn)
 	{
 		this._activate_fns.push(fn);
+		if (this._active)
+			fn();
 	};
+	// Pass a function to be called when leaving the active state
+	// If state machine is currently in the inactive state, the function
+	// will be called immediately
 	two_state_machine.prototype.on_deactivate = function(fn)
 	{
 		this._deactivate_fns.push(fn);
+		if (!this._active)
+			fn();
 	};
 	two_state_machine.prototype.is_active = function()
 	{
 		return this._active;
 	};
+	// Transition to active state
 	two_state_machine.prototype.activate = function()
 	{
-		this._active = true;
-		for (var i = 0; i < this._activate_fns.length; i++)
-			this._activate_fns[i]();
+		if (!this._active)
+		{
+			this._active = true;
+			for (var i = 0; i < this._activate_fns.length; i++)
+				this._activate_fns[i]();
+		}
 	};
+	// Transition to inactive state
 	two_state_machine.prototype.deactivate = function()
 	{
-		for (var i = 0; i < this._deactivate_fns.length; i++)
-			this._deactivate_fns[i]();
-		this._active = false;
+		if (this._active)
+		{
+			this._active = false;
+			for (var i = 0; i < this._deactivate_fns.length; i++)
+				this._deactivate_fns[i]();
+		}
 	};
 	return two_state_machine;
 })();

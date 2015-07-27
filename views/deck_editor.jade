@@ -21,7 +21,7 @@ block headers
 		| }
 
 block scripts
-	script(src='/javascripts/client_common/html.js')
+	script(src='/javascripts/html.js')
 	script(src='/javascripts/common/deck.js')
 	script(src='/javascripts/common/card.js')
 	script(src='/javascripts/two_state_machine.js')
@@ -35,8 +35,6 @@ block scripts
 	script
 		| var step1 = new two_state_machine();
 		| var step2 = new two_state_machine();
-		//- Start with step2 busy until step1 is finished
-		| step2.activate(); 
 	script(src='/javascripts/deck_editor/load_deck.js')
 	script
 		| $(document).ready(function() {

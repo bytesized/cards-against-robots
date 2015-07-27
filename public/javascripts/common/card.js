@@ -1,4 +1,4 @@
-// Client-side requires: client_common/html.js
+// Client-side requires: html.js
 //                       card.css
 if ((typeof module) !== 'undefined')
 {
