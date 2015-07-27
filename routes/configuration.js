@@ -226,7 +226,7 @@ router.post('/', function(req, res, next)
 	}).catch(function(err)
 	{
 		// Got an error sent from the user module
-		if (err.name === 'UserError' && err.code === 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
+		if (err instanceof user.error && err.code === 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
 		{
 			// If the only error is that the primary super user already exists, the configuration is complete,
 			// just warn the user that no new user was created

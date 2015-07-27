@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var user = require(path.normalize(path.join(__dirname, '..', '..', 'db', 'user')));
 var deck = require(path.normalize(path.join(__dirname, '..', '..', 'db', 'deck')));
+var card = require(path.normalize(path.join(__dirname, '..', '..', 'db', 'card')));
 var ensure_user = require(path.normalize(path.join(__dirname, '..', '..', 'common', 'ensure_user'))).ajax;
 var ensure_data = require(path.normalize(path.join(__dirname, '..', '..', 'common', 'ensure_ajax_data')));
 var router = express.Router();
@@ -18,7 +19,7 @@ router.post('/create', ensure_user.authenticated, ensure_data.exists('name'), fu
 		res.json({ error: null, deck: created_deck });
 	}).catch(function(err)
 	{
-		if (err.name === 'DeckError')
+		if (err instanceof deck.error)
 			res.json({ error: err.message });
 		else
 			next(err);
@@ -34,7 +35,7 @@ router.post('/load', ensure_user.authenticated, ensure_data.exists('id'), functi
 		res.json({ error: null, cards: cards });
 	}).catch(function(err)
 	{
-		if (err.name === 'DeckError')
+		if (err instanceof deck.error)
 			res.json({ error: err.message });
 		else
 			next(err);

@@ -69,7 +69,7 @@ router.post('/register', function(req, res, next)
 		{
 			// The only error did not handle was the "that username already exists" error.
 			// do so now.
-			if (err.name === 'UserError' && err.code === 'DUP_USERNAME')
+			if (err instanceof user.error && err.code === 'DUP_USERNAME')
 			{
 				res.set_validation_errors([{param:'username', msg: err.message, value: ''}])
 				res.render('register', {form_data: form_data});
