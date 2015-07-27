@@ -118,18 +118,18 @@ block content
 						.form-group
 							.col-xs-12.col-sm-6.col-sm-offset-2.col-md-4
 								.btn-group.btn-group-justified(data-toggle='buttons')
-									label#white_button.btn.btn-default.btn-lg.active
-										input(type='radio' name='add_card-color_radio' value='white')
+									label#white_button.btn.btn-default.btn-lg
+										input(type='radio', name='add_card-color_radio', value='white', checked='checked')
 										| White
 									label#black_button.btn.btn-default.btn-lg
-										input(type='radio' name='add_card-color_radio' value='black')
+										input(type='radio', name='add_card-color_radio', value='black')
 										| Black
 						.form-group
 							.col-xs-12.col-sm-6.col-sm-offset-2
 								button#add_card-button.btn.btn-primary.btn-lg(autocomplete='off')
 									span(style='margin-left: 25px;margin-right: 25px;') Add
 				.hidden-xs.col-sm-4
-					.card.card_white
+					#add_card-preview.card.card_white
 			#browse_cards-tab.tab-pane.fade
 				.row
 					.col-xs-12
