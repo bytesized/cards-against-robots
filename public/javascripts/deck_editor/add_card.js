@@ -1,6 +1,6 @@
 // Requires common/card.js
 //          deck_editor/load_deck.js
-//          step2 (defined in the deck_editor page)
+//          step2_queue (defined in the deck_editor page)
 var add_card = {};
 $(document).ready(function()
 {
@@ -29,15 +29,15 @@ $(document).ready(function()
 
 	add_card.enable = function()
 	{
-		if (!step2.is_active() && load_deck.loaded_deck.is_active())
+		if (!step2_queue.is_sending() && load_deck.loaded_deck.is_active())
 			add_card.button.removeAttr('disabled');
 	};
 	add_card.disable = function()
 	{
 		add_card.button.attr('disabled', 'disabled');
 	};
-	step2.on_activate(add_card.disable);
-	step2.on_deactivate(add_card.enable);
+	step2_queue.on_send(add_card.disable);
+	step2_queue.on_done(add_card.enable);
 	load_deck.loaded_deck.on_activate(add_card.enable);
 	load_deck.loaded_deck.on_deactivate(add_card.disable);
 

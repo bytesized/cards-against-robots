@@ -1,5 +1,6 @@
 // Requires two_state_machine.js
-//          step1 & step2 (state machines defined in the deck_editor page)
+//          step1_queue & step2_queue (defined in the deck_editor page)
+
 var load_deck = {};
 $(document).ready(function()
 {
@@ -32,13 +33,14 @@ $(document).ready(function()
 	}
 	load_deck.enable = function()
 	{
-		load_deck.menu_button.removeAttr('disabled');
+		if (!step1_queue.is_sending() && !step2_queue.is_sending())
+			load_deck.menu_button.removeAttr('disabled');
 	}
-	step1.on_activate(load_deck.disable);
-	step1.on_deactivate(load_deck.enable);
+	step1_queue.on_send(load_deck.disable);
+	step1_queue.on_done(load_deck.enable);
 	// Do not attempt to load a new deck while editing the deck in step 2
-	step2.on_activate(load_deck.disable);
-	step2.on_deactivate(load_deck.enable);
+	step2_queue.on_send(load_deck.disable);
+	step2_queue.on_done(load_deck.enable);
 
 	load_deck.menu_button.popover({
 		title: function()
@@ -54,7 +56,7 @@ $(document).ready(function()
 		animation: true,
 		trigger: 'manual'
 	});
-	
+
 	$('body').on('click.load_deck', function(event)
 	{
 		event = event || window.event;
@@ -103,12 +105,9 @@ $(document).ready(function()
 			attempt = 1;
 
 		if (attempt === 1)
-		{
 			load_deck.menu_button.append(' <span class=\'glyphicon glyphicon-transfer\'></span>');
-			step1.activate();
-		}
 
-		var request = $.post(load_deck.ajax_url, { id: load_deck.loaded_deck.id }, null, "json");
+		var request = step1_queue.send(load_deck.ajax_url, { id: load_deck.loaded_deck.id });
 
 		request.success(function(data, text_status, jqXHR)
 		{
@@ -141,10 +140,6 @@ $(document).ready(function()
 				// deck is already deactivated, just `unload` to reset defaults
 				load_deck.unload();
 			}
-		});
-		request.always(function()
-		{
-			step1.deactivate();
 		});
 	};
 });

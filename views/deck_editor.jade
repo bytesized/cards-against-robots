@@ -21,22 +21,15 @@ block headers
 		| }
 
 block scripts
+	script(src='/javascripts/bind.js')
+	script(src='/javascripts/ajax_request_queue.js')
+	script
+		| step1_queue = new ajax_request_queue(1);
+		| step2_queue = new ajax_request_queue(1);
 	script(src='/javascripts/html.js')
 	script(src='/javascripts/common/deck.js')
 	script(src='/javascripts/common/card.js')
 	script(src='/javascripts/two_state_machine.js')
-	//- According to HTTP 1.1 specification, section 8.1.4:
-	//- "A single-user client SHOULD NOT maintain more than 2 connections with any server"
-	//- For this page, we will have that mean that each of the two 'steps' on the page will
-	//- be allowed a single simultaneous connection
-	//- This will be enforced with these two state machines
-	//- (step 2 will actually have a request queue as well, but the state machine will
-	//- still be useful for maintaining the state of the page)
-	//- Activation of a state machine indicates transfer is in progress
-	//- Deactivation indicates transfer has completed
-	script
-		| var step1 = new two_state_machine();
-		| var step2 = new two_state_machine();
 	script(src='/javascripts/deck_editor/load_deck.js')
 	script
 		| $(document).ready(function() {
@@ -88,9 +81,9 @@ block content
 				h2 Step 2 
 					small Edit chosen deck
 		ul#method_tabs.nav.nav-tabs(style='margin-bottom: 10px;')
-			li.active
-				a(data-toggle='tab', href='#view_deck-tab') View
 			li
+				a(data-toggle='tab', href='#view_deck-tab') View
+			li.active
 				a(data-toggle='tab', href='#add_card-tab') Add Cards
 			li
 				a(data-toggle='tab', href='#browse_cards-tab') Browse Cards
@@ -99,12 +92,12 @@ block content
 			li
 				a(data-toggle='tab', href='#search-tab') Search
 		#method_tab_content.tab-content(style='width: 100%;')
-			#view_deck-tab.tab-pane.fade.in.active
+			#view_deck-tab.tab-pane.fade
 				.row
 					.col-xs-12
 						h3 View Deck
-						p Under Development
-			#add_card-tab.tab-pane.fade(style='width: 100%;')
+						p Coming Soon!
+			#add_card-tab.tab-pane.fade.in.active(style='width: 100%;')
 				.col-xs-12.col-sm-8
 					.form-horizontal
 						.form-group
@@ -134,14 +127,14 @@ block content
 				.row
 					.col-xs-12
 						h3 Browse Cards
-						p Under Development
+						p Coming Soon!
 			#top_decks-tab.tab-pane.fade
 				.row
 					.col-xs-12
 						h3 Top Decks
-						p Under Development
+						p Coming Soon!
 			#search-tab.tab-pane.fade
 				.row
 					.col-xs-12
 						h3 Search
-						p Under Development
+						p Coming Soon!

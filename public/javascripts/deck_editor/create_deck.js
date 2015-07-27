@@ -1,6 +1,6 @@
 // Requires common/deck.js
 //          deck_editor/load_deck.js
-//          step1 (defined in the deck_editor page)
+//          step1_queue (defined in the deck_editor page)
 var create_deck = {};
 $(document).ready(function()
 {
@@ -12,11 +12,11 @@ $(document).ready(function()
 	create_deck.name_input = $(create_deck.name_input_selector);
 	create_deck.button = $(create_deck.button_selector);
 
-	step1.on_activate(function()
+	step1_queue.on_send(function()
 	{
 		create_deck.button.attr('disabled', 'disabled');
 	});
-	step1.on_deactivate(function()
+	step1_queue.on_done(function()
 	{
 		create_deck.button.removeAttr('disabled');
 	});
@@ -35,7 +35,7 @@ $(document).ready(function()
 		animation: true,
 		trigger: 'manual'
 	});
-	
+
 	$('body').on('click.create_deck', function(event)
 	{
 		event = event || window.event;
@@ -83,12 +83,9 @@ $(document).ready(function()
 			attempt = 1;
 
 		if (attempt === 1)
-		{
 			create_deck.name_input.next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-transfer');
-			step1.activate();
-		}
 
-		var request = $.post(create_deck.ajax_url, { name: deck_name }, null, "json");
+		var request = step1_queue.send(create_deck.ajax_url, { name: deck_name });
 
 		request.success(function(data, text_status, jqXHR)
 		{
@@ -122,10 +119,6 @@ $(document).ready(function()
 				create_deck.name_input.popover('show');
 				create_deck.name_input.next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-warning-sign');
 			}
-		});
-		request.always(function()
-		{
-			step1.deactivate();
 		});
 	};
 });
