@@ -15,13 +15,14 @@ load_deck.menu = $(load_deck.menu_selector);
 // Activation of the state machine indicates that a deck is loaded
 // Deactivation indicates that no deck is loaded
 load_deck.loaded_deck = new two_state_machine;
-load_deck.loaded_deck.on_deactivate(function()
+load_deck.unload = function()
 {
 	load_deck.loaded_deck.id = null;
 	load_deck.loaded_deck.name = null;
 	load_deck.loaded_deck.cards = [];
 	load_deck.menu_button.html(load_deck.default_button_html);
-});
+};
+load_deck.loaded_deck.on_deactivate(load_deck.unload);
 
 load_deck.disable = function()
 {
@@ -111,14 +112,16 @@ load_deck.reload = function(attempt)
 
 	request.success(function(data, text_status, jqXHR)
 	{
-		load_deck.menu_button.find('span.glyphicon').attr('class', 'caret');
 		if (data.error)
 		{
 			load_deck.menu_button.data('load_deck.message_title', 'Error');
 			load_deck.menu_button.data('load_deck.message', data.error);
 			load_deck.menu_button.popover('show');
+			// deck is already deactivated, just `unload` to reset defaults
+			load_deck.unload();
 		} else
 		{
+			load_deck.menu_button.find('span.glyphicon').attr('class', 'caret');
 			load_deck.loaded_deck.cards = data.cards;
 			// Notify others that a deck has been loaded
 			load_deck.loaded_deck.activate();
@@ -135,7 +138,8 @@ load_deck.reload = function(attempt)
 			load_deck.menu_button.data('load_deck.message_title', 'Error');
 			load_deck.menu_button.data('load_deck.message', 'Error contacting the server: ' + error_thrown);
 			load_deck.menu_button.popover('show');
-			load_deck.menu_button.find('span.glyphicon').attr('class', 'caret');
+			// deck is already deactivated, just `unload` to reset defaults
+			load_deck.unload();
 		}
 	});
 	request.always(function()
