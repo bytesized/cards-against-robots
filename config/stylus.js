@@ -10,7 +10,6 @@ var config = require(path.normalize(path.join(__dirname, '..', 'configuration'))
 
 var compile = function(str, stylus_path)
 {
-	console.info(stylus.nodes);
 	return stylus(str)
 		.set('filename', stylus_path)
 		.set('compress', true)
