@@ -111,6 +111,7 @@ load_deck.reload = function(attempt)
 
 	request.success(function(data, text_status, jqXHR)
 	{
+		load_deck.menu_button.find('span.glyphicon').attr('class', 'caret');
 		if (data.error)
 		{
 			load_deck.menu_button.data('load_deck.message_title', 'Error');
@@ -118,7 +119,6 @@ load_deck.reload = function(attempt)
 			load_deck.menu_button.popover('show');
 		} else
 		{
-			load_deck.menu_button.find('span.glyphicon').attr('class', 'caret');
 			load_deck.loaded_deck.cards = data.cards;
 			// Notify others that a deck has been loaded
 			load_deck.loaded_deck.activate();
@@ -135,6 +135,7 @@ load_deck.reload = function(attempt)
 			load_deck.menu_button.data('load_deck.message_title', 'Error');
 			load_deck.menu_button.data('load_deck.message', 'Error contacting the server: ' + error_thrown);
 			load_deck.menu_button.popover('show');
+			load_deck.menu_button.find('span.glyphicon').attr('class', 'caret');
 		}
 	});
 	request.always(function()
