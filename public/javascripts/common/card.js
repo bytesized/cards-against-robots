@@ -188,6 +188,7 @@ if ((typeof module) === 'undefined')
 	$(document).ready(function()
 	{
 		var blank_card = new card.card_object();
+		blank_card.text = '';
 		blank_card.color = card.white;
 		$('.card_white').render_card(blank_card, null);
 		blank_card.color = card.black;
