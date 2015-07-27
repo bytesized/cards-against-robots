@@ -1,4 +1,5 @@
-// Requires step1 & step2 (defined in the deck_editor page)
+// Requires two_state_machine.js
+//          step1 & step2 (state machines defined in the deck_editor page)
 var load_deck = {};
 load_deck.menu_button_selector = $('#load_deck-menu_toggle');
 load_deck.menu_selector = $('#load_deck-menu');
@@ -9,9 +10,18 @@ load_deck.max_attempts = 3;
 load_deck.menu_button = $(load_deck.menu_button_selector);
 load_deck.menu = $(load_deck.menu_selector);
 
-load_deck.loaded_deck = {};
-// Default attributes will be set when we call `unload()`
-// (just after it is defined)
+// `loaded_deck` will be a state machine, but will also have properties
+// describing the deck. 
+// Activation of the state machine indicates that a deck is loaded
+// Deactivation indicates that no deck is loaded
+load_deck.loaded_deck = new two_state_machine;
+load_deck.loaded_deck.on_deactivate(function()
+{
+	load_deck.loaded_deck.id = null;
+	load_deck.loaded_deck.name = null;
+	load_deck.loaded_deck.cards = [];
+	load_deck.menu_button.html(load_deck.default_button_html);
+});
 
 load_deck.disable = function()
 {
@@ -53,16 +63,6 @@ $(document).ready(function()
 	});
 });
 
-load_deck.unload = function()
-{
-	load_deck.loaded_deck.id = null;
-	load_deck.loaded_deck.name = null;
-	load_deck.loaded_deck.cards = [];
-	load_deck.menu_button.html(load_deck.default_button_html);
-};
-// Call function immediately to set defaults
-load_deck.unload();
-
 load_deck.add_decks = function(deck_list)
 {
 	for (var i = 0; i < deck_list.length; i++)
@@ -81,6 +81,9 @@ load_deck.load_clicked = function(event)
 	target = $(target);
 
 	event.preventDefault();
+
+	// Unload whatever was loaded already
+	load_deck.loaded_deck.deactivate();
 
 	load_deck.loaded_deck.id = target.data('load_deck.deck_id');
 	load_deck.loaded_deck.name = target.text();
@@ -102,8 +105,6 @@ load_deck.reload = function(attempt)
 	{
 		load_deck.menu_button.append(' <span class=\'glyphicon glyphicon-transfer\'></span>');
 		step1.activate();
-		// Do not allow editing the deck while loading the deck
-		step2.activate();
 	}
 
 	var request = $.post(load_deck.ajax_url, { id: load_deck.loaded_deck.id }, null, "json");
@@ -115,11 +116,12 @@ load_deck.reload = function(attempt)
 			load_deck.menu_button.data('load_deck.message_title', 'Error');
 			load_deck.menu_button.data('load_deck.message', data.error);
 			load_deck.menu_button.popover('show');
-			load_deck.unload();
 		} else
 		{
 			load_deck.menu_button.find('span.glyphicon').attr('class', 'caret');
 			load_deck.loaded_deck.cards = data.cards;
+			// Notify others that a deck has been loaded
+			load_deck.loaded_deck.activate();
 		}
 	});
 	request.fail(function(jqXHR, text_status, error_thrown)
@@ -133,12 +135,10 @@ load_deck.reload = function(attempt)
 			load_deck.menu_button.data('load_deck.message_title', 'Error');
 			load_deck.menu_button.data('load_deck.message', 'Error contacting the server: ' + error_thrown);
 			load_deck.menu_button.popover('show');
-			load_deck.unload();
 		}
 	});
 	request.always(function()
 	{
 		step1.deactivate();
-		step2.deactivate();
 	});
 };
