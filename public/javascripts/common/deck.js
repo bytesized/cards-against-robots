@@ -23,9 +23,9 @@ deck.deck_object = (function() {
 	// are set to their default values
 	function deck_object()
 	{
-		this.id         = -1;
-		this.name       = '';
-		this.creator    = -1;
+		this.id         = null;
+		this.name       = null;
+		this.creator    = null;
 		this.play_count = 0;
 		this.card_count = 0;
 	};

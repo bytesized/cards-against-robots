@@ -23,9 +23,9 @@ user.user_object = (function() {
 	// are set to their default values.
 	function user_object()
 	{
-		this.id        = -1;
-		this.username  = '';
-		this.password  = '';
+		this.id        = null;
+		this.username  = null;
+		this.password  = null;
 		this.admin     = false;
 		this.superuser = false;
 		this.last_seen = null;

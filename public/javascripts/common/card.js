@@ -28,10 +28,10 @@ card.card_object = (function() {
 	// Constructor. Make sure all properties are defined set to their default values
 	function card_object()
 	{
-		this.id         = -1;
-		this.text       = '';
+		this.id         = null;
+		this.text       = null;
 		this.color      = null;
-		this.creator    = -1;
+		this.creator    = null;
 		this.deck_count = 0;
 		this.play_count = 0;
 		this.win_count  = 0;
