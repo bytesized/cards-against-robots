@@ -41,8 +41,19 @@ block scripts
 	script
 		| $(document).ready(function() {
 		| 	load_deck.add_decks(!{JSON.stringify(user_decks)});
+		| 	load_deck.loaded_deck.on_deactivate(function()
+		| 	{
+		| 		$('#method_tabs').addClass('disable_all');
+		| 		$('#method_tab_content').addClass('disable_all');
+		| 	});
+		| 	load_deck.loaded_deck.on_activate(function()
+		| 	{
+		| 		$('#method_tabs').removeClass('disable_all');
+		| 		$('#method_tab_content').removeClass('disable_all');
+		| 	});
 		| });
 	script(src='/javascripts/deck_editor/create_deck.js')
+	script(src='/javascripts/deck_editor/add_card.js')
 
 block content
 	.container
@@ -65,11 +76,11 @@ block content
 							input#create_deck-name_input.form-control(type='text', size='50', placeholder='New Deck Name')
 							span.input-group-addon
 								span.glyphicon.glyphicon-remove-circle
-					button#create_deck-button.btn.btn-default Create
+					button#create_deck-button.btn.btn-default(autocomplete='off') Create
 		.row
 			.col-xs-12
 				.btn-group
-					button#load_deck-menu_toggle.btn.btn-default.dropdown-toggle(data-toggle='dropdown') Choose a deck 
+					button#load_deck-menu_toggle.btn.btn-default.dropdown-toggle(data-toggle='dropdown', autocomplete='off') Choose a deck 
 						span.caret
 					ul#load_deck-menu.dropdown-menu
 		.row
@@ -87,7 +98,7 @@ block content
 				a(data-toggle='tab', href='#top_decks-tab') Top Decks
 			li
 				a(data-toggle='tab', href='#search-tab') Search
-		.tab-content(style='width: 100%;')
+		#method_tab_content.tab-content(style='width: 100%;')
 			#view_deck-tab.tab-pane.fade.in.active
 				.row
 					.col-xs-12
@@ -115,7 +126,7 @@ block content
 										| Black
 						.form-group
 							.col-xs-12.col-sm-6.col-sm-offset-2
-								button#add_card-button.btn.btn-primary.btn-lg
+								button#add_card-button.btn.btn-primary.btn-lg(autocomplete='off')
 									span(style='margin-left: 25px;margin-right: 25px;') Add
 				.hidden-xs.col-sm-4
 					.card.card_white

@@ -1,3 +1,16 @@
-.jumbotron-short
-	padding-top: 5px
-	padding-bottom: 5px
+opacity(fractional_opacity)
+	percent_opacity = fractional_opacity * 100
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=" + percent_opacity + ")";
+	/* IE 5-7 */
+	filter: unquote("alpha(opacity=" + percent_opacity + ");")
+	/* Netscape */
+	-moz-opacity: fractional_opacity;
+	/* Safari 1.x */
+	-khtml-opacity: fractional_opacity;
+	/* Good browsers */
+	opacity: fractional_opacity;
+
+// Utility class for disabling an entire div
+.disable_all
+	pointer-events : none
+	opacity(0.4)
