@@ -17,6 +17,7 @@ module.exports = {
 			if (!allow_fallback)
 				throw new Error("Unable to generate session key");
 
+			// LOGGING
 			console.log("Warning! Could not generate a random secret! Falling back on pseudo random secret. " +
 				"If you want to prevent this fallback, use the -r option.");
 			// Don't catch errors from this. If we can't even get pseudo random bytes, throw an error
