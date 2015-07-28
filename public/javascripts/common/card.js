@@ -96,14 +96,17 @@ card.card_validation_fns =
 	{
 		fn: function(card_candidate)
 		{
-			if (card_candidate.color === card.black && card.blank_count(card_candidate.text) < 1)
-				return false
-			else
-				return true
+			if (card_candidate.color === card.black)
+			{
+				var blank_count = card.blank_count(card_candidate.text);
+				if (blank_count < 1 || blank_count > 3)
+					return false;
+			}
+			return true;
 		},
 		msg: function(card_candidate)
 		{
-			return "Black cards must have at least one blank";
+			return "Black cards must have 1-3 blanks";
 		}
 	}
 ];
