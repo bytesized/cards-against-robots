@@ -1,6 +1,7 @@
 "use strict";
 var path = require('path');
 var validator = require('validator');
+var Promise = require("bluebird");
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var database = require(path.join(__dirname, 'database'));
 var deck_common = require(path.normalize(path.join(__dirname, '..', 'public', 'javascripts', 'common', 'deck')));
@@ -22,9 +23,9 @@ var init_db = function()
 // the Promise will be fulfilled if the database and tables already exist)
 var init_deck_list = function()
 {
-	return database.pool.queryAsync("SHOW TABLES LIKE 'deck_list';").then(function(result)
+	return database.pool.queryAsync("SHOW TABLES LIKE 'deck_list';").spread(function(results, fields)
 	{
-		if (result[0].length == 0)
+		if (results.length == 0)
 		{
 			// This should definitely already be integer type, but it is going in an
 			// SQL statement, so make double sure
@@ -52,9 +53,9 @@ var init_deck_list = function()
 // the Promise will be fulfilled if the database and tables already exist)
 var init_deck_descriptions = function()
 {
-	return database.pool.queryAsync("SHOW TABLES LIKE 'deck_descriptions';").then(function(result)
+	return database.pool.queryAsync("SHOW TABLES LIKE 'deck_descriptions';").spread(function(results, fields)
 	{
-		if (result[0].length == 0)
+		if (results.length == 0)
 		{
 			var query = 
 				"CREATE TABLE deck_descriptions (" +
@@ -62,6 +63,7 @@ var init_deck_descriptions = function()
 					"FOREIGN KEY(deck)    REFERENCES deck_list(id) ON DELETE RESTRICT ON UPDATE CASCADE, " +
 					"card                 INT UNSIGNED NOT NULL, " +
 					"FOREIGN KEY(card)    REFERENCES cards(id) ON DELETE RESTRICT ON UPDATE CASCADE, " +
+					"UNIQUE KEY (deck, card), " +
 					"quantity             INT UNSIGNED NOT NULL" +
 					// Need to have an index on the deck column so desk's can be assembled quickly, but
 					// with InnoDB (default engine) FOREIGN KEY's are indexed anyways. Rather than
@@ -79,16 +81,15 @@ var init_deck_descriptions = function()
 // is not valid
 var create_deck = function(deck)
 {
-	return new Promise(function(resolve, reject)
+	return Promise.try(function()
 	{
 		deck_common.check_deck(deck);
-		resolve();
 	}).then(function()
 	{
 		return database.pool.queryAsync('INSERT INTO deck_list (name, creator) VALUES (?, ?);', [deck.name, deck.creator]);
-	}).then(function(result)
+	}).spread(function(results, fields)
 	{
-		deck.id = result[0].insertId
+		deck.id = results.insertId
 		return deck;
 	}).catch(function(err)
 	{
@@ -103,9 +104,9 @@ var create_deck = function(deck)
 // objects belonging to the specified user
 var get_decks_by_user_id = function(id)
 {
-	return database.pool.queryAsync('SELECT * FROM deck_list WHERE creator = ? ;', [id]).then(function(results)
+	return database.pool.queryAsync('SELECT * FROM deck_list WHERE creator = ? ;', [id]).spread(function(results, fields)
 	{
-		return results[0];
+		return results;
 	});
 };
 
@@ -114,19 +115,72 @@ var get_decks_by_user_id = function(id)
 // No error is given if the deck does not exist, an empty array is returned
 var get_cards = function(deck_id)
 {
-	return database.pool.queryAsync('SELECT * FROM deck_descriptions WHERE deck = ? ;', [deck_id]).then(function(results)
+	return database.pool.queryAsync('SELECT * FROM deck_descriptions WHERE deck = ? ;', [deck_id]).spread(function(results, fields)
+	{
+		return results;
+	});
+};
+
+// Returns a Promise. If the Promise is fulfilled, it will yield a deck object.
+// Note: The deck object does not contain the cards in the deck
+var get_deck_by_id = function(deck_id)
+{
+	return database.pool.queryAsync('SELECT * FROM deck_list WHERE id = ? ;', [deck_id]).spread(function(results, fields)
 	{
 		return results[0];
 	});
 };
 
+// Returns a Promise. If user owns the deck, the Promise is fulfilled and yields the deck object.
+// If the user does not own the deck, the Promise is rejected
+var ensure_user_ownership = function(deck_id, user_id)
+{
+	return get_deck_by_id(deck_id).then(function(deck_object)
+	{
+		if (deck_object.creator !== user_id)
+			throw new deck_common.error('That deck is owned by someone else', 'PERMISSION_DENIED');
+		return deck_object;
+	});
+};
+
+// Returns a Promise. If the card was is now in the deck and the quantity is equal to the quantity
+// given, the Promise is fulfilled.
+// If the card is already in the deck, it is not added again; the quantity is updated (not added!)
+// to be the quantity given
+var add_card_to_deck = function(card_id, deck_id, quantity)
+{
+	return database.with_transaction(function(connection)
+	{
+		return connection.queryAsync('INSERT INTO deck_descriptions (deck, card, quantity) VALUES (?, ?, ?);',
+			[deck_id, card_id, quantity]).spread(function(results, fields)
+		{
+			return connection.queryAsync('UPDATE cards SET deck_count = deck_count+1 WHERE id = ? ;', [card_id]);
+		}, function(err)
+		{
+			// Catch duplicate entry error. If we get one, that means this card is already in this deck.
+			// Do not update the deck count, just update the quantity
+			if (err.code === 'ER_DUP_ENTRY')
+			{
+				return connection.queryAsync('UPDATE deck_descriptions SET quantity = ? WHERE card = ? AND deck = ? ;',
+					[quantity, card_id, deck_id]);
+			} else
+			{
+				throw err;
+			}
+		});
+	});
+};
+
 module.exports = {
-	init_db            : init_db,
-	error              : deck_common.error,
-	deck_object        : deck_common.deck_object,
-	check_deck_name    : deck_common.check_deck_name,
-	check_deck         : deck_common.check_deck,
-	get_all_by_user_id : get_decks_by_user_id,
-	create             : create_deck,
-	get_cards          : get_cards
+	init_db               : init_db,
+	error                 : deck_common.error,
+	deck_object           : deck_common.deck_object,
+	check_deck_name       : deck_common.check_deck_name,
+	check_deck            : deck_common.check_deck,
+	get_all_by_user_id    : get_decks_by_user_id,
+	create                : create_deck,
+	get_cards             : get_cards,
+	get_by_id             : get_deck_by_id,
+	ensure_user_ownership : ensure_user_ownership,
+	add_card              : add_card_to_deck
 };

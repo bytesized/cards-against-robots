@@ -22,6 +22,8 @@ block headers
 
 block scripts
 	script(src='/javascripts/bind.js')
+	script(src='/javascripts/validator.min.js')
+	script(src='/javascripts/common/custom_validators.js')
 	script(src='/javascripts/ajax_request_queue.js')
 	script
 		| step1_queue = new ajax_request_queue(1);
@@ -121,6 +123,7 @@ block content
 							.col-xs-12.col-sm-6.col-sm-offset-2
 								button#add_card-button.btn.btn-primary.btn-lg(autocomplete='off')
 									span(style='margin-left: 25px;margin-right: 25px;') Add
+									span.glyphicon.glyphicon-circle-arrow-right
 				.hidden-xs.col-sm-4
 					#add_card-preview.card.card_white
 			#browse_cards-tab.tab-pane.fade
