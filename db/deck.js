@@ -154,11 +154,20 @@ var add_card_to_deck = function(card_id, deck_id, quantity)
 		return connection.queryAsync('INSERT INTO deck_descriptions (deck, card, quantity) VALUES (?, ?, ?);',
 			[deck_id, card_id, quantity]).spread(function(results, fields)
 		{
-			return connection.queryAsync('UPDATE cards SET deck_count = deck_count+1 WHERE id = ? ;', [card_id]);
+			return Promise.join(
+				connection.queryAsync('UPDATE cards SET deck_count = deck_count+1 WHERE id = ? ;', [card_id]),
+				connection.queryAsync('UPDATE deck_list SET card_count = card_count+1 WHERE id = ? ;', [deck_id]),
+				function(card_results, deck_results)
+				{
+					// Nothing to do. Database has been updated, transaction will automatically rollback if either
+					// query fails
+					return;
+				}
+			);
 		}, function(err)
 		{
 			// Catch duplicate entry error. If we get one, that means this card is already in this deck.
-			// Do not update the deck count, just update the quantity
+			// Do not update the card's deck count or the deck's card count, just update the quantity
 			if (err.code === 'ER_DUP_ENTRY')
 			{
 				return connection.queryAsync('UPDATE deck_descriptions SET quantity = ? WHERE card = ? AND deck = ? ;',
