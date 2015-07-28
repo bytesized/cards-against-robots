@@ -66,6 +66,14 @@ html
 							li
 								a(href='/user/logout') Logout
 		div(style='margin: 20px;')
+			#standard_modal.modal.fade
+				.modal-dialog
+					.modal-content
+						.modal-header
+							button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+							h4.modal-title
+						.modal-body
+						.modal-footer
 			block content
 
 		//- Some config settings need to be available in client javascript.

@@ -2,6 +2,7 @@
 //          deck_editor/load_deck.js
 //          step2_queue (defined in the deck_editor page)
 //          validator.js and common/custom_validators.js
+//          yes_no_dialog.js
 var add_card = {};
 $(document).ready(function()
 {
@@ -146,7 +147,23 @@ $(document).ready(function()
 		if (!add_card.validate(card_object, quantity))
 			return;
 
-		add_card.send_request(card_object, quantity, deck_id);
+		// Warn the user about white cards with blanks. If this is not necessary, just
+		// send the request now
+		if (card_object.color === card.white && card.blank_count(card_object.text) !== 0)
+		{
+			yes_no_dialog.show(
+				'Confirmation',
+				'<p>Blanks have been detected in your card text. Are you sure you want to submit it as a white card?</p>',
+				{
+					yes_handler: function()
+					{
+						add_card.send_request(card_object, quantity, deck_id);
+					}
+				});
+		} else
+		{
+			add_card.send_request(card_object, quantity, deck_id);
+		}
 	};
 	add_card.button.click(add_card.on_click);
 
