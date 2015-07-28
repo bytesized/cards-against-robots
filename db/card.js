@@ -1,6 +1,7 @@
 "use strict";
 var path = require('path');
 var validator = require('validator');
+var Promise = require("bluebird");
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var database = require(path.join(__dirname, 'database'));
 var card_common = require(path.normalize(path.join(__dirname, '..', 'public', 'javascripts', 'common', 'card')));
@@ -10,9 +11,9 @@ var card_common = require(path.normalize(path.join(__dirname, '..', 'public', 'j
 // the Promise will be fulfilled if the database and tables already exist)
 var init_db = function()
 {
-	return database.pool.queryAsync("SHOW TABLES LIKE 'cards';").then(function(result)
+	return database.pool.queryAsync("SHOW TABLES LIKE 'cards';").spread(function(results, fields)
 	{
-		if (result[0].length == 0)
+		if (results.length == 0)
 		{
 			// This should definitely already be integer type, but it is going in an
 			// SQL statement, so make double sure
@@ -52,25 +53,25 @@ var init_db = function()
 //    and then the object will be returned
 var create_card = function(card)
 {
-	return new Promise(function(resolve, reject)
+	return Promise.try(function()
 	{
 		card_common.check_card(card);
-		resolve();
 	}).then(function()
 	{
 		return database.pool.queryAsync('INSERT INTO cards (text, color, creator) VALUES (?, ?, ?);',
 			[card.text, card.color, card.creator]);
-	}).then(function(result)
+	}).spread(function(results, fields)
 	{
-		card.id = result[0].insertId;
+		card.id = results.insertId;
+		console.info(card);
 		return card;
 	}).catch(function(err)
 	{
 		if (err.code == 'ER_DUP_ENTRY')
 			return database.pool.queryAsync('SELECT * FROM cards WHERE text = ? AND color = ? ;',
-				[card.text, card.creator]).then(function(result)
+				[card.text, card.color]).spread(function(results, fields)
 			{
-				return result[0];
+				return results[0];
 			});
 		else
 			throw err;

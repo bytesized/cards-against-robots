@@ -20,9 +20,9 @@ invitation_error.prototype.constructor = invitation_error;
 // the Promise will be fulfilled if the database and tables already exist)
 var init_db = function()
 {
-	return database.pool.queryAsync("SHOW TABLES LIKE 'invitations';").then(function(result)
+	return database.pool.queryAsync("SHOW TABLES LIKE 'invitations';").spread(function(results, fields)
 	{
-		if (result[0].length == 0)
+		if (results.length == 0)
 		{
 			// This should definitely already be integer type, but it is going in an
 			// SQL statement, so make double sure

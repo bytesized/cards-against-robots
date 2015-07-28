@@ -62,12 +62,11 @@ var validate_password_field = function(req, field)
 // invitation module should be used instead.
 var create_user = function(user, override_invitation)
 {
-	return new Promise(function(resolve, reject)
+	return Promise.try(function(resolve, reject)
 	{
 		if (config.invitations_required && !override_invitation)
 			throw new user_common.error('Attempt to create user without an invitation', 'INTERNAL_ERROR');
 		user_common.check_user(user);
-		resolve();
 	}).then(function()
 	{
 		return bcrypt.genSaltAsync(10);
@@ -102,10 +101,9 @@ var create_primary_superuser = function(user)
 {
 	user.admin = true;
 	user.superuser = true;
-	return new Promise(function(resolve, reject)
+	return Promise.try(function()
 	{
 		user_common.check_user(user);
-		resolve();
 	}).then(function()
 	{
 		return bcrypt.genSaltAsync(10);
