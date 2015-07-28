@@ -63,7 +63,6 @@ var create_card = function(card)
 	}).spread(function(results, fields)
 	{
 		card.id = results.insertId;
-		console.info(card);
 		return card;
 	}).catch(function(err)
 	{
