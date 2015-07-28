@@ -13,6 +13,20 @@ $(document).ready(function()
 	load_deck.menu_button = $(load_deck.menu_button_selector);
 	load_deck.menu = $(load_deck.menu_selector);
 
+	load_deck.card_change_fns = [];
+
+	// Allows a function to be ran when the cards in the loaded deck are changed
+	load_deck.on_cards_changed = function(fn)
+	{
+		load_deck.card_change_fns.push(fn);
+	};
+
+	load_deck.notify_cards_changed = function()
+	{
+		for (var i = 0; i < load_deck.card_change_fns.length; i++)
+			load_deck.card_change_fns[i]();
+	};
+
 	// `loaded_deck` will be a state machine, but will also have properties
 	// describing the deck. 
 	// Activation of the state machine indicates that a deck is loaded
@@ -24,6 +38,7 @@ $(document).ready(function()
 		load_deck.loaded_deck.name = null;
 		load_deck.loaded_deck.cards = [];
 		load_deck.menu_button.html(load_deck.default_button_html);
+		load_deck.notify_cards_changed();
 	};
 	load_deck.loaded_deck.on_deactivate(load_deck.unload);
 
@@ -124,11 +139,12 @@ $(document).ready(function()
 				load_deck.loaded_deck.cards = data.cards;
 				// Notify others that a deck has been loaded
 				load_deck.loaded_deck.activate();
+				load_deck.notify_cards_changed();
 			}
 		});
 		request.fail(function(jqXHR, text_status, error_thrown)
 		{
-			if (attempt < load_deck.max_attempts)
+			if (attempt < load_deck.max_attempts && jqXHR.status != 500)
 			{
 				load_deck.reload(attempt + 1);
 				load_deck.menu_button.find('span.glyphicon').attr('class', 'glyphicon glyphicon-repeat');
@@ -141,5 +157,14 @@ $(document).ready(function()
 				load_deck.unload();
 			}
 		});
+	};
+
+	load_deck.add_cards = function(card_list)
+	{
+		if (load_deck.loaded_deck.is_active())
+		{
+			load_deck.loaded_deck.cards = load_deck.loaded_deck.cards.concat(card_list);
+			load_deck.notify_cards_changed();
+		}
 	};
 });

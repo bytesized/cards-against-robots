@@ -108,7 +108,7 @@ $(document).ready(function()
 		});
 		request.fail(function(jqXHR, text_status, error_thrown)
 		{
-			if (attempt < create_deck.max_attempts)
+			if (attempt < create_deck.max_attempts && jqXHR.status != 500)
 			{
 				create_deck.send_request(deck_name, attempt + 1);
 				create_deck.name_input.next().find('span.glyphicon').attr('class', 'glyphicon glyphicon-repeat');
