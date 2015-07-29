@@ -69,7 +69,7 @@ block content
 					.form-group
 						label.sr-only(for='create_deck-name_input', style='margin-right: 5px;') Make New Deck
 						.input-group(style='margin-right: 5px;')
-							input#create_deck-name_input.form-control(type='text', size='50', placeholder='New Deck Name')
+							input#create_deck-name_input.form-control(type='text', size='50', placeholder='New Deck Name', maxlength=config.field_sizes.deck_name)
 							span.input-group-addon
 								span.glyphicon.glyphicon-remove-circle
 					button#create_deck-button.btn.btn-default(autocomplete='off') Create
@@ -106,7 +106,7 @@ block content
 						.form-group
 							label.control-label.col-xs-12.col-sm-2 Card Text
 							.col-xs-12.col-sm-10
-								input#add_card-text_input.form-control(type='text', placeholder='Card Text')
+								input#add_card-text_input.form-control(type='text', placeholder='Card Text', maxlength=config.field_sizes.card_text)
 						.form-group
 							label.control-label.col-xs-4.col-sm-2 Quantity
 							.col-xs-8.col-sm-4

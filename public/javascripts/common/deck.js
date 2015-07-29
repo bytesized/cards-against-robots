@@ -58,14 +58,14 @@ deck.deck_name_validation_fns =
 	{
 		fn: function(deck_name)
 		{
-			if (deck_name.match(/^[-a-zA-Z0-9_+=:().&%$^* ]*$/) == null)
+			if (deck_name.match(/^[-a-zA-Z0-9_+=:().&%$^*!? ]*$/) == null)
 				return false;
 			else
 				return true;
 		},
 		msg: function(deck_name)
 		{
-			return "Deck name may only contain letters, numbers, spaces, and these special characters: -,_,+,=,:,(,),.,&,%,$,^,*";
+			return "Deck name may only contain letters, numbers, spaces, and these special characters: -,_,+,=,:,(,),.,&,%,$,^,*,!,?";
 		}
 	}
 ];

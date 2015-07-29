@@ -12,6 +12,13 @@ $(document).ready(function()
 	create_deck.name_input = $(create_deck.name_input_selector);
 	create_deck.button = $(create_deck.button_selector);
 
+	create_deck.name_input.keyup(function(event)
+	{
+		event = event || window.event;
+		if (event.keyCode === 13)
+			create_deck.button.click();
+	});
+
 	step1_queue.on_send(function()
 	{
 		create_deck.button.attr('disabled', 'disabled');

@@ -213,7 +213,7 @@ $(document).ready(function()
 		{
 			if (data.error)
 			{
-				add_card.button.data('add_card.message_title', 'Cannot Create Deck');
+				add_card.button.data('add_card.message_title', 'Cannot Add Card');
 				add_card.button.data('add_card.message', data.error);
 				add_card.button.popover('show');
 				add_card.button.closest('.form-group').addClass('has-error');
