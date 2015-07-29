@@ -60,9 +60,9 @@ var init_deck_descriptions = function()
 			var query = 
 				"CREATE TABLE deck_descriptions (" +
 					"deck                 INT UNSIGNED NOT NULL, " +
-					"FOREIGN KEY(deck)    REFERENCES deck_list(id) ON DELETE RESTRICT ON UPDATE CASCADE, " +
+					"FOREIGN KEY(deck)    REFERENCES deck_list(id) ON DELETE CASCADE ON UPDATE CASCADE, " +
 					"card                 INT UNSIGNED NOT NULL, " +
-					"FOREIGN KEY(card)    REFERENCES cards(id) ON DELETE RESTRICT ON UPDATE CASCADE, " +
+					"FOREIGN KEY(card)    REFERENCES cards(id) ON DELETE CASCADE ON UPDATE CASCADE, " +
 					"UNIQUE KEY (deck, card), " +
 					"quantity             INT UNSIGNED NOT NULL" +
 					// Need to have an index on the deck column so desk's can be assembled quickly, but
