@@ -1,3 +1,6 @@
+//////////////////////////////////////
+/////////////// Mixins ///////////////
+//////////////////////////////////////
 opacity(fractional_opacity)
 	percent_opacity = fractional_opacity * 100
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=" + percent_opacity + ")";
@@ -10,7 +13,49 @@ opacity(fractional_opacity)
 	/* Good browsers */
 	opacity: fractional_opacity;
 
+display_flex()
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+
+flex()
+	-webkit-flex : arguments
+	-ms-flex     : arguments
+	flex         : arguments
+
+prewrap_whitespace()
+	white-space : pre           /* CSS 2.0 */
+	white-space : pre-wrap      /* CSS 2.1 */
+	white-space : pre-line      /* CSS 3.0 */
+	white-space : -pre-wrap     /* Opera 4-6 */
+	white-space : -o-pre-wrap   /* Opera 7 */
+	white-space : -moz-pre-wrap /* Mozilla */
+	white-space : -hp-pre-wrap  /* HP Printers */
+	word-wrap   : break-word    /* IE 5+ */
+
+//////////////////////////////////////
+/////////////// Styles ///////////////
+//////////////////////////////////////
+
 // Utility class for disabling an entire div
 .disable_all
 	pointer-events : none
 	opacity(0.4)
+
+// These flex classes are intended to allow creation of a row where some
+// items expand to take up extra space and some do not
+.flex_container
+	display_flex()
+.flex_noexpand
+	flex(none)
+.flex_expand
+	flex(1 1)
+
+.hard_wrap
+	overflow: hidden
+	prewrap_whitespace()
+
+.tab-content, .tab-content .tab-pane
+	width: 100%;

@@ -3,6 +3,54 @@ extends layout
 block headers
 	title Create Game - #{config.site_name}
 
+block scripts
+	script(src='/javascripts/ajax_request_queue.js')
+	script
+		| request_queue = new ajax_request_queue();
+	script(src='/javascripts/html.js')
+	script(src='/javascripts/create_game/deck_list.js')
+	script(src='/javascripts/create_game/selected_decks.js')
+	script
+		//- Eventually, this will load default decks instead of nothing
+		| selected_decks.init([]);
+	script(src='/javascripts/create_game/deck_row_signals.js')
+	script(src='/javascripts/create_game/deck_row_manager.js')
+
+
+//- Makes a deck list 
+//- Each deck name span has the class `deck_list_text`.
+//- Each card count badge has the class `deck_list_card_count`.
+//- The list has the class `deck_list_group`.
+//- Each row has the class `deck_list_item` and `data-deck_id = deck.id`
+//- Available options:
+//-  + add_button        If true, a button intended for adding the deck is included. It will be created
+//                       with class `add_deck`
+//-  + remove_button     If true, a button intended for removing the deck is included. It will be
+//                       created with class `remove_deck`
+//-  + id                Sets the id of the deck list to the one given
+//-  + class             Adds the class(es) given to the deck list
+//-  + template          If true, the deck list will be created with `display: none;` and a single empty
+//                       row, suitable for inserting deck data into with javascript. If this option is
+//-                      given, the `decks` argument will be overridden, so its content does not matter
+mixin deck_list(decks, options)
+	- if (options.template) decks = [{name: '', card_count: ''}];
+	.list-group.deck_list_group(id=options.id, class=options.class, style=(options.template ? 'display: none;' : ''))
+		each deck in decks
+			.list-group-item.deck_list_item(data-deck_id=deck.id)
+				.flex_container
+					if options.add_button
+						.flex_noexpand
+							span.add_deck.btn.btn-default(style='margin-right: 7px;')
+								span.glyphicon.glyphicon-plus(style='margin-left: 2px; margin-right: 2px;')
+					if options.remove_button
+						.flex_noexpand
+							span.remove_deck.btn.btn-default(style='margin-right: 7px;')
+								span.glyphicon.glyphicon-minus(style='margin-left: 2px; margin-right: 2px;')
+					.flex_expand.hard_wrap(style='margin-top: 7px; margin-bottom: 7px;')
+						span.deck_list_text #{deck.name}
+					.flex_noexpand
+						span.badge.deck_list_card_count(style='margin-left: 7px;') #{deck.card_count}
+
 block content
 	//- Set default values
 	- if (!form_data) form_data = {};
@@ -11,6 +59,7 @@ block content
 	- if (typeof form_data.hand_size    === 'undefined') form_data.hand_size    = 10;
 	- if (typeof form_data.max_players  === 'undefined') form_data.max_players  = 6;
 	- if (typeof form_data.redraws      === 'undefined') form_data.redraws      = 0;
+	+deck_list([], {template: true, id: 'deck_list-template', add_button: true, remove_button: true})
 	.container
 		.row
 			.col-xs-12
@@ -37,19 +86,19 @@ block content
 						label.control-label.col-xs-12.col-sm-2(for='password_input') Room Password
 						.col-xs-12.col-sm-10
 							input.form-control(type='text', id='password_input', name='password', placeholder='Password', value=form_data.password)
-							span.help-block If password is blank, anyone may join the game
+							span.help-block If password is blank, anyone may join
 			.panel.panel-default
 				.panel-body
 					.form-group(class=input_status.max_points)
 						label.control-label.col-xs-12.col-sm-2(for='max_points_input') Objective
 						.col-xs-12.col-sm-10
 							input.form-control(type='text', id='max_points_input', name='max_points', placeholder='Number of Points', value=form_data.max_points)
-							span.help-block Once a player has this many points, they win and the game ends
+							span.help-block Number of points to win (1-50)
 					.form-group(class=input_status.max_points)
 						label.control-label.col-xs-12.col-sm-2(for='hand_size_input') Hand Size
 						.col-xs-12.col-sm-10
 							input.form-control(type='text', id='hand_size_input', name='hand_size', placeholder='Number of Cards', value=form_data.hand_size)
-							span.help-block Number of cards dealt to each player (up to 40 cards allowed)
+							span.help-block Number of cards dealt to each player (2-40)
 					.form-group(class=input_status.max_points)
 						label.control-label.col-xs-12.col-sm-2(for='max_players_input') Maximum Players
 						.col-xs-12.col-sm-10
@@ -60,6 +109,37 @@ block content
 						.col-xs-12.col-sm-10
 							input.form-control(type='text', id='redraws_input', name='redraws', placeholder='Number of Redraws', value=form_data.redraws)
 							span.help-block A redraw can be used during a player's turn to discard all cards and draw a new hand
+			.panel.panel-default
+				.panel-body
+					.row
+						.col-sm-12.col-md-6
+							ul.nav.nav-tabs
+								li.active
+									a(data-toggle='tab', href='#my_decks_tab') My Decks
+								li
+									a(data-toggle='tab', href='#fav_decks_tab') Favorites
+								li
+									a(data-toggle='tab', href='#top_decks_tab') Popular
+								li
+									a(data-toggle='tab', href='#search_decks_tab') Search
+							.tab-content
+								#my_decks_tab.tab-pane.fade.in.active
+									if user_decks.length === 0
+										.list-group
+											.list-group-item
+												i You have no decks
+									else
+										+deck_list(user_decks, {class: 'deck_row_manager-add_list', add_button: true})
+								#fav_decks_tab.tab-pane.fade
+									h3 Coming Soon
+								#top_decks_tab.tab-pane.fade
+									h3 Coming Soon
+								#search_decks_tab.tab-pane.fade
+									h3 Coming Soon
+						.col-sm-12.col-md-6
+							h3 Selected Decks
+							//- Make an empty list which we will put things in with Javascript
+							+deck_list([], {id: 'selected_decks-list', remove_button: true})
 			.form-group
 				.col-xs-12.col-sm-offset-2.col-sm-10
-					button.btn.btn-primary(type='submit') Create Game
+					button.btn.btn-primary.btn-lg(type='submit') Create Game
