@@ -22,7 +22,6 @@ block headers
 
 block scripts
 	script(src='/javascripts/yes_no_dialog.js')
-	script(src='/javascripts/bind.js')
 	script(src='/javascripts/validator.min.js')
 	script(src='/javascripts/common/custom_validators.js')
 	script(src='/javascripts/ajax_request_queue.js')
@@ -94,13 +93,13 @@ block content
 				a(data-toggle='tab', href='#top_decks-tab') Top Decks
 			li
 				a(data-toggle='tab', href='#search-tab') Search
-		#method_tab_content.tab-content(style='width: 100%;')
+		#method_tab_content.tab-content
 			#view_deck-tab.tab-pane.fade
 				.row
 					.col-xs-12
 						h3 View Deck
 						p Coming Soon!
-			#add_card-tab.tab-pane.fade.in.active(style='width: 100%;')
+			#add_card-tab.tab-pane.fade.in.active
 				.col-xs-12.col-sm-8
 					.form-horizontal
 						.form-group

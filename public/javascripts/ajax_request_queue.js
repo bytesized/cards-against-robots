@@ -1,5 +1,3 @@
-// Requires bind.js
-
 // This file provides a mechanism for creating request queues and sending AJAX requests through them
 // These queues are intended to limit simultaneous AJAX requests to 2 and to provide notifications
 // for anything that needs to know if requests are in progress

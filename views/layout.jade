@@ -61,11 +61,13 @@ html
 							li(class=(active_button == 'create' ? 'active' : ''))
 								a(href='/game/create') Create Game
 							li(class=(active_button == 'deck editor' ? 'active' : ''))
-								a(href='/deck/edit') Deck Editor
+								a(href='/deck/edit') Edit Decks
 						ul.nav.navbar-nav.navbar-right
 							li
 								a(href='/user/logout') Logout
+
 		div(style='margin: 20px;')
+			//- Generic modal for scripts to use
 			#standard_modal.modal.fade
 				.modal-dialog
 					.modal-content
@@ -74,6 +76,7 @@ html
 							h4.modal-title
 						.modal-body
 						.modal-footer
+
 			block content
 
 		//- Some config settings need to be available in client javascript.
@@ -94,6 +97,7 @@ html
 				| config.properties = {};
 				| config.properties.is_configured = false;
 
+		script(src='/javascripts/polyfills.js')
 		script(src='http://code.jquery.com/jquery-1.11.3.min.js')
 		script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
 		block scripts
