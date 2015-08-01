@@ -30,12 +30,11 @@ deck_row_manager.contains = function(row)
 
 	// Search the list of rows with that id for one with the same node as the one passed
 	var row_node = row.get(0);
-	for (var index in deck_row_manager.rows[row_id])
+	deck_row_manager.rows[row_id].for_each(function(i, deck_row)
 	{
-		var existing_row = deck_row_manager.rows[row_id][index];
-		if (existing_row.get(0) === row_node)
+		if (deck_row.get(0) === row_node)
 			return true;
-	}
+	});
 
 	return false;
 };
@@ -141,22 +140,20 @@ selected_decks.on_deck_add(function(deck_object, deck_row)
 {
 	deck_row_manager.add_row(deck_row);
 
-	for (var index in deck_row_manager.rows[deck_object.id])
+	deck_row_manager.rows[deck_object.id].for_each(function(i, deck_row)
 	{
-		var deck_row = deck_row_manager.rows[deck_object.id][index];
 		deck_row_manager.set_button_remove(deck_row);
-	}
+	});
 });
 
 // When a deck is removed from the selected list, remove that row from the manager
 // and change all decks with the same id to have add buttons
 selected_decks.on_deck_remove(function(deck_object, deck_row)
 {
-	for (var index in deck_row_manager.rows[deck_object.id])
+	deck_row_manager.rows[deck_object.id].for_each(function(i, deck_row)
 	{
-		var deck_row = deck_row_manager.rows[deck_object.id][index];
 		deck_row_manager.set_button_add(deck_row);
-	}
+	});
 
 	deck_row_manager.remove_row(deck_row);
 });

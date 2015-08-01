@@ -130,3 +130,11 @@ if (!Array.prototype.filter) {
 		return res;
 	};
 }
+
+// This isn't actually a polyfill...
+Array.prototype.for_each = function(fn)
+{
+	var len = this.length;
+	for (var i = 0; i < len; i++)
+		fn(i, this[i]);
+};
