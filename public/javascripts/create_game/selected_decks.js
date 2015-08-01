@@ -3,6 +3,7 @@
 var selected_decks = {};
 selected_decks.empty_list_html = '<i>No Decks Selected</i>';
 selected_decks.list_selector = '#selected_decks-list';
+selected_decks.input_selector = '#selected_decks-input';
 
 selected_decks.empty_list_row_html = null;
 selected_decks.decks = [];
@@ -29,6 +30,24 @@ selected_decks.notify_ready = function()
 			fn();
 		}
 	})
+};
+
+// This function synchronizes the state of this module with the data in the hidden input
+selected_decks.set_input_value = function()
+{
+	$(document).ready(function()
+	{
+		var selected_decks_object = [];
+
+		selected_decks.decks.for_each(function(i, deck)
+		{
+			var deck_output = {};
+			deck_output.id = deck.id;
+			selected_decks_object.push(deck_output);
+		});
+
+		$(selected_decks.input_selector).val(JSON.stringify(selected_decks_object));
+	});
 };
 
 // This function serves a number of purposes. It adds the decks given to the list and displays it
@@ -147,10 +166,10 @@ $(document).ready(function()
 				deck          : decks[i],
 				remove_button : true
 			});
-
 			selected_decks.list.append(new_row);
-
 			var row = selected_decks.list.find(deck_list.row_selector).last();
+
+			selected_decks.set_input_value();
 
 			// Notify that the deck was added (this will cause add_remove_deck
 			// to connect the remove button signal)
@@ -179,5 +198,7 @@ $(document).ready(function()
 
 		if (selected_decks.decks.length === 0)
 			selected_decks.list.html(selected_decks.empty_list_row_html);
+
+		selected_decks.set_input_value();
 	};
 });

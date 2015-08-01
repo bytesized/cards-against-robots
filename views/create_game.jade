@@ -138,6 +138,7 @@ block content
 									h3 Coming Soon
 						.col-sm-12.col-md-6
 							h3 Selected Decks
+							input#selected_decks-input(type='hidden', name='decks', value='[]')
 							//- Make an empty list which we will put things in with Javascript
 							+deck_list([], {id: 'selected_decks-list', remove_button: true})
 			.form-group
