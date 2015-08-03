@@ -147,6 +147,13 @@ var config_fields =
 		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
 	},
 	{
+		name: 'field_sizes.room_name',
+		form_name: 'room_name_length',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Room Name Length must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
 		name: 'super_user_name',
 		form_name: 'super_user_name',
 		validate: function(req, name)

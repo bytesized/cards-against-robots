@@ -25,6 +25,7 @@ block content
 	- if (typeof form_data.field_sizes.username === 'undefined')    form_data.field_sizes.username        = '63';
 	- if (typeof form_data.field_sizes.deck_name === 'undefined')   form_data.field_sizes.deck_name       = '63';
 	- if (typeof form_data.field_sizes.card_text === 'undefined')   form_data.field_sizes.card_text       = '500';
+	- if (typeof form_data.field_sizes.room_name === 'undefined')   form_data.field_sizes.room_name       = '63';
 	- if (typeof form_data.super_user_name === 'undefined')         form_data.super_user_name        = '';
 	//- Omit super user password
 
@@ -137,6 +138,11 @@ block content
 			.col-xs-10
 				input(type='text', class='form-control', id='card_text_length_input', name='card_text_length', placeholder='Length', value=form_data.field_sizes.card_text, readonly=inputs_disabled)
 				span(class='help-block') Maximum number of characters allowed per card.
+		.form-group(class=input_status.room_name_length)
+			label(for='room_name_length_input', class='control-label col-xs-2') Room Name Length
+			.col-xs-10
+				input(type='text', class='form-control', id='room_name_length_input', name='room_name_length', placeholder='Length', value=form_data.field_sizes.room_name, readonly=inputs_disabled)
+				span(class='help-block') Maximum number of characters allowed in room names.
 		.form-group(class=input_status.super_user_name)
 			label(for='super_user_name_input', class='control-label col-xs-2') Username
 			.col-xs-10
