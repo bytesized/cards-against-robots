@@ -437,6 +437,21 @@ validate_room.decks.do_validation = function(event, button_selector, input_selec
 	try
 	{
 		decks = JSON.parse(decks);
+	} catch(err)
+	{
+		event.preventDefault();
+		$(button_selector).data('validate_room.decks.error', 'Error reading deck selection');
+		$(button_selector).popover('show');
+		validate_room.decks.prevent_popover_close = true;
+		setTimeout(function()
+		{
+			validate_room.decks.prevent_popover_close = false;
+		}, 500);
+		return;
+	}
+
+	try
+	{
 		room.check_decks(decks);
 	} catch(err)
 	{
