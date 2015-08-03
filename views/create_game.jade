@@ -4,6 +4,16 @@ block headers
 	title Create Game - #{config.site_name}
 
 block scripts
+	script(src='/javascripts/validator.min.js')
+	script(src='/javascripts/common/room.js')
+	script(src='/javascripts/create_game/validate_room.js')
+	script
+		| validate_room.room_name.set_input('#name_input');
+		| validate_room.password.set_input('#password_input');
+		| validate_room.objective.set_input('#max_points_input');
+		| validate_room.hand_size.set_input('#hand_size_input');
+		| validate_room.max_players.set_input('#max_players_input');
+		| validate_room.decks.set_input('#create_game_btn', '#selected_decks-input');
 	script(src='/javascripts/ajax_request_queue.js')
 	script
 		| request_queue = new ajax_request_queue();
@@ -143,4 +153,4 @@ block content
 							+deck_list([], {id: 'selected_decks-list', remove_button: true})
 			.form-group
 				.col-xs-12.col-sm-offset-2.col-sm-10
-					button.btn.btn-primary.btn-lg(type='submit') Create Game
+					button#create_game_btn.btn.btn-primary.btn-lg(type='submit') Create Game

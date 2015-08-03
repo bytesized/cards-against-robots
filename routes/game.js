@@ -22,4 +22,9 @@ router.get('/create', ensure_user.authenticated, function(req, res, next)
 	});
 });
 
+// router.post('/create', ensure_user.authenticated, function(req, res, next)
+// {
+	
+// });
+
 module.exports = router;
