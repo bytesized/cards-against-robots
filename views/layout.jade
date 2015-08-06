@@ -37,6 +37,8 @@ html
 			if validation_error_list
 				each error in validation_error_list
 					li.list-group-item.list-group-item-danger #{error.msg}
+		//- This navbar should only be used when `user` is defined.
+		//- `user` will be defined automatically by common/ensure_user.js
 		mixin game_navbar(active_button)
 			.container
 				nav.navbar.navbar-inverse(role='navigation')
@@ -47,24 +49,27 @@ html
 							span.icon-bar
 							span.icon-bar
 					.collapse.navbar-collapse(id='navbar')
-						form.navbar-form.navbar-left
-							.form-group
-								.input-group
-									span.input-group-addon
-										span.glyphicon.glyphicon-user
-									input.form-control(type='text', placeholder='Display Name', value='')
-						ul.nav.navbar-nav
-							li(class=(active_button == 'home' ? 'active' : ''))
-								a(href='/game') Home
-							li(class=(active_button == 'join' ? 'active' : ''))
-								a(href='/game/list') Join Game
-							li(class=(active_button == 'create' ? 'active' : ''))
-								a(href='/game/create') Create Game
-							li(class=(active_button == 'deck editor' ? 'active' : ''))
-								a(href='/deck/edit') Edit Decks
-						ul.nav.navbar-nav.navbar-right
-							li
-								a(href='/user/logout') Logout
+						if user.room
+							ul.nav.navbar-nav
+								- room_url = '/room/' + encodeURIComponent(user.room);
+								li(class=(active_button == 'current game' ? 'active' : ''))
+									a(href=room_url) Current Game
+							ul.nav.navbar-nav.navbar-right
+								li
+									a(href='/game/leave_room') Leave Game
+						else
+							ul.nav.navbar-nav
+								li(class=(active_button == 'home' ? 'active' : ''))
+									a(href='/game') Home
+								li(class=(active_button == 'join' ? 'active' : ''))
+									a(href='/game/list') Join Game
+								li(class=(active_button == 'create' ? 'active' : ''))
+									a(href='/game/create') Create Game
+								li(class=(active_button == 'deck editor' ? 'active' : ''))
+									a(href='/deck/edit') Edit Decks
+							ul.nav.navbar-nav.navbar-right
+								li
+									a(href='/user/logout') Logout
 
 		div(style='margin: 20px;')
 			//- Generic modal for scripts to use
