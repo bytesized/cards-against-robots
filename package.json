@@ -24,6 +24,7 @@
 		"mysql": "*",
 		"crypto": "*",
 		"bluebird": "*",
-		"bcrypt": "*"
+		"bcrypt": "*",
+		"socket.io": "*"
 	}
 }

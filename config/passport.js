@@ -4,6 +4,7 @@ var path = require('path');
 var passport = require('passport');
 var local_strategy = require('passport-local').Strategy;
 var user = require(path.normalize(path.join(__dirname, '..', 'db', 'user')));
+var room = require(path.normalize(path.join(__dirname, '..', 'db', 'room')));
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 
 module.exports = function()
@@ -17,6 +18,7 @@ module.exports = function()
 	{
 		user.get_by_id(id).then(function(user_info)
 		{
+			user_info.room = room.get_user_room(user_info.id);
 			done(null, user_info);
 		}, function(err)
 		{

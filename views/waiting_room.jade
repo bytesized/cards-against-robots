@@ -1,0 +1,100 @@
+extends layout
+
+block headers
+	title Waiting Room - #{config.site_name}
+
+block scripts
+	script(src='/javascripts/html.js')
+	script(src='/socket.io/socket.io.js')
+	script
+		| if (!window.location.origin)
+		| {
+		| 	window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+		| }
+		| var socket = io(window.location.origin + '/room');
+	script(src='/javascripts/game/chat.js')
+
+block content
+	.container
+		.row
+			+game_navbar('current game')
+		.row
+			.col-xs-12
+				ul.list-group
+					+flash_messages
+				ul.list-group
+					+validation_errors
+		.panel.panel-default
+			.panel-body
+				.row
+					.col-xs-12
+						h3 #{room.name}
+				.row
+					.col-xs-12.col-sm-6
+						if room.publicly_listed
+								p
+									b Publicly Listed Game
+						else
+								p
+									b Unlisted Game
+						if room.password === null
+							p
+								b Password: 
+								i None
+						else
+							p
+								b Password: 
+								| #{room.password}
+						p Playing with #{room.deck.count(card.white)} white cards and #{room.deck.count(card.black)} black cards
+					.col-xs-12.col-sm-6
+						p
+							b Objective: 
+							| #{room.objective}
+						p
+							b Hand Size: 
+							| #{room.hand_size}
+						p
+							b Redraws: 
+							| #{room.redraws}
+		.row
+			.col-xs-12.col-md-6.col-lg-8
+				.list-group#user_list
+					each list_user in room.players
+						.list-group-item.user_list_item(data-user_id=list_user.id)
+							.flex_container
+								if user.id === room.host
+									.flex_noexpand
+										span.kick_user.btn.btn-default.dummy_btn(style='margin-right: 7px;')
+											if list_user.id === user.id
+												span.glyphicon.glyphicon-star(style='margin-left: 2px; margin-right: 2px;')
+											else
+												span.glyphicon.glyphicon-remove(style='margin-left: 2px; margin-right: 2px;')
+								.flex_expand.hard_wrap(style='margin-top: 7px; margin-bottom: 7px;')
+									span.username_text #{list_user.username}
+					- blank_rows = room.max_players - room.players.length;
+					while blank_rows > 0
+						.list-group-item.user_list_item
+							.flex_container
+								if user.id === room.host
+									.flex_noexpand
+										span.kick_user.btn.btn-default.dummy_btn(style='margin-right: 7px;')
+											span.glyphicon.glyphicon-unchecked(style='margin-left: 2px; margin-right: 2px;')
+								.flex_expand.hard_wrap(style='margin-top: 7px; margin-bottom: 7px;')
+									span.username_text
+										i Open Slot
+						- --blank_rows;
+			.col-xs-12.col-md-6.col-lg-4
+				.panel.panel-default
+					.panel-body(style='width: 100%; height: 350px;')
+						.flex_vcontainer(style='height: 100%;')
+							#chat-window.flex_expand(style='width: 100%; overflow-y: scroll;')
+								each msg in room.chat
+									p
+										b #{msg.username}: 
+										| #{msg.text}
+							.flex_noexpand(role='form', style='width: 100%;')
+								.input-group
+									input#chat-input.form-control(type='text', autocomplete="off")
+									span.input-group-btn
+										span#chat-button.btn.btn-default
+											span.glyphicon.glyphicon-chevron-right

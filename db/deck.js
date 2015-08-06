@@ -3,6 +3,7 @@ var path = require('path');
 var validator = require('validator');
 var Promise = require("bluebird");
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
+var card = require(path.join(__dirname, 'card'));
 var database = require(path.join(__dirname, 'database'));
 var deck_common = require(path.normalize(path.join(__dirname, '..', 'public', 'javascripts', 'common', 'deck')));
 
@@ -180,6 +181,59 @@ var add_card_to_deck = function(card_id, deck_id, quantity)
 	});
 };
 
+// Returns a Promise. The promise, if fulfilled, will yield an object with all cards in the
+// specified decks, organized by color (Ex: {black: [], white: []})
+// Uses a MYSQL transaction
+var compile_decks = function(deck_ids)
+{
+	return database.with_transaction(function(connection)
+	{
+		// Make an array of requests for cards.
+		var white_card_queries = [];
+		var black_card_queries = [];
+		for (var i = 0; i < deck_ids.length; i++)
+		{
+			var query = connection.queryAsync(
+				'SELECT cards.* FROM deck_descriptions INNER JOIN cards ON deck_descriptions.card = cards.id ' +
+				'WHERE deck_descriptions.deck = ? AND cards.color = ?; ', [deck_ids[i], card.white]).spread(function(results, fields)
+				{
+					return results;
+				});
+			white_card_queries.push(query);
+
+			query = connection.queryAsync(
+				'SELECT cards.* FROM deck_descriptions INNER JOIN cards ON deck_descriptions.card = cards.id ' +
+				'WHERE deck_descriptions.deck = ? AND cards.color = ?; ', [deck_ids[i], card.black]).spread(function(results, fields)
+				{
+					return results;
+				});
+			black_card_queries.push(query);
+		};
+		var white_card_promise = Promise.all(white_card_queries).then(function(result_arrays)
+		{
+			// We now have an array of arrays of cards (one array of cards per deck).
+			// Concatenate them into just a single array of cards
+			var all_cards = [];
+			// Apply each array as an argument to `concat`
+			all_cards = all_cards.concat.apply(all_cards, result_arrays);
+			return all_cards;
+		});
+		var black_card_promise = Promise.all(black_card_queries).then(function(result_arrays)
+		{
+			// We now have an array of arrays of cards (one array of cards per deck).
+			// Concatenate them into just a single array of cards
+			var all_cards = [];
+			// Apply each array as an argument to `concat`
+			all_cards = all_cards.concat.apply(all_cards, result_arrays);
+			return all_cards;
+		});
+		return Promise.join(white_card_promise, black_card_promise, function(white_cards, black_cards)
+		{
+			return {white: white_cards, black: black_cards};
+		});
+	});
+};
+
 module.exports = {
 	init_db               : init_db,
 	error                 : deck_common.error,
@@ -191,5 +245,6 @@ module.exports = {
 	get_cards             : get_cards,
 	get_by_id             : get_deck_by_id,
 	ensure_user_ownership : ensure_user_ownership,
-	add_card              : add_card_to_deck
+	add_card              : add_card_to_deck,
+	compile_decks         : compile_decks
 };

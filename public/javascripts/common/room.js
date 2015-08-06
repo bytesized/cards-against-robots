@@ -24,16 +24,21 @@ room.room_object = (function() {
 	// Constructor.
 	function room_object()
 	{
-		this.id              = null;
-		this.publicly_listed = null;
-		this.name            = null;
-		this.password        = null;
-		this.objective       = null;
-		this.hand_size       = null;
-		this.max_players     = null;
-		this.redraws         = null;
-		this.decks           = null;
-		this.players         = [];
+		this.id                   = null;
+		this.publicly_listed      = null;
+		this.name                 = null;
+		this.password             = null;
+		this.objective            = null;
+		this.hand_size            = null;
+		this.max_players          = null;
+		this.redraws              = null;
+		this.decks                = null;
+		this.players              = [];
+		this.waiting_players      = [];
+		this.host                 = null;
+		this.deck                 = null;
+		this.started              = false;
+		this.chat                 = [];
 	};
 	return room_object;
 })();
@@ -85,27 +90,17 @@ room.objective_validation_fns =
 	{
 		fn: function(candidate)
 		{
-			if (typeof candidate === 'number' && validator.isInt(candidate))
-				return true;
-			else
-				return false;
+			if (validator.isInt(candidate, 10))
+			{
+				candidate = validator.toInt(candidate, 10);
+				if (candidate >= 1 && candidate <= 50)
+					return true;
+			}
+			return false;
 		},
 		msg: function(candidate)
 		{
-			return 'Objective must be an integer';
-		}
-	},
-	{
-		fn: function(candidate)
-		{
-			if (candidate >= 1 && candidate <= 50)
-				return true;
-			else
-				return false;
-		},
-		msg: function(candidate)
-		{
-			return 'Objective must be between 1 and 50';
+			return 'Objective must be an integer between 1 and 50';
 		}
 	}
 ];
@@ -115,27 +110,17 @@ room.hand_size_validation_fns =
 	{
 		fn: function(candidate)
 		{
-			if (typeof candidate === 'number' && validator.isInt(candidate))
-				return true;
-			else
-				return false;
+			if (validator.isInt(candidate, 10))
+			{
+				candidate = validator.toInt(candidate, 10);
+				if (candidate >= 2 && candidate <= 40)
+					return true;
+			}
+			return false;
 		},
 		msg: function(candidate)
 		{
-			return 'Hand Size must be an integer';
-		}
-	},
-	{
-		fn: function(candidate)
-		{
-			if (candidate >= 2 && candidate <= 40)
-				return true;
-			else
-				return false;
-		},
-		msg: function(candidate)
-		{
-			return 'Hand Size must be between 2 and 40';
+			return 'Hand Size must be an integer between 2 and 40';
 		}
 	}
 ];
@@ -145,27 +130,17 @@ room.max_players_validation_fns =
 	{
 		fn: function(candidate)
 		{
-			if (typeof candidate === 'number' && validator.isInt(candidate))
-				return true;
-			else
-				return false;
+			if (validator.isInt(candidate, 10))
+			{
+				candidate = validator.toInt(candidate, 10);
+				if (candidate >= 3 && candidate <= 25)
+					return true;
+			}
+			return false;
 		},
 		msg: function(candidate)
 		{
-			return 'Maximum Players value must be an integer';
-		}
-	},
-	{
-		fn: function(candidate)
-		{
-			if (candidate >= 3 && candidate <= 25)
-				return true;
-			else
-				return false;
-		},
-		msg: function(candidate)
-		{
-			return 'Maximum number of Players must be between 3 and 25';
+			return 'Maximum Players value must be an integer between 3 and 25';
 		}
 	}
 ];
@@ -175,23 +150,13 @@ room.redraws_validation_fns =
 	{
 		fn: function(candidate)
 		{
-			if (typeof candidate === 'number' && validator.isInt(candidate))
-				return true;
-			else
-				return false;
-		},
-		msg: function(candidate)
-		{
-			return 'Redraws value must be a postive integer';
-		}
-	},
-	{
-		fn: function(candidate)
-		{
-			if (candidate >= 0)
-				return true;
-			else
-				return false;
+			if (validator.isInt(candidate, 10))
+			{
+				candidate = validator.toInt(candidate, 10);
+				if (candidate >= 0)
+					return true;
+			}
+			return false;
 		},
 		msg: function(candidate)
 		{
@@ -203,14 +168,14 @@ room.redraws_validation_fns =
 room.decks_validation_fns =
 [
 	{
-		fn: function(candidate)
+		fn: function(deck_list)
 		{
-			if (candidate.length > 0)
+			if (deck_list.length > 0)
 				return true;
 			else
 				return false;
 		},
-		msg: function(candidate)
+		msg: function(deck_list)
 		{
 			return 'At least one deck must be chosen';
 		}
@@ -230,6 +195,71 @@ room.room_validation_fns =
 		msg: function(candidate)
 		{
 			return 'Publicly Listed attribute not found';
+		}
+	},
+	{
+		fn: function(candidate)
+		{
+			if (typeof candidate.host === 'number')
+				return true;
+			else
+				return false;
+		},
+		msg: function(candidate)
+		{
+			return 'Host not found';
+		}
+	},
+	{
+		fn: function(candidate)
+		{
+			if (typeof candidate.objective === 'number')
+				return true;
+			else
+				return false;
+		},
+		msg: function(candidate)
+		{
+			return 'Objective in invalid format';
+		}
+	},
+	{
+		fn: function(candidate)
+		{
+			if (typeof candidate.hand_size === 'number')
+				return true;
+			else
+				return false;
+		},
+		msg: function(candidate)
+		{
+			return 'Hand Size in invalid format';
+		}
+	},
+	{
+		fn: function(candidate)
+		{
+			if (typeof candidate.max_players === 'number')
+				return true;
+			else
+				return false;
+		},
+		msg: function(candidate)
+		{
+			return 'Maximum Players in invalid format';
+		}
+	},
+	{
+		fn: function(candidate)
+		{
+			if (typeof candidate.redraws === 'number')
+				return true;
+			else
+				return false;
+		},
+		msg: function(candidate)
+		{
+			return 'Redraws in invalid format';
 		}
 	}
 ];

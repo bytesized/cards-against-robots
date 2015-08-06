@@ -20,6 +20,13 @@ display_flex()
 	display: -webkit-flex;
 	display: flex;
 
+flex_column()
+	-webkit-box-orient: vertical;
+	-moz-box-orient: vertical;
+	-webkit-flex-direction: column;
+	-ms-flex-direction: column;
+	flex-direction: column;
+
 flex()
 	-webkit-flex : arguments
 	-ms-flex     : arguments
@@ -48,6 +55,9 @@ prewrap_whitespace()
 // items expand to take up extra space and some do not
 .flex_container
 	display_flex()
+.flex_vcontainer
+	display_flex()
+	flex_column()
 .flex_noexpand
 	flex(none)
 .flex_expand
@@ -56,6 +66,13 @@ prewrap_whitespace()
 .hard_wrap
 	overflow: hidden
 	prewrap_whitespace()
+
+.dummy_btn
+	pointer-events: none
+
+/////////////////////////////////////////
+/////////////// Bootstrap ///////////////
+/////////////////////////////////////////
 
 .tab-content, .tab-content .tab-pane
 	width: 100%;
