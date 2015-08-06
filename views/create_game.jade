@@ -10,7 +10,7 @@ block scripts
 	script
 		| validate_room.room_name.set_input('#name_input');
 		| validate_room.password.set_input('#password_input');
-		| validate_room.objective.set_input('#max_points_input');
+		| validate_room.objective.set_input('#objective_input');
 		| validate_room.hand_size.set_input('#hand_size_input');
 		| validate_room.max_players.set_input('#max_players_input');
 		| validate_room.redraws.set_input('#redraws_input');
@@ -23,7 +23,7 @@ block scripts
 	script(src='/javascripts/create_game/selected_decks.js')
 	script
 		//- Eventually, this will load default decks instead of nothing
-		| selected_decks.init([]);
+		| selected_decks.init(!{JSON.stringify(auto_load_decks)});
 	script(src='/javascripts/create_game/deck_row_signals.js')
 	script(src='/javascripts/create_game/deck_row_manager.js')
 
@@ -35,13 +35,13 @@ block scripts
 //- Each row has the class `deck_list_item` and `data-deck_id = deck.id`
 //- Available options:
 //-  + add_button        If true, a button intended for adding the deck is included. It will be created
-//                       with class `add_deck`
+//-                      with class `add_deck`
 //-  + remove_button     If true, a button intended for removing the deck is included. It will be
-//                       created with class `remove_deck`
+//-                      created with class `remove_deck`
 //-  + id                Sets the id of the deck list to the one given
 //-  + class             Adds the class(es) given to the deck list
 //-  + template          If true, the deck list will be created with `display: none;` and a single empty
-//                       row, suitable for inserting deck data into with javascript. If this option is
+//-                      row, suitable for inserting deck data into with javascript. If this option is
 //-                      given, the `decks` argument will be overridden, so its content does not matter
 mixin deck_list(decks, options)
 	- if (options.template) decks = [{name: '', card_count: ''}];
@@ -66,20 +66,20 @@ block content
 	//- Set default values
 	- if (!form_data) form_data = {};
 	- if (typeof form_data.public       === 'undefined') form_data.public       = true;
-	- if (typeof form_data.max_points   === 'undefined') form_data.max_points   = 12;
+	- if (typeof form_data.objective    === 'undefined') form_data.objective    = 12;
 	- if (typeof form_data.hand_size    === 'undefined') form_data.hand_size    = 10;
 	- if (typeof form_data.max_players  === 'undefined') form_data.max_players  = 6;
 	- if (typeof form_data.redraws      === 'undefined') form_data.redraws      = 0;
 	+deck_list([], {template: true, id: 'deck_list-template', add_button: true, remove_button: true})
 	.container
 		.row
+			+game_navbar('create')
+		.row
 			.col-xs-12
 				ul.list-group
 					+flash_messages
 				ul.list-group
 					+validation_errors
-		.row
-			+game_navbar('create')
 		form.form-horizontal(method='POST')
 			.panel.panel-default
 				.panel-body
@@ -100,22 +100,22 @@ block content
 							span.help-block If password is blank, anyone may join
 			.panel.panel-default
 				.panel-body
-					.form-group(class=input_status.max_points)
-						label.control-label.col-xs-12.col-sm-2(for='max_points_input') Objective
+					.form-group(class=input_status.objective)
+						label.control-label.col-xs-12.col-sm-2(for='objective_input') Objective
 						.col-xs-12.col-sm-10
-							input.form-control(type='text', id='max_points_input', name='max_points', placeholder='Number of Points', value=form_data.max_points)
+							input.form-control(type='text', id='objective_input', name='objective', placeholder='Number of Points', value=form_data.objective)
 							span.help-block Number of points to win (1-50)
-					.form-group(class=input_status.max_points)
+					.form-group(class=input_status.hand_size)
 						label.control-label.col-xs-12.col-sm-2(for='hand_size_input') Hand Size
 						.col-xs-12.col-sm-10
 							input.form-control(type='text', id='hand_size_input', name='hand_size', placeholder='Number of Cards', value=form_data.hand_size)
 							span.help-block Number of cards dealt to each player (2-40)
-					.form-group(class=input_status.max_points)
+					.form-group(class=input_status.max_players)
 						label.control-label.col-xs-12.col-sm-2(for='max_players_input') Maximum Players
 						.col-xs-12.col-sm-10
 							input.form-control(type='text', id='max_players_input', name='max_players', placeholder='Number of Players', value=form_data.max_players)
 							span.help-block Number of players that can be in the game simultaneously (3 - 25)
-					.form-group(class=input_status.max_points)
+					.form-group(class=input_status.redraws)
 						label.control-label.col-xs-12.col-sm-2(for='redraws_input') Redraws
 						.col-xs-12.col-sm-10
 							input.form-control(type='text', id='redraws_input', name='redraws', placeholder='Number of Redraws', value=form_data.redraws)
