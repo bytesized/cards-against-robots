@@ -167,9 +167,8 @@ var get_user_by_username = function(username)
 // converts these fields.
 var user_fix_types = function(user)
 {
-	if (user.admin !== undefined)     user.admin     = Boolean(user.admin);
-	if (user.superuser !== undefined) user.superuser = Boolean(user.superuser);
-	if (user.password !== undefined)  user.password  = user.password.toString('ascii');
+	if (user.password !== undefined)
+		user.password = user.password.toString('ascii');
 	return user;
 };
 

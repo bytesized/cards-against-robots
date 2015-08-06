@@ -63,7 +63,14 @@ var create_pool = function()
 		user            : config.mysql.username,
 		password        : config.mysql.password,
 		database        : config.mysql.database,
-		timezone        : 'UTC'
+		timezone        : 'UTC',
+		typeCast        : function (field, next) // Typecast tiny values to booleans
+		                  {
+		                  	if (field.type == 'TINY' && field.length == 1)
+		                  		return (field.string() == '1');
+		                  	else
+		                  		return next();
+		                  }
 	});
 };
 
