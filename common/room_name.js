@@ -27,7 +27,7 @@ for (var i = 0; i < words.adjectives.length; i++)
 // Throws an error if there are no more room names available
 var get_name = function()
 {
-	if (available_room_count == 0)
+	if (available_room_count === 0)
 		throw new Error('Out of available rooms!');
 
 	// This will be the 0-based index of which name to use 0 means the first adjective, first noun
@@ -55,7 +55,7 @@ var get_name = function()
 			++noun_index;
 	}
 
-	// Mark this combonation as used
+	// Mark this combination as used
 	--available_room_count;
 	--available_room_count_by_adjective[adjective_index];
 	nouns_taken_by_adjective[adjective_index][noun_index] = true;
