@@ -37,12 +37,6 @@ var connect_authenticate_middleware = function(io_namespace)
 		});
 	});
 };
-var authenticate_middleware = function(socket, next)
-{
-	session_middleware(socket.request, {}, function(err)
-	{
-	});
-}
 
 var init = function(server)
 {
