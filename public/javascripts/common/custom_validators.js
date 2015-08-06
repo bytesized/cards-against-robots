@@ -30,8 +30,12 @@ var custom_validators = {
 		else
 			return true;
 	},
-	custom_fn: function(param, fn)
+	custom_fn: function(param, fn, options)
 	{
+		if (!options)
+			options = {};
+		if (options.hasOwnProperty('override_param'))
+			param = options.override_param;
 		var result = fn(param);
 		if (result)
 			return true;
