@@ -30,7 +30,6 @@ var init_db = function()
 					"password   BINARY(60) NOT NULL, " +
 					"admin      BOOL NOT NULL, " +
 					"superuser  BOOL NOT NULL, " +
-					"last_seen  TIMESTAMP NULL, " +
 					"locked     BOOL NOT NULL" +
 				") ENGINE InnoDB;";
 			return database.pool.queryAsync(query);
