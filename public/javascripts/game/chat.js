@@ -1,4 +1,4 @@
-// Requires socket,
+// Requires room_socket,
 //          html.js
 var chat = {};
 chat.button_selector = '#chat-button';
@@ -23,14 +23,17 @@ $(document).ready(function()
 		var text = chat.input.val();
 		chat.input.val('');
 
-		socket.emit('room.chat', text);
+		room_socket.emit('chat', text);
 	};
 	chat.button.on('click.chat', chat.send_message);
 
-	socket.on('room.chat', function(msg_json)
+	chat.receive_message = function(msg)
 	{
-		console.log('Received');
-		msg = JSON.parse(msg_json);
 		chat.window.append('<p><b>' + html.encode(msg.username) + ':</b> ' + html.encode(msg.text) + '</p>');
+	};
+	room_socket.on('chat', function(msg_json)
+	{
+		var msg = JSON.parse(msg_json);
+		chat.receive_message(msg);
 	});
 });
