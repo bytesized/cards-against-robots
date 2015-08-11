@@ -34,6 +34,7 @@ router.get('/:id', ensure_user.authenticated, function(req, res, next)
 			try
 			{
 				room.join(req.user, room_object.id);
+				req.user.room = room_object.id;
 			} catch (err)
 			{
 				if (err instanceof room.error)

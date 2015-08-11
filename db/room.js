@@ -93,15 +93,8 @@ var sanitize_decks = function(dirty_decks)
 		var clean_deck = {};
 
 		if (!(typeof dirty_decks[i].id === 'number'))
-		{
-			console.info(dirty_decks[i]);
-			console.log(typeof dirty_decks[i].id);
-			console.info(dirty_decks[i]);
-			console.log(typeof dirty_decks[i].id);
-			console.info(dirty_decks[i]);
-			console.log(typeof dirty_decks[i].id);
 			throw new room_common.error('ID could not be sanitized', 'BAD_DECK_ATTR');
-		}
+
 		clean_deck.id = dirty_decks[i].id;
 		clean_decks.push(clean_deck);
 	}
@@ -131,7 +124,9 @@ var create_room = function(room_object)
 		return user.get_by_id(room_object.host);
 	}).then(function(user_object)
 	{
-		room_object.players = [user_object];
+		room_object.players = {};
+		room_object.players[user_object.id] = user_object;
+		room_object.player_list = [user_object.id];
 
 		room_object.id = room_name.get();
 		if (rooms[room_object.id])
@@ -163,87 +158,119 @@ var get_user_room = function(user_id)
 	return user_rooms[user_id];
 };
 
-// Returns the index of the players array that holds the player specified
-// Returns null if they player_id was not found in the array
-var get_active_player_index = function(player_id, room_id)
-{
-	for (var i = 0; i < rooms[room_id].players.length; i++)
-	{
-		if (rooms[room_id].players[i].id === player_id)
-			return i;
-	}
-	return null;
-};
-
-// Returns the index of the waiting_players array that holds the player specified
-// Returns null if they player_id was not found in the array
-var get_waiting_player_index = function(player_id, room_id)
-{
-	for (var i = 0; i < rooms[room_id].waiting_players.length; i++)
-	{
-		if (rooms[room_id].waiting_players[i].id === player_id)
-			return i;
-	}
-	return null;
-};
-
 // Returns the player object. If `active_only` is true, the waiting players are not
 // searched. Returns null if the player is not found
 var get_player = function(player_id, room_id, active_only)
 {
-	var index = get_active_player_index(player_id, room_id);
-	if (index !== null)
-		return rooms[room_id].players[index];
+	var room = get_room_by_id(room_id);
+	if (room.players[player_id])
+		return room.players[player_id];
 
 	if (active_only)
 		return null;
 
-	index = get_waiting_player_index(player_id, room_id);
-	if (index !== null)
-		return rooms[room_id].waiting_players[index];
+	if (room.waiting_players[player_id])
+		return room.waiting_players[player_id];
 
 	return null;
 };
 
 // Causes the user specified to leave the room
+// Does not send a signal to the user who is leaving
 var leave_room = function(user_id)
 {
 	var room_id = user_rooms[user_id];
+	if (room_id === undefined)
+		return;
+	var room = rooms[room_id];
 
-	var player_index = get_active_player_index(user_id, room_id);
-	if (player_index !== null)
+	// The data object that will be sent to the clients to notify that a player has left
+	var socket_data_object = {};
+	socket_data_object.player = user_id;
+
+	if(room.players[user_id])
 	{
-		rooms[room_id].players[player_index].socket.leave(room_id);
-		delete rooms[room_id].players[player_index].socket;
-		rooms[room_id].players.splice(player_index, 1);
-	} else
-	{
-		player_index = get_waiting_player_index(user_id, room_id);
-		if (player_index !== null)
+		if (room.players[user_id].socket !== undefined)
 		{
-			rooms[room_id].waiting_players[player_index].socket.leave(room_id);
-			delete rooms[room_id].waiting_players[player_index].socket;
-			rooms[room_id].waiting_players.splice(player_index, 1);
+			room.players[user_id].socket.leave(room_id);
+			delete room.players[user_id].socket;
 		}
+		delete room.players[user_id];
+		var list_index = room.player_list.indexOf(user_id);
+		room.player_list.splice(list_index, 1);
+	} else if (room.waiting_players[user_id])
+	{
+		if (room.waiting_players[user_id].socket !== undefined)
+		{
+			room.waiting_players[user_id].socket.leave(room_id);
+			delete room.waiting_players[user_id].socket;
+		}
+		delete room.waiting_players[user_id];
+		var list_index = room.waiting_list.indexOf(user_id);
+		room.waiting_list.splice(list_index, 1);
 	}
 
 	delete user_rooms[user_id];
+
+	if (room.player_list.length === 0 && rooms[room_id].waiting_list.length === 0)
+	{
+		close_room(room_id);
+	} else
+	{
+		if (room.host === user_id)
+		{
+			room.host = room.player_list[0];
+			socket_data_object.new_host = room.host;
+		}
+
+		room_io.to(room_id).emit('player_leave', JSON.stringify(socket_data_object));
+	}
+};
+
+var close_room = function(room_id)
+{
+	var room = get_room_by_id(room_id);
+	for (var i = 0; i < room.player_list.length; i++)
+		leave_room(room.player_list[i]);
+	for (var i = 0; i < room.waiting_list.length; i++)
+		leave_room(room.waiting_list[i]);
+
+	delete rooms[room_id];
+	room_name.release(room_id);
+	var lookup_id = room_id.toLowerCase();
+	delete room_lookup[lookup_id];
+
+	room_io.to(room_id).emit('close');
 };
 
 // Will throw an error if the room cannot be joined
 var join_room = function(user_object, room_id)
 {
-	if (rooms[room_id].players.length + rooms[room_id].waiting_players.length >= rooms[room_id].max_players)
+	if (!rooms[room_id])
+		throw new room_common.error('No such room', 'BAD_ROOM');
+	var room = get_room_by_id(room_id);
+	if (room.player_list.length + room.waiting_list.length >= room.max_players)
 		throw new room_common.error('That room is full', 'ROOM_FULL');
 
 	if (user_rooms[user_object.id] !== undefined)
 		leave_room(user_object.id);
 
-	if (rooms[room_id].started)
-		rooms[room_id].waiting_players.push(user_object);
-	else
-		rooms[room_id].players.push(user_object);
+	if (room.started)
+	{
+		room.waiting_list.push(user_object.id);
+		room.waiting_players[user_object.id] = user_object;
+	} else
+	{
+		room.player_list.push(user_object.id);
+		room.players[user_object.id] = user_object;
+	}
 	user_rooms[user_object.id] = room_id;
+
+	var safe_user_object = {
+		id       : user_object.id,
+		username : user_object.username,
+	};
+	room_io.to(room_id).emit('player_join', JSON.stringify(safe_user_object));
 };
 
 // Returns null if the lookup failed, otherwise returns the correct id from the
@@ -263,10 +290,10 @@ var lookup_room = function(lookup_id)
 // a waiting player or not a player in the room at all
 var active_player = function(user_id, room_id)
 {
-	if (get_active_player_index(user_id, room_id) === null)
-		return false;
-	else
+	if (rooms[room_id].players[user_id])
 		return true;
+	else
+		return false;
 };
 
 var connect_socket = function(user_id, socket)
@@ -293,14 +320,46 @@ var handle_chat_msg = function(user, msg)
 	var msg_object = {user_id: user.id, username: user.username, text: msg};
 
 	room.chat.push(msg_object);
-	room_io.to(room_id).emit('room.chat', JSON.stringify(msg_object));
+	room_io.to(room_id).emit('chat', JSON.stringify(msg_object));
 };
 // Connect socket.io to this function
 room_io.on('connection', function(socket)
 {
-	socket.on('room.chat', function(msg)
+	socket.on('chat', function(msg)
 	{
 		handle_chat_msg(socket.request.user, msg);
+	});
+});
+
+var kick_user = function(to_kick, kicker)
+{
+	var room_id = get_user_room(kicker);
+	if (!room_id)
+		return;
+	var room = get_room_by_id(room_id);
+
+	if (kicker !== room.host)
+	{
+		// LOGGING
+		console.log('Prevented non-host from kicking a player!');
+		return;
+	}
+
+	console.log('Kicked!');
+	var user_object = get_player(to_kick, room_id);
+	if (user_object.socket)
+		user_object.socket.emit('kick');
+	leave_room(to_kick);
+};
+// Connect socket.io to this function
+room_io.on('connection', function(socket)
+{
+	socket.on('kick', function(user_id)
+	{
+		if (!validator.isInt(user_id, 10))
+			return;
+		user_id = validator.toInt(user_id, 10);
+		kick_user(user_id, socket.request.user.id);
 	});
 });
 
@@ -327,7 +386,9 @@ module.exports = {
 	get_by_id                   : get_room_by_id,
 	get_user_room               : get_user_room,
 	leave                       : leave_room,
+	close                       : close_room,
 	join                        : join_room,
 	lookup                      : lookup_room,
-	active_player               : active_player
+	active_player               : active_player,
+	kick_user                   : kick_user
 };

@@ -123,7 +123,22 @@ function send_create_game_failure(req, res, auto_load_decks)
 		// Now `results` is an array of decks that were selected by the user,
 		// return these as the auto load decks
 		res.render('create_game', {form_data: req.body, user_decks: user_decks, auto_load_decks: results});
+	}, function(err)
+	{
+		next(err);
 	});
 }
+
+router.get('/leave_room', ensure_user.authenticated, function(req, res, next)
+{
+	room.leave(req.user.id);
+	res.redirect('/game/');
+});
+
+router.get('/kicked', ensure_user.authenticated, function(req, res, next)
+{
+	req.flash('error', 'You have been kicked from the game');
+	res.redirect('/game/');
+});
 
 module.exports = router;
