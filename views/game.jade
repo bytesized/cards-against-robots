@@ -8,10 +8,12 @@ block content
 		.row
 			.col-xs-12
 				h1 #{config.site_name}
-				ul.list-group
-					+flash_messages
 		.row
 			+game_navbar('home')
+		.row
+			.col-xs-12
+				ul.list-group
+					+flash_messages
 		.row
 			.col-xs-12
 				h3 Welcome #{user.username}
