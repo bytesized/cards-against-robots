@@ -101,6 +101,14 @@ html
 				| var config = {};
 				| config.properties = {};
 				| config.properties.is_configured = false;
+		//- If user is defined, expose a few fields to the client Javascript
+		if user
+			script
+				| var current_user = {};
+				| current_user.id = !{JSON.stringify(user.id)};
+				| current_user.username = !{JSON.stringify(user.username)};
+				| current_user.admin = !{JSON.stringify(user.admin)};
+				| current_user.superuser = !{JSON.stringify(user.superuser)};
 
 		script(src='/javascripts/polyfills.js')
 		script(src='http://code.jquery.com/jquery-1.11.3.min.js')
