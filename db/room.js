@@ -14,6 +14,9 @@ var room_common = require(path.normalize(path.join(__dirname, '..', 'public', 'j
 
 // This object will have room-id keys with room object values
 var rooms = {};
+// This list will keep track of all room ids currently in use. This will be exposed to other
+// modules to allow iteration over rooms, but should be considered READ-ONLY
+var room_ids = [];
 // This object will have user-id keys pointing to room object ids
 var user_rooms = {};
 // An object for looking up rooms
@@ -133,6 +136,7 @@ var create_room = function(room_object)
 			throw new room_common.error('Room ID generated is already in use', 'INTERNAL_ERROR');
 
 		// Room is ready, just insert it
+		room_ids.unshift(room_object.id);
 		rooms[room_object.id] = room_object;
 		user_rooms[room_object.host] = room_object.id;
 		var lookup_id = room_object.id.toLowerCase();
@@ -230,11 +234,15 @@ var leave_room = function(user_id)
 var close_room = function(room_id)
 {
 	var room = get_room_by_id(room_id);
+	if (room === undefined)
+		return;
+
 	for (var i = 0; i < room.player_list.length; i++)
 		leave_room(room.player_list[i]);
 	for (var i = 0; i < room.waiting_list.length; i++)
 		leave_room(room.waiting_list[i]);
 
+	room_ids.splice(room_ids.indexOf(room_id), 1);
 	delete rooms[room_id];
 	room_name.release(room_id);
 	var lookup_id = room_id.toLowerCase();
@@ -345,7 +353,6 @@ var kick_user = function(to_kick, kicker)
 		return;
 	}
 
-	console.log('Kicked!');
 	var user_object = get_player(to_kick, room_id);
 	if (user_object.socket)
 		user_object.socket.emit('kick');
@@ -382,9 +389,11 @@ module.exports = {
 	validate_decks_field        : validate_decks_field,
 	check_room                  : room_common.check_room,
 	sanitize_decks              : sanitize_decks,
+	room_ids                    : room_ids,
 	create                      : create_room,
 	get_by_id                   : get_room_by_id,
 	get_user_room               : get_user_room,
+	get_player                  : get_player,
 	leave                       : leave_room,
 	close                       : close_room,
 	join                        : join_room,
