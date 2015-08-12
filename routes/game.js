@@ -141,4 +141,9 @@ router.get('/kicked', ensure_user.authenticated, function(req, res, next)
 	res.redirect('/game/');
 });
 
+router.get('/list', ensure_user.authenticated, function(req, res, next)
+{
+	res.render('game_list', {room: room});
+});
+
 module.exports = router;

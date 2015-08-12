@@ -1,0 +1,56 @@
+extends layout
+
+block headers
+	title Room List - #{config.site_name}
+
+block scripts
+	script
+		| $(document).ready(function()
+		| {
+		|  	$('[data-toggle="tooltip"]').tooltip();
+		| });
+
+block content
+	.container
+		.row
+			+game_navbar('game_list')
+		.row
+			.col-xs-12
+				ul.list-group
+					+flash_messages
+				ul.list-group
+					+validation_errors
+		.row
+			.col-xs-12
+				#game_list.list-group
+					- room_count = 0;
+					each room_id in room.room_ids
+						- room_object = room.get_by_id(room_id);
+						if room_object.publicly_listed
+							- ++room_count;
+							.list-group-item(data-room_id=room_object.id)
+								.flex_container
+									.flex_noexpand
+										if room_object.started
+											span.glyphicon.inline_glyph.glyphicon-play(data-toggle="tooltip", data-original-title="Game In Progress")
+										else
+											span.glyphicon.inline_glyph.glyphicon-pause(data-toggle="tooltip", data-original-title="Waiting to Start")
+									if room_object.password
+										.flex_noexpand
+											span.glyphicon.inline_glyph.glyphicon-lock(data-toggle="tooltip", data-original-title="Game is Password Protected")
+									.flex_expand.hard_wrap(style='margin-top: 7px; margin-bottom: 7px;')
+										span.room_name
+											b #{room_object.name}
+											|  - 
+											i #{room.get_player(room_object.host, room_object.id).username}
+									.flex_noexpand
+										- slots_remaining = room_object.max_players - room_object.player_list.length - room_object.waiting_list.length
+										span.label(class=(slots_remaining === 0 ? 'label-danger' : 'label-default'), style='cursor: default;', data-toggle="tooltip", data-original-title="Player Slots Remaining")
+											| #{slots_remaining}
+									.flex_noexpand
+										a.btn.btn-default(href='/room/' + encodeURIComponent(room_object.id), style='margin-left: 7px;')
+											span.glyphicon.glyphicon-chevron-right(style='margin-left: 2px; margin-right: 2px;')
+					- console.log(room_count);
+					if room_count === 0
+						.list-group-item.room_list_item
+							i No Rooms
