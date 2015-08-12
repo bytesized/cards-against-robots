@@ -7,7 +7,7 @@ var card = require(path.normalize(path.join(__dirname, '..', 'db', 'card')));
 var ensure_user = require(path.normalize(path.join(__dirname, '..', 'common', 'ensure_user')));
 var router = express.Router();
 
-/* GET home page. */
+/* GET room page. */
 router.get('/:id', ensure_user.authenticated, function(req, res, next)
 {
 	var room_object = room.get_by_id(req.params.id);
@@ -54,5 +54,46 @@ router.get('/:id', ensure_user.authenticated, function(req, res, next)
 			res.render('waiting_room', {room: room_object, card: {white: card.white, black: card.black}});
 	}
 });
+
+/* POST room page. */
+router.post('/:id', ensure_user.authenticated, function(req, res, next)
+{
+	var room_id = req.params.id;
+	var room_object = room.get_by_id(room_id);
+	if (!room_object)
+		return next();
+
+	// If no password, redirect to GET request
+	if (!req.body.password)
+		res.redirect('/room/' + encodeURIComponent(room_id));
+
+	if (room_object.password === req.body.password)
+	{
+		try
+		{
+			room.join(req.user, room_object.id);
+			req.user.room = room_object.id;
+		} catch (err)
+		{
+			if (err instanceof room.error)
+			{
+				req.flash('error', err.message);
+				return res.redirect('/game/list');
+			} else {
+				return next(err);
+			}
+		}
+
+		// User is now registered as a room member
+		// Now, redirect to GET request
+		res.redirect('/room/' + encodeURIComponent(room_id));
+	} else
+	{
+		req.flash('error', 'Incorrect Password');
+		// Redirect to GET request
+		res.redirect('/room/' + encodeURIComponent(room_id));
+	}
+});
+
 
 module.exports = router;
