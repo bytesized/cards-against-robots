@@ -30,10 +30,13 @@ $(document).ready(function()
 	chat.receive_message = function(msg)
 	{
 		chat.window.append('<p><b>' + html.encode(msg.username) + ':</b> ' + html.encode(msg.text) + '</p>');
+
+		chat.window.scrollTop(chat.window[0].scrollHeight);
 	};
 	room_socket.on('chat', function(msg_json)
 	{
 		var msg = JSON.parse(msg_json);
 		chat.receive_message(msg);
 	});
+	chat.window.scrollTop(chat.window[0].scrollHeight);
 });
