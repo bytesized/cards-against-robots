@@ -156,25 +156,53 @@ if ((typeof module) === 'undefined')
 
 	// Render a div as a card. If deck is null, deck text will indicate that no
 	// deck is set
-	jQuery.fn.render_card = function(card_object, deck)
+	// If `options.card` is set, it will be used as the card. Otherwise, Jquery data
+	// is used. Card data expected: `card-color` and `card-text`
+	// If `options.deck_name` is set, it will be used for the card deck. Otherwise, Jquery
+	// data is used. Deck data expected: `card-deck_name`
+	jQuery.fn.render_card = function(options)
 	{
+		if (!options)
+			options = {};
+
+		var card_object = {};
+		if (options.card)
+		{
+			card_object = options.card;
+		} else
+		{
+			if (typeof this.data('card-color') === 'boolean')
+				card_object.color = this.data('card-color')
+			else
+				card_object.color = (this.data('card-color').toLowerCase() === 'true');
+			card_object.text = this.data('card-text');
+		}
+		var deck_name;
+		if (options.deck_name)
+			deck_name = options.deck_name;
+		else
+				deck_name = this.data('card-deck_name');
+
+		this.removeClass('card_black');
+		this.removeClass('card_white');
 		if(card_object.color === card.black)
 		{
 			// If the card color is black, fix consecutive blanks and display them
 			// as 7 underscores
 			card_object.text = card_object.text.replace(card.blank_regex, "$1_______");
-			this.attr('class', 'card card_black');
-		} else {
-			this.attr('class', 'card card_white');
+			this.addClass('card_black');
+		} else
+		{
+			this.addClass('card_white');
 		}
 
-		if (deck === null)
-			deck = '<i>No Deck</i>';
+		if (deck_name === null)
+			deck_name = '<i>No Deck</i>';
 		else
-			deck = html.encode(deck);
+			deck_name = html.encode(deck_name);
 
 		this.html("<div class='card_spacer'></div><div class='card_icon'></div>" +
-			"<div class='deck_name'>" + deck + "</div><span>" + 
+			"<div class='deck_name'>" + deck_name + "</div><span>" + 
 			html.encode(card_object.text) + "</span>");
 
 		var deck_name_div = this.find(".deck_name");
@@ -193,9 +221,17 @@ if ((typeof module) === 'undefined')
 		var blank_card = new card.card_object();
 		blank_card.text = '';
 		blank_card.color = card.white;
-		$('.card_white').render_card(blank_card, null);
+		$('.card_white').render_card({card: blank_card, deck_name: null});
 		blank_card.color = card.black;
-		$('.card_black').render_card(blank_card, null);
+		$('.card_black').render_card({card: blank_card, deck_name: null});
+		// Filter out cards that we already did above
+		$('.card').filter(function(index)
+		{
+			return !($(this).hasClass('card_white') || $(this).hasClass('card_black'));
+		}).each(function(index)
+		{
+			$(this).render_card();
+		});;
 	});
 } else
 {

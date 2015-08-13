@@ -128,7 +128,7 @@ $(document).ready(function()
 		if (load_deck.loaded_deck.is_active())
 			deck_name = load_deck.loaded_deck.name;
 
-		add_card.preview.render_card(card_object, deck_name);
+		add_card.preview.render_card({deck_name: deck_name, card: card_object});
 	};
 	add_card.text_input.bind('keyup', add_card.update_preview);
 	$('input[name=' + add_card.color_input_name + ']').change(add_card.update_preview);
