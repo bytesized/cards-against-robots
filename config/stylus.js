@@ -15,6 +15,8 @@ var compile = function(str, stylus_path)
 		.set('compress', true)
 		.define('card_height', new stylus.nodes.Unit(config.card.height, 'px'))
 		.define('card_width', new stylus.nodes.Unit(config.card.width, 'px'))
+		.define('card_margin', new stylus.nodes.Unit(config.card.margin, 'px'))
+		.define('card_padding', new stylus.nodes.Unit(config.card.padding, 'px'))
 		.define('card_icon_url', '/images/' + encodeURIComponent(config.card_icon.filename))
 		.define('card_icon_height', new stylus.nodes.Unit(config.card_icon.height, 'px'))
 		.define('card_icon_width', new stylus.nodes.Unit(config.card_icon.width, 'px'));

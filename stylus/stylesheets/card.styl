@@ -13,8 +13,8 @@ border_radius()
 	-webkit-border-radius : arguments
 	border-radius         : arguments
 
-card_padding = 5px
 .card
+	display            : block
 	border_radius      : 5px
 	border             : 1px solid black
 	width              : card_width
@@ -23,6 +23,7 @@ card_padding = 5px
 	position           : relative
 	overflow           : hidden
 	prewrap_whitespace()
+	margin             : card_margin
 
 .card_white
 	background : white

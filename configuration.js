@@ -40,6 +40,8 @@ var set_default_config = function()
 	config_object.card = {};
 	config_object.card.width = 200;
 	config_object.card.height = 300;
+	config_object.card.margin = 5;
+	config_object.card.padding = 5;
 };
 
 // Load configuration if it exists
