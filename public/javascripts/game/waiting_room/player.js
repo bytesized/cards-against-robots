@@ -9,15 +9,19 @@ player.dummy_button_class = 'dummy_btn';
 player.kick_button_class = 'kick_player';
 player.kick_button_container_selector = '.flex_noexpand';
 player.user_id_data_key = 'user_id';
+player.start_button_selector = '#start_button';
 player.kick_glyphicon = 'glyphicon-remove';
 player.empty_glyphicon = 'glyphicon-unchecked';
 player.host_glyphicon = 'glyphicon-star';
 player.transfer_glyphicon = 'glyphicon-transfer';
 player.open_slot_html = '<i>Open Slot</i>';
 
+player.count_change_fns = [];
+
 $(document).ready(function()
 {
 	player.list = $(player.list_seletor);
+	player.start_button = $(player.start_button_selector);
 
 	// Should be passed button elements
 	player.add_tooltips = function(elements)
@@ -56,6 +60,8 @@ $(document).ready(function()
 		button.removeClass(player.dummy_button_class);
 		button.on('click.player', player.kick);
 		player.add_tooltips(player_slot.find('.' + player.kick_button_class));
+
+		player.notify_count_change();
 	};
 	room_socket.on('player_join', function(player_json)
 	{
@@ -92,6 +98,8 @@ $(document).ready(function()
 		player_slot.remove();
 		player.list.append(player_slot);
 
+		player.notify_count_change();
+
 		if (data.new_host)
 			player.set_host(data.new_host);
 	};
@@ -122,6 +130,7 @@ $(document).ready(function()
 	player.become_host = function()
 	{
 		player.list.find('.' + player.kick_button_class).closest(player.kick_button_container_selector).show();
+		player.start_button.show();
 	};
 
 	player.kicked = function()
@@ -154,4 +163,27 @@ $(document).ready(function()
 		});
 		buttons.on('click.player', player.kick);
 	})();
+
+	// Returns the number of players in the game
+	player.count = function()
+	{
+		return player.list.find(player.list_row_selector).filter(function(index)
+		{
+			return (typeof $(this).data(player.user_id_data_key) !== 'undefined');
+		}).length;
+	};
+
+	// Calls the given function with the new player count as an argument whenever
+	// the player count changes
+	player.on_count_change = function(fn)
+	{
+		player.count_change_fns.push(fn);
+	};
+
+	player.notify_count_change = function()
+	{
+		var count = player.count();
+		for (var i = 0; i < player.count_change_fns.length; i++)
+			player.count_change_fns[i](count);
+	};
 });

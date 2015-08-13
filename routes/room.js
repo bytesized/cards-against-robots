@@ -48,7 +48,7 @@ router.get('/:id', ensure_user.authenticated, function(req, res, next)
 		}
 
 		// User is now registered as a room member
-		if (room.started && room.active_player(req.user.id, room_object.id))
+		if (room_object.started && room.active_player(req.user.id, room_object.id))
 			res.render('game_room', {room: room_object});
 		else
 			res.render('waiting_room', {room: room_object, card: {white: card.white, black: card.black}});

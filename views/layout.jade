@@ -52,7 +52,7 @@ html
 						if user.room
 							ul.nav.navbar-nav
 								- room_url = '/room/' + encodeURIComponent(user.room);
-								li(class=(active_button == 'current game' ? 'active' : ''))
+								li(class=(active_button == 'current_game' ? 'active' : ''))
 									a(href=room_url) Current Game
 							ul.nav.navbar-nav.navbar-right
 								li
@@ -96,6 +96,7 @@ html
 				| config.field_sizes = !{JSON.stringify(config.field_sizes)};
 				| config.properties = {};
 				| config.properties.is_configured = !{JSON.stringify(config.properties.is_configured)};
+				| config.card = !{JSON.stringify(config.card)};
 		else
 			script
 				| var config = {};

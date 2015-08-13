@@ -41,6 +41,7 @@ room.room_object = (function() {
 		this.deck                 = null;
 		this.started              = false;
 		this.chat                 = [];
+		this.current_game         = {};
 	};
 	return room_object;
 })();

@@ -122,7 +122,7 @@ var create_room = function(room_object)
 			throw new room_common.error('Selected decks have no black cards', 'INSUFFICIENT_CARDS');
 		if (cards.white.length === 0)
 			throw new room_common.error('Selected decks have no white cards', 'INSUFFICIENT_CARDS');
-		room_object.deck = new smart_deck(cards.white, cards.black);
+		room_object.deck = new smart_deck(cards.black, cards.white);
 
 		return user.get_by_id(room_object.host);
 	}).then(function(user_object)
@@ -370,6 +370,52 @@ room_io.on('connection', function(socket)
 	});
 });
 
+var start_game = function(room_id)
+{
+	var room = get_room_by_id(room_id);
+	if (!room || room.started === true)
+		return;
+
+	room.started = true;
+	room.current_game = {};
+	var player_count = room.player_list.length;
+
+	// Pick a Card Czar
+	var czar_index = Math.floor(Math.random() * player_count);
+	room.current_game.czar = room.player_list[czar_index];
+	room.current_game.black_card = room.deck.deal_black();
+
+	// If the black card has three blanks, everyone starts with +2 cards
+	var initial_hand_size = room.hand_size;
+	if (card.blank_count(room.current_game.black_card.text) > 2)
+		initial_hand_size += 2;
+
+	// Deal each user their cards
+	for (var i = 0; i < player_count; i++)
+	{
+		var player = room.players[room.player_list[i]];
+		player.current_game = {};
+		player.current_game.hand = room.deck.deal_white(initial_hand_size);
+	};
+
+	room_io.to(room_id).emit('start_game');
+};
+var start_user_game = function(user_id)
+{
+	var room_id = get_user_room(user_id);
+	if (!room_id)
+		return;
+
+	return start_game(room_id);
+};
+room_io.on('connection', function(socket)
+{
+	socket.on('start_game', function()
+	{
+		start_user_game(socket.request.user.id);
+	});
+});
+
 module.exports = {
 	error                       : room_common.error,
 	room_object                 : room_common.room_object,
@@ -399,5 +445,7 @@ module.exports = {
 	join                        : join_room,
 	lookup                      : lookup_room,
 	active_player               : active_player,
-	kick_user                   : kick_user
+	kick_user                   : kick_user,
+	start_game                  : start_game,
+	start_user_game             : start_user_game
 };

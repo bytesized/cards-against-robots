@@ -14,12 +14,13 @@ block scripts
 		| var room_socket = io(window.location.origin + '/room');
 	script(src='/javascripts/game/chat.js')
 	script(src='/javascripts/game/waiting_room/player.js')
+	script(src='/javascripts/game/waiting_room/start_game.js')
 
 
 block content
 	.container
 		.row
-			+game_navbar('current game')
+			+game_navbar('current_game')
 		.row
 			.col-xs-12
 				ul.list-group
@@ -100,3 +101,6 @@ block content
 									span.input-group-btn
 										span#chat-button.btn.btn-default
 											span.glyphicon.glyphicon-chevron-right
+		.row
+			.col-xs-12
+				span#start_button.btn.btn-primary.btn-lg.btn-block(style=(user.id === room.host ? '' : 'display: none;')) Start Game

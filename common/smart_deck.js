@@ -40,5 +40,37 @@ module.exports = (function() {
 		else
 			return this.original_deck.white.length;
 	};
+	// Returns an array of (white) cards of the length specified.
+	// Attempts to draw from deck. If that is insufficient, shuffles the discard back into the
+	// deck. If that is insufficient, a copy of the original deck is shuffled back into the deck.
+	smart_deck.prototype.deal_white = function(quantity)
+	{
+		if (this.deck.white.length < quantity)
+		{
+			this.deck.white = this.deck.white.concat(shuffle(this.discard.white));
+			this.discard.white = [];
+		}
+		while (this.deck.white.length < quantity)
+			this.deck.white = this.deck.white.concat(shuffle(this.original_deck.white));
+
+		var delt_cards = this.deck.white.splice(0, quantity);
+		return delt_cards;
+	};
+	// Returns a single (black) card.
+	// Attempts to draw from deck. If that is insufficient, shuffles the discard back into the
+	// deck. If that is insufficient, a copy of the original deck is shuffled back into the deck.
+	smart_deck.prototype.deal_black = function()
+	{
+		if (this.deck.black.length < 1)
+		{
+			this.deck.black = this.deck.black.concat(shuffle(this.discard.black));
+			this.discard.black = [];
+		}
+		if (this.deck.black.length < 1)
+			this.deck.black = this.deck.black.concat(shuffle(this.original_deck.black));
+
+		var delt_card = this.deck.black.shift();
+		return delt_card;
+	};
 	return smart_deck;
 })();
