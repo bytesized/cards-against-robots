@@ -1,5 +1,6 @@
 // Requires room_socket,
 //          html.js
+// Provides basic chat functionality for the waiting room and the game
 var chat = {};
 chat.button_selector = '#chat-button';
 chat.input_selector = '#chat-input';
