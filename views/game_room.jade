@@ -1,0 +1,52 @@
+extends layout
+
+block headers
+	title Playing Game - #{config.site_name}
+	link(rel='stylesheet', href='https://code.jquery.com/ui/1.11.4/themes/cupertino/jquery-ui.css')
+	link(rel='stylesheet', href='/stylesheets/card.css')
+
+block scripts
+	script(src='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js')
+	script(src='/javascripts/game/chat_window.js')
+	script(src='/javascripts/html.js')
+	script(src='/javascripts/common/card.js')
+	script(src='/socket.io/socket.io.js')
+	script
+		| if (!window.location.origin)
+		| {
+		| 	window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+		| }
+		| var room_socket = io(window.location.origin + '/room');
+	script(src='/javascripts/game/chat.js')
+
+block content
+	.container
+		.row
+			+game_navbar('current_game')
+		.row
+			.col-xs-12
+				ul.list-group
+					+flash_messages
+				ul.list-group
+					+validation_errors
+		.row
+			.col-xs-12.chat_container
+				#chat
+					span#chat_handle_sw.ui-icon.ui-icon-triangle-1-sw.ui-resizable-handle.ui-resizable-sw.visible-lg-block(style='position: absolute; bottom: 0px; left: 0px;')
+					.panel.panel-default(style='width: 100%; height: 100%;')
+						.panel-body(style='width: 100%; height: 100%;')
+							.flex_vcontainer(style='height: 100%;')
+								#chat-window.flex_expand.hard_wrap(style='width: 100%; overflow-y: scroll;')
+									each msg in room.chat
+										p
+											b #{msg.username}: 
+											| #{msg.text}
+								.flex_noexpand(role='form', style='width: 100%;')
+									.input-group
+										input#chat-input.form-control(type='text', autocomplete="off")
+										span.input-group-btn
+											span#chat-button.btn.btn-default
+												span.glyphicon.glyphicon-chevron-right
+				each card in room.players[user.id].current_game.hand
+					.col-lg-5ths
+						.card(data-card-color=JSON.stringify(card.color), data-card-text=card.text, data-card-deck_name=card.deck_name)

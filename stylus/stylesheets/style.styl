@@ -78,9 +78,73 @@ prewrap_whitespace()
 	margin-right: 5px
 	cursor: default
 
+// Chat Window:
+// We want it to float to the right for large screens and take up the whole
+// bottom on smaller screens
+#chat
+	position: absolute
+	bottom: 0px
+	left: 0px
+	right: 0px
+	height: 300px
+.chat_container
+	padding-bottom: 400px
+@media (min-width: 1200px)
+	// On larger screens, it will also be resizable, so this style must not step
+	// on Jquery UI's toes
+	container_width = 1170 // Specs of a `.container`
+	container_padding = 15
+	container_inner_width = container_width - (2 * container_padding)
+	card_columns = 5
+	col_width = (container_inner_width / card_columns)
+	card_col_spacing = (col_width - card_width) / 2 // Space along card edges
+	#chat
+		position: relative
+		width: card_width * 2 + card_col_spacing * 2
+		height: card_height
+		margin: card_margin
+		margin-right: card_col_spacing
+		float: right
+	.chat_container
+		padding-bottom: 0px
+@media (max-width: 1200px)
+	// Do not let JQuery UI set dimensions on the element if it is sitting on the bottom
+	#chat
+		width: auto !important
+		height: 300px !important
+
 /////////////////////////////////////////
 /////////////// Bootstrap ///////////////
 /////////////////////////////////////////
 
 .tab-content, .tab-content .tab-pane
 	width: 100%;
+
+/////////////////////////////////////////
+//////////// Pseudo-Bootstrap ///////////
+/////////////////////////////////////////
+
+.col-xs-5ths, .col-sm-5ths, .col-md-5ths, .col-lg-5ths
+	position: relative
+	min-height: 1px
+	padding-right: 10px
+	padding-left: 10px
+
+.col-xs-5ths
+	width: 20%
+	float: left
+
+@media (min-width: 768px)
+	.col-sm-5ths
+		width: 20%
+		float: left
+
+@media (min-width: 992px)
+	.col-md-5ths
+		width: 20%
+		float: left
+
+@media (min-width: 1200px)
+	.col-lg-5ths
+		width: 20%;
+		float: left;
