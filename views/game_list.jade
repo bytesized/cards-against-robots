@@ -45,12 +45,11 @@ block content
 											i #{room.get_player(room_object.host, room_object.id).username}
 									.flex_noexpand
 										- slots_remaining = room_object.max_players - room_object.player_list.length - room_object.waiting_list.length
-										span.label(class=(slots_remaining === 0 ? 'label-danger' : 'label-default'), style='cursor: default;', data-toggle="tooltip", data-original-title="Player Slots Remaining")
-											| #{slots_remaining}
+										span.label(class=(slots_remaining === 0 ? 'label-danger' : 'label-default'), style='cursor: default;', data-toggle="tooltip", data-original-title="Players Joined / Max")
+											| #{room_object.player_list.length + room_object.waiting_list.length} / #{room_object.max_players}
 									.flex_noexpand
 										a.btn.btn-default(href='/room/' + encodeURIComponent(room_object.id), style='margin-left: 7px;')
 											span.glyphicon.glyphicon-chevron-right(style='margin-left: 2px; margin-right: 2px;')
-					- console.log(room_count);
 					if room_count === 0
 						.list-group-item.room_list_item
 							i No Rooms
