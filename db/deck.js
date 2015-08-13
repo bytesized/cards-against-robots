@@ -183,18 +183,24 @@ var add_card_to_deck = function(card_id, deck_id, quantity)
 
 // Returns a Promise. The promise, if fulfilled, will yield an object with all cards in the
 // specified decks, organized by color (Ex: {black: [], white: []})
+// Card objects returned have all the fields from the `cards` MYSQL table PLUS `deck_id` and
+// `deck_name`.
 // Uses a MYSQL transaction
 var compile_decks = function(deck_ids)
 {
 	return database.with_transaction(function(connection)
 	{
 		// Make an array of requests for cards.
+		// I normally do not like to loop over MYSQL queries, but I do not expect people to add THAT many decks,
+		// and I think that it is much more readable this way
 		var white_card_queries = [];
 		var black_card_queries = [];
 		for (var i = 0; i < deck_ids.length; i++)
 		{
 			var query = connection.queryAsync(
-				'SELECT cards.* FROM deck_descriptions INNER JOIN cards ON deck_descriptions.card = cards.id ' +
+				'SELECT cards.*, deck_list.id as deck_id, deck_list.name as deck_name ' +
+				'FROM deck_descriptions INNER JOIN cards ON deck_descriptions.card = cards.id ' +
+				'INNER JOIN deck_list ON deck_list.id = deck_descriptions.deck ' + 
 				'WHERE deck_descriptions.deck = ? AND cards.color = ?; ', [deck_ids[i], card.white]).spread(function(results, fields)
 				{
 					return results;
@@ -202,7 +208,9 @@ var compile_decks = function(deck_ids)
 			white_card_queries.push(query);
 
 			query = connection.queryAsync(
-				'SELECT cards.* FROM deck_descriptions INNER JOIN cards ON deck_descriptions.card = cards.id ' +
+				'SELECT cards.*, deck_list.id as deck_id, deck_list.name as deck_name ' +
+				'FROM deck_descriptions INNER JOIN cards ON deck_descriptions.card = cards.id ' +
+				'INNER JOIN deck_list ON deck_list.id = deck_descriptions.deck ' + 
 				'WHERE deck_descriptions.deck = ? AND cards.color = ?; ', [deck_ids[i], card.black]).spread(function(results, fields)
 				{
 					return results;
