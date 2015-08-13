@@ -48,5 +48,5 @@ block content
 											span#chat-button.btn.btn-default
 												span.glyphicon.glyphicon-chevron-right
 				each card in room.players[user.id].current_game.hand
-					.col-lg-5ths
+					.col-xs-4.col-md-3.col-lg-5ths
 						.card(data-card-color=JSON.stringify(card.color), data-card-text=card.text, data-card-deck_name=card.deck_name)
