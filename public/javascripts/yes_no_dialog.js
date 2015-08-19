@@ -55,10 +55,14 @@ $(document).ready(function()
 		});
 
 		// Clean up after ourselves after the modal closes
+		// Also call the closed handler
 		yes_no_dialog.dialog.one('hidden.bs.modal', function() {
 			yes_no_dialog.title.empty();
 			yes_no_dialog.body.empty();
 			yes_no_dialog.footer.empty();
+
+			if (options.closed_handler)
+				options.closed_handler();
 		});
 
 		yes_no_dialog.dialog.modal({
