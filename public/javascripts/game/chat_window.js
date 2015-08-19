@@ -1,25 +1,25 @@
-// Provides chat window styling for the game chat (but not for the waiting room chat,
+// Provides styling for the game chat/score window (but not for the waiting room chat,
 // which is simpler)
-var chat_window = {};
+var float_window = {};
 
 $(document).ready(function()
 {
 	// Page measurements. True ONLY for a window >= 1200px, but that is the only time the chat resizes anyways
-	chat_window.container_width = 1170;
-	chat_window.container_padding = 15;
-	chat_window.container_inner_width = chat_window.container_width - (2 * chat_window.container_padding);
-	chat_window.card_columns = 5;
-	chat_window.col_width = (chat_window.container_inner_width / chat_window.card_columns);
-	chat_window.card_col_spacing = (chat_window.col_width - config.card.width) / 2 // Space along card edges
-	chat_window.card_height = config.card.height + (config.card.margin * 2);
+	float_window.container_width = 1170;
+	float_window.container_padding = 15;
+	float_window.container_inner_width = float_window.container_width - (2 * float_window.container_padding);
+	float_window.card_columns = 5;
+	float_window.col_width = (float_window.container_inner_width / float_window.card_columns);
+	float_window.card_col_spacing = (float_window.col_width - config.card.width) / 2 // Space along card edges
+	float_window.card_height = config.card.height + (config.card.margin * 2);
 
-	$('#chat').resizable({
+	$('#game_floater').resizable({
 		handles: {
-			'sw': '#chat_handle_sw'
+			'sw': $('#floater_handle_sw')
 		},
 		minHeight: config.card.height,
 		minWidth: config.card.width,
-		maxWidth: (chat_window.container_inner_width - (2 * chat_window.card_col_spacing)),
+		maxWidth: (float_window.container_inner_width - (2 * float_window.card_col_spacing)),
 		resize: function(event, ui)
 		{
 			// Do not change the value of `left`, we are already floating left
@@ -31,12 +31,12 @@ $(document).ready(function()
 
 			// Compute window (outer) size, without the bottom margin
 			var outer_size = ui.size.height + config.card.margin;
-			var total_height = Math.ceil(outer_size / chat_window.card_height) * chat_window.card_height;
+			var total_height = Math.ceil(outer_size / float_window.card_height) * float_window.card_height;
 			var bottom_margin = total_height - outer_size;
 			// We want a minimum margin. If we are less than that, add another whole card on
 			if (bottom_margin < config.card.margin)
-				bottom_margin += chat_window.card_height;
-			$('#chat').css('margin-bottom', bottom_margin + 'px');
+				bottom_margin += float_window.card_height;
+			$('#game_floater').css('margin-bottom', bottom_margin + 'px');
 		}
 	});
 });

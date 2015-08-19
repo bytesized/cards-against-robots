@@ -6,8 +6,20 @@ block headers
 	link(rel='stylesheet', href='/stylesheets/card.css')
 
 block scripts
+	if (user.id === room.current_game.czar)
+		if (room.current_game.waiting_for_players)
+			- current_turn = 'card_czar_waiting';
+		else
+			- current_turn = 'card_czar_playing';
+	else
+		if (room.current_game.waiting_for_players)
+			- current_turn = 'play_white';
+		else
+			- current_turn = 'all_played';
+
 	script(src='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js')
-	script(src='/javascripts/game/chat_window.js')
+	script(src='/javascripts/game/float_window.js')
+	script(src='/javascripts/notification_dialog.js')
 	script(src='/javascripts/html.js')
 	script(src='/javascripts/common/card.js')
 	script(src='/socket.io/socket.io.js')
@@ -18,8 +30,35 @@ block scripts
 		| }
 		| var room_socket = io(window.location.origin + '/room');
 	script(src='/javascripts/game/chat.js')
+	script(src='/javascripts/game/game_turn.js')
+	script(src='/javascripts/game/player.js')
+	- player_list = [];
+	each player_id in room.player_list
+		- player_object = room.players[player_id];
+		- player_played = !(player_object.current_game.played_cards === null || player_object.current_game.played_cards.length < room.current_game.black_card.blank_count);
+		- player_list.push({id: player_object.id, username: player_object.username, played: player_played});
+	script
+		| player.init(!{JSON.stringify(player_list)}, !{JSON.stringify(room.current_game.czar)}, !{JSON.stringify(room.host)});
+	script(src='/javascripts/game/game_card.js')
+	script
+		| game_card.load_played(!{JSON.stringify(room.players[user.id].current_game.played_cards)});
+	script //- Init `game_turn` after other game modules have had a chance to register with it
+		| game_turn.init(!{JSON.stringify(current_turn)});
 
 block content
+	//- This doesn't seem to carry across blocks, so I will do it in both blocks.
+	//- Seems a pretty hacky, but I'm not sure of a way around it
+	if (user.id === room.current_game.czar)
+		if (room.current_game.waiting_for_players)
+			- current_turn = 'card_czar_waiting';
+		else
+			- current_turn = 'card_czar_playing';
+	else
+		if (room.current_game.waiting_for_players)
+			- current_turn = 'play_white';
+		else
+			- current_turn = 'all_played';
+
 	.container
 		.row
 			+game_navbar('current_game')
@@ -29,24 +68,81 @@ block content
 					+flash_messages
 				ul.list-group
 					+validation_errors
+		.row.game_turn-card_czar_waiting(style=(current_turn == 'card_czar_waiting' ? '' : 'display: none;'))
+			.col-xs-12
+				h1(style='text-align: center;') You are the Card Czar
+				p Once the other players have each played a card, it will be your turn to pick one
 		.row
-			.col-xs-12.chat_container
-				#chat
-					span#chat_handle_sw.ui-icon.ui-icon-triangle-1-sw.ui-resizable-handle.ui-resizable-sw.visible-lg-block(style='position: absolute; bottom: 0px; left: 0px;')
-					.panel.panel-default(style='width: 100%; height: 100%;')
-						.panel-body(style='width: 100%; height: 100%;')
-							.flex_vcontainer(style='height: 100%;')
-								#chat-window.flex_expand.hard_wrap(style='width: 100%; overflow-y: scroll;')
-									each msg in room.chat
-										p
-											b #{msg.username}: 
-											| #{msg.text}
-								.flex_noexpand(role='form', style='width: 100%;')
-									.input-group
-										input#chat-input.form-control(type='text', autocomplete="off")
-										span.input-group-btn
-											span#chat-button.btn.btn-default
-												span.glyphicon.glyphicon-chevron-right
-				each card in room.players[user.id].current_game.hand
-					.col-xs-4.col-md-3.col-lg-5ths
-						.card(data-card-color=JSON.stringify(card.color), data-card-text=card.text, data-card-deck_name=card.deck_name)
+			.game_card-hand_container.game_floater_parent.col-xs-12
+				#game_floater
+					span#floater_handle_sw.ui-icon.ui-icon-triangle-1-sw.ui-resizable-handle.ui-resizable-sw.visible-lg-block(style='position: absolute; bottom: 0px; left: 0px;')
+					.flex_vcontainer(style='height: 100%;')
+						.flex_noexpand
+							span.label.label-default(style='position: absolute; top: 0px; right: 0px;')
+								- play_count = 0;
+								each player_id in room.player_list
+									if player_id !== room.current_game.czar
+										if room.players[player_id].current_game.played_cards !== null && room.players[player_id].current_game.played_cards.length === room.current_game.black_card.blank_count
+											- ++play_count;
+								span#player-played_count #{play_count}
+								| /
+								span#player-must_play_count #{room.player_list.length - 1}
+							ul.nav.nav-tabs
+								li.active
+									a(data-toggle="tab" href='#chat') Chat
+								li
+									a(data-toggle="tab" href='#score') Score
+						.flex_expand.flex_vcontainer
+							.panel.panel-default.flex_expand.flex_vcontainer(style='margin-bottom: 0px;')
+								.panel-body.tab-content.flex_expand.flex_vcontainer
+									#chat.flex_expand.flex_vcontainer.tab-pane.fade.in.active
+										.flex_expand.flex_vcontainer
+											#chat-window.flex_expand.hard_wrap(style='overflow-y: scroll;')
+												each msg in room.chat
+													p
+														b #{msg.username}: 
+														| #{msg.text}
+											.flex_noexpand(role='form')
+												.input-group
+													input#chat-input.form-control(type='text', autocomplete="off")
+													span.input-group-btn
+														span#chat-button.btn.btn-default
+															span.glyphicon.glyphicon-chevron-right
+									#score.flex_expand.tab-pane.fade.hard_wrap
+										ul.list-unstyled
+											each player_id in room.player_list
+												- player = room.players[player_id];
+												if player.id === room.current_game.czar
+													- glyphicon = 'glyphicon-certificate';
+												else
+													if player.current_game.played_cards === null || player.current_game.played_cards < room.current_game.black_card.blank_count
+														- glyphicon = 'glyphicon-unchecked';
+													else
+														- glyphicon = 'glyphicon-check';
+												li.player-score(data-player-id=player.id)
+													span.glyphicon.inline_glyph(class=glyphicon)
+													b #{player.username}: 
+													| #{player.current_game.score}
+				.col-xs-4.col-md-3.col-lg-5ths
+					- card_object = {color: room.current_game.black_card.color, text: room.current_game.black_card.text, deck_name: room.current_game.black_card.deck_name, id: room.current_game.black_card.id};
+					#game_card-black_card.card(data-card-data=JSON.stringify(card_object))
+				//- Make an object associating hand ids with the play number of the card so we can make the badges
+				- played_list = {};
+				- all_played = false;
+				if room.players[user.id].current_game.played_cards
+					if room.players[user.id].current_game.played_cards.length === room.current_game.black_card.blank_count
+						- all_played = true;
+					each card, index in room.players[user.id].current_game.played_cards
+						- played_list[card.hand_id] = index + 1;
+				each card, index in room.players[user.id].current_game.hand
+					.col-xs-4.col-md-3.col-lg-5ths.game_turn-play_white(style=(current_turn === 'play_white' ? '' : 'display: none;'))
+						- card_object = {color: card.color, text: card.text, deck_name: card.deck_name, hand_id: index, id: card.id};
+						.card.game_card-hand_card(data-card-data=JSON.stringify(card_object), class=(all_played ? '' : 'card_clickable'))
+							if played_list[index]
+								if room.current_game.black_card.blank_count > 1
+									span.game_card-number_label.label.label-default(style='position: absolute; top: 0px; right: 0px;') #{played_list[index]}
+								if played_list[index] === room.current_game.black_card.blank_count
+									div#game_card-undo_button.hcentered_absolute(style='bottom: 0px;')
+										a.btn.btn-default
+											span.glyphicon.glyphicon-ok
+											|  Undo

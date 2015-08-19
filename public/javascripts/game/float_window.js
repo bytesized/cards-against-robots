@@ -34,9 +34,8 @@ $(document).ready(function()
 
 		chat.window.scrollTop(chat.window[0].scrollHeight);
 	};
-	room_socket.on('chat', function(msg_json)
+	room_socket.on('chat', function(msg)
 	{
-		var msg = JSON.parse(msg_json);
 		chat.receive_message(msg);
 	});
 	chat.window.scrollTop(chat.window[0].scrollHeight);

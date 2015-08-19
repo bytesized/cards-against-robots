@@ -12,7 +12,6 @@ html
 			if config && config.site_name
 				title= config.site_name
 	body
-		- if (!user) user = {};
 		//- Takes a bootstrap `list-group-item-*` class and an array of messages
 		//- Should be explictly put in a ul.list-group like this:
 		//-     ul.list-group
@@ -49,7 +48,7 @@ html
 							span.icon-bar
 							span.icon-bar
 					.collapse.navbar-collapse(id='navbar')
-						if user.room
+						if user && user.room
 							ul.nav.navbar-nav
 								- room_url = '/room/' + encodeURIComponent(user.room);
 								li(class=(active_button == 'current_game' ? 'active' : ''))

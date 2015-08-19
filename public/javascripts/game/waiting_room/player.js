@@ -63,9 +63,8 @@ $(document).ready(function()
 
 		player.notify_count_change();
 	};
-	room_socket.on('player_join', function(player_json)
+	room_socket.on('player_join', function(new_player)
 	{
-		var new_player = JSON.parse(player_json);
 		player.add_player(new_player);
 	});
 
@@ -103,9 +102,8 @@ $(document).ready(function()
 		if (data.new_host)
 			player.set_host(data.new_host);
 	};
-	room_socket.on('player_leave', function(data_json)
+	room_socket.on('player_leave', function(data)
 	{
-		var data = JSON.parse(data_json);
 		player.remove_player(data);
 	});
 

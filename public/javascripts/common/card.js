@@ -154,34 +154,43 @@ if ((typeof module) === 'undefined')
 {
 	// If this is client-side...
 
+	card.card_data_key = 'card-data';
+
+	// Gets a card's data
+	jQuery.fn.get_card = function()
+	{
+		var card_object = this.data(card.card_data_key);
+		this.removeAttr('data-' + card.card_data_key);
+		if (typeof card_object === 'string')
+		{
+			card_object = JSON.parse(card_object);
+			this.data(card.card_data_key, card_object);
+		}
+		return card_object;
+	};
+
 	// Render a div as a card. If deck is null, deck text will indicate that no
 	// deck is set
-	// If `options.card` is set, it will be used as the card. Otherwise, Jquery data
-	// is used. Card data expected: `card-color` and `card-text`
-	// If `options.deck_name` is set, it will be used for the card deck. Otherwise, Jquery
-	// data is used. Deck data expected: `card-deck_name`
+	// If `options.card` is set, it will be used as the card. Otherwise, the JQuery data
+	// `card-data` will be used.
+	// If `options.deck_name` is set, it will be used for the card deck. Otherwise, the
+	// card object's `deck_name` property is used (from JQuery or `options.card`)
 	jQuery.fn.render_card = function(options)
 	{
 		if (!options)
 			options = {};
 
-		var card_object = {};
+		var card_object;
 		if (options.card)
-		{
 			card_object = options.card;
-		} else
-		{
-			if (typeof this.data('card-color') === 'boolean')
-				card_object.color = this.data('card-color')
-			else
-				card_object.color = (this.data('card-color').toLowerCase() === 'true');
-			card_object.text = this.data('card-text');
-		}
+		else
+			card_object = this.get_card()
+
 		var deck_name;
 		if (options.deck_name)
 			deck_name = options.deck_name;
 		else
-				deck_name = this.data('card-deck_name');
+			deck_name = card_object.deck_name;
 
 		this.removeClass('card_black');
 		this.removeClass('card_white');
@@ -201,8 +210,13 @@ if ((typeof module) === 'undefined')
 		else
 			deck_name = html.encode(deck_name);
 
-		this.html("<div class='card_spacer'></div><div class='card_icon'></div>" +
-			"<div class='deck_name'>" + deck_name + "</div><span>" + 
+		this.find('.card_spacer').remove();
+		this.find('.card_icon').remove();
+		this.find('.deck_name').remove();
+		this.find('.card_text').remove();
+
+		this.prepend("<div class='card_spacer'></div><div class='card_icon'></div>" +
+			"<div class='deck_name'>" + deck_name + "</div><span class='card_text'>" + 
 			html.encode(card_object.text) + "</span>");
 
 		var deck_name_div = this.find(".deck_name");
@@ -213,6 +227,13 @@ if ((typeof module) === 'undefined')
 		{
 			deck_name_div.hide();
 		});
+	};
+
+	// Sets a card's data and renders it
+	jQuery.fn.set_card = function(card_object)
+	{
+		this.data(card.card_data_key) = card_object;
+		this.render_card();
 	};
 
 	// On document ready, render all cards as blanks

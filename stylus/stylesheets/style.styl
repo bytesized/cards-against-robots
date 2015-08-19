@@ -14,11 +14,11 @@ opacity(fractional_opacity)
 	opacity: fractional_opacity;
 
 display_flex()
-	display: -webkit-box;
-	display: -moz-box;
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	display: flex;
+	display: -webkit-box
+	display: -moz-box
+	display: -ms-flexbox
+	display: -webkit-flex
+	display: flex
 
 flex_column()
 	-webkit-box-orient: vertical;
@@ -41,6 +41,13 @@ prewrap_whitespace()
 	white-space : -moz-pre-wrap /* Mozilla */
 	white-space : -hp-pre-wrap  /* HP Printers */
 	word-wrap   : break-word    /* IE 5+ */
+
+transform()
+	-o-transform      : arguments
+	-moz-transform    : arguments
+	-ms-transform     : arguments
+	-webkit-transform : arguments
+	transform         : arguments
 
 //////////////////////////////////////
 /////////////// Styles ///////////////
@@ -78,16 +85,22 @@ prewrap_whitespace()
 	margin-right: 5px
 	cursor: default
 
-// Chat Window:
+// Sets position to absolute and centers the element horizontally
+.hcentered_absolute
+	position: absolute
+	left: 50%
+	transform(translate(-50%, 0))
+
+// Chat/Score Window:
 // We want it to float to the right for large screens and take up the whole
 // bottom on smaller screens
-#chat
+#game_floater
 	position: absolute
 	bottom: 0px
 	left: 0px
 	right: 0px
 	height: 300px
-.chat_container
+.game_floater_parent
 	padding-bottom: 400px
 @media (min-width: 1200px)
 	// On larger screens, it will also be resizable, so this style must not step
@@ -98,7 +111,7 @@ prewrap_whitespace()
 	card_columns = 5
 	col_width = (container_inner_width / card_columns)
 	card_col_spacing = (col_width - card_width) / 2 // Space along card edges
-	#chat
+	#game_floater
 		position: relative
 		width: card_width * 2 + card_col_spacing * 2
 		height: card_height
@@ -106,11 +119,11 @@ prewrap_whitespace()
 		margin-right: card_col_spacing
 		margin-left: card_col_spacing
 		float: right
-	.chat_container
+	.game_floater_parent
 		padding-bottom: 0px
 @media (max-width: 1199px)
 	// Do not let JQuery UI set dimensions on the element if it is sitting on the bottom
-	#chat
+	#game_floater
 		width: auto !important
 		height: 300px !important
 
@@ -120,6 +133,10 @@ prewrap_whitespace()
 
 .tab-content, .tab-content .tab-pane
 	width: 100%;
+
+// Bootstrap's specificity is overriding my styles, so I will just override its right back
+.tab-content > .active.flex_vcontainer, .tab-content > .active.flex_container
+	display_flex();
 
 /////////////////////////////////////////
 //////////// Pseudo-Bootstrap ///////////
