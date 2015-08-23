@@ -138,3 +138,7 @@ Array.prototype.for_each = function(fn)
 	for (var i = 0; i < len; i++)
 		fn(i, this[i]);
 };
+
+// IE does not seem to set `window.location.origin`
+if (!window.location.origin)
+	window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');

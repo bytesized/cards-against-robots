@@ -7,6 +7,7 @@ var config = require(path.normalize(path.join(__dirname, '..', 'configuration'))
 var deck = require(path.join(__dirname, 'deck'));
 var user = require(path.join(__dirname, 'user'));
 var card = require(path.join(__dirname, 'card'));
+var html = require(path.normalize(path.join(__dirname, '..', 'common', 'html')));
 var random = require(path.normalize(path.join(__dirname, '..', 'common', 'random')));
 var io_common = require(path.normalize(path.join(__dirname, '..', 'common', 'socket_io')));
 var room_name = require(path.normalize(path.join(__dirname, '..', 'common', 'room_name')));
@@ -192,7 +193,14 @@ var leave_room = function(user_id)
 	// The data object that will be sent to the clients to notify that a player has left
 	var socket_data_object = {};
 	socket_data_object.player = user_id;
+	socket_data_object.username = '';
+	socket_data_object.active_player = false;
+	socket_data_object.fatal = false;
+	socket_data_object.new_czar = null;
+	socket_data_object.new_czar_username = null;
+	socket_data_object.played_cards = null;
 
+	var active_player_index;
 	if(room.players[user_id])
 	{
 		if (room.players[user_id].socket !== undefined)
@@ -200,9 +208,11 @@ var leave_room = function(user_id)
 			room.players[user_id].socket.leave(room_id);
 			delete room.players[user_id].socket;
 		}
+		socket_data_object.username = room.players[user_id].username;
 		delete room.players[user_id];
-		var list_index = room.player_list.indexOf(user_id);
-		room.player_list.splice(list_index, 1);
+		active_player_index = room.player_list.indexOf(user_id);
+		room.player_list.splice(active_player_index, 1);
+		socket_data_object.active_player = true;
 	} else if (room.waiting_players[user_id])
 	{
 		if (room.waiting_players[user_id].socket !== undefined)
@@ -210,6 +220,7 @@ var leave_room = function(user_id)
 			room.waiting_players[user_id].socket.leave(room_id);
 			delete room.waiting_players[user_id].socket;
 		}
+		socket_data_object.username = room.waiting_players[user_id].username;
 		delete room.waiting_players[user_id];
 		var list_index = room.waiting_list.indexOf(user_id);
 		room.waiting_list.splice(list_index, 1);
@@ -217,7 +228,95 @@ var leave_room = function(user_id)
 
 	delete user_rooms[user_id];
 
-	if (room.player_list.length === 0 && rooms[room_id].waiting_list.length === 0)
+	if (room.started)
+	{
+		if (room.player_list.length < 3)
+		{
+			socket_data_object.fatal = true;
+			clean_up_game(room_id);
+		} else
+		{
+			// If the person who left was the czar, pick a new czar
+			var leaving_user_was_czar = false;
+			if (room.current_game.czar === user_id)
+			{
+				leaving_user_was_czar = true;
+				var old_czar = room.current_game.czar;
+				// To pick the czar, use the same index as the old czar, who has now been removed
+				// This will be the next person
+				var new_czar_index = active_player_index % room.player_list.length;
+				var new_czar = room.player_list[new_czar_index];
+				room.current_game.czar = new_czar;
+				socket_data_object.new_czar = new_czar;
+				var new_czar_object = room.players[new_czar];
+				socket_data_object.new_czar_username = new_czar_object.username;
+				// 'un-play' any cards the new card czar played
+				// Note: if it is the czar's turn, we will later need to remove the cards from
+				// `room.current_game.played` as well
+				new_czar_object.current_game.played_cards = null;
+			}
+			// Three cases to handle when someone leaves mid-game:
+			// 1) The person who left was the czar and it was their turn to pick a card. To fix this, we must
+			//    remove the new czar's card(s) from the played list.
+			// 2) The person who left was not the czar, but it was the czar's turn. That person's played cards
+			//    must be removed from the played cards for the room
+			// 3) It was not the czar's turn, but the person who left was the only person that still needed to
+			//    play, or similarly, the only person who still needed to play was the person who just became
+			//    the new czar. This means that we need to start the czar's turn
+			// There is still one remaining case:
+			//  - It was not the czar's turn, and it still isn't
+			// In this case, there is really nothing to handle. The game will continue as usual without the
+			// player that left.
+			if (!room.current_game.waiting_for_players)
+			{
+				var player_remove_played; // Whose played cards are being removed
+				if (leaving_user_was_czar)
+				{
+					// Case 1 - Remove new czar's played cards
+					player_remove_played = room.current_game.czar;
+				} else
+				{
+					// Case 2 - Remove leaving user's played cards
+					player_remove_played = user_id;
+				}
+				// Find user's played cards
+				var index = undefined;
+				for (var i = 0; i < room.current_game.played.length; i++)
+				{
+					if (room.current_game.played[i].player === player_remove_played)
+					{
+						index = i;
+						break;
+					}
+				}
+				// Remove played cards from list
+				if (index !== undefined)
+					room.current_game.played.splice(index, 1);
+				// Compile just the cards to send to clients for display
+				socket_data_object.played_cards = [];
+				for (var i = 0; i < room.current_game.played.length; i++)
+				{
+					var player_cards = room.current_game.played[i].cards;
+					var card_objects = [];
+					for (var j = 0; j < player_cards.length; j++)
+					{
+						card_objects[j] = player_cards[j].card_object;
+						card_objects[j].player_id = room.current_game.played[i].player_id;
+					}
+					socket_data_object.played_cards[i] = card_objects;
+				}
+			} else
+			{
+				if (all_played(room_id))
+				{
+					// Case 3
+					socket_data_object.played_cards = start_czar_turn(room_id, {return_cards: true});
+				}
+			}
+		}
+	}
+
+	if (room.player_list.length === 0 && room.waiting_list.length === 0)
 	{
 		close_room(room_id);
 	} else
@@ -248,8 +347,6 @@ var close_room = function(room_id)
 	room_name.release(room_id);
 	var lookup_id = room_id.toLowerCase();
 	delete room_lookup[lookup_id];
-
-	room_io.to(room_id).emit('close');
 };
 
 // Will throw an error if the room cannot be joined
@@ -264,14 +361,17 @@ var join_room = function(user_object, room_id)
 	if (user_rooms[user_object.id] !== undefined)
 		leave_room(user_object.id);
 
+	var waiting;
 	if (room.started)
 	{
 		room.waiting_list.push(user_object.id);
 		room.waiting_players[user_object.id] = user_object;
+		waiting = true;
 	} else
 	{
 		room.player_list.push(user_object.id);
 		room.players[user_object.id] = user_object;
+		waiting = false;
 	}
 	user_rooms[user_object.id] = room_id;
 
@@ -279,7 +379,7 @@ var join_room = function(user_object, room_id)
 		id       : user_object.id,
 		username : user_object.username,
 	};
-	room_io.to(room_id).emit('player_join', safe_user_object);
+	room_io.to(room_id).emit('player_join', {user: safe_user_object, waiting: waiting});
 };
 
 // Returns null if the lookup failed, otherwise returns the correct id from the
@@ -317,13 +417,13 @@ var connect_socket = function(user_id, socket)
 	{
 		try
 		{
+			user_object.socket.emit('dup_connection');
 			user_object.socket.leave(room_id);
 			user_object.socket.disconnect(true);
 		} catch (err)
 		{
 			// Just in case, catch errors from the socket not being valid anymore. If
 			// it is not valid, the socket is not in the room, so we are done
-			console.log(err);
 		}
 	}
 	user_object.socket = socket;
@@ -339,7 +439,7 @@ var handle_chat_msg = function(user, msg)
 {
 	var room_id = get_user_room(user.id);
 	var room = get_room_by_id(room_id);
-	var msg_object = {user_id: user.id, username: user.username, text: msg};
+	var msg_object = {type: 'chat', user_id: user.id, username: user.username, text: msg};
 
 	room.chat.push(msg_object);
 	room_io.to(room_id).emit('chat', msg_object);
@@ -392,7 +492,7 @@ var start_game = function(room_id)
 
 	room.started = true;
 	room.current_game = {};
-	room.current_game.played_cards = [];
+	room.current_game.played = [];
 	var player_count = room.player_list.length;
 
 	// Pick a Card Czar
@@ -401,16 +501,19 @@ var start_game = function(room_id)
 	room.current_game.black_card = room.deck.deal_black();
 	room.current_game.black_card.blank_count = card.blank_count(room.current_game.black_card.text);
 
-	// If the black card has three blanks, everyone starts with +2 cards
-	var initial_hand_size = room.hand_size;
-	if (card.blank_count(room.current_game.black_card.text) > 2)
-		initial_hand_size += 2;
+	// If the black card has three blanks, everyone but the czar starts with +2 cards
+	var extra_cards = 0;
+	if (card.blank_count(room.current_game.black_card.text) === 3)
+		extra_cards = 2;
 
 	for (var i = 0; i < player_count; i++)
 	{
 		var player = room.players[room.player_list[i]];
 		player.current_game = {};
-		player.current_game.hand = room.deck.deal_white(initial_hand_size);
+		if (player.id === room.current_game.czar)
+			player.current_game.hand = room.deck.deal_white(room.hand_size);
+		else
+			player.current_game.hand = room.deck.deal_white(room.hand_size + extra_cards);
 		player.current_game.score = 0;
 		player.current_game.redraws = room.redraws;
 		player.current_game.played_cards = null;
@@ -421,11 +524,15 @@ var start_game = function(room_id)
 
 	room_io.to(room_id).emit('start_game');
 };
-var start_user_game = function(user_id)
+// Starts the game that belongs to the host with the given user id
+var start_host_game = function(user_id)
 {
 	var room_id = get_user_room(user_id);
 	if (!room_id)
 		return;
+	var room = get_room_by_id(room_id);
+	if (user_id !== room.host)
+		return
 
 	return start_game(room_id);
 };
@@ -433,50 +540,9 @@ room_io.on('connection', function(socket)
 {
 	socket.on('start_game', function()
 	{
-		start_user_game(socket.request.user.id);
+		start_host_game(socket.request.user.id);
 	});
 });
-
-// Returns `true` if all active players in the room have played and `false` if they have not
-// Returns `null` if the room does not exist
-var all_played = function(room_id)
-{
-	var room = get_room_by_id(room_id);
-	if (room === undefined)
-		return null;
-
-	for (var i = 0; i < room.player_list.length; i++)
-	{
-		if (room.players[room.player_list[i]].id !== room.current_game.czar)
-		{
-			if (room.players[room.player_list[i]].current_game.played_cards === null ||
-				room.players[room.player_list[i]].current_game.played_cards.length < room.current_game.black_card.blank_count)
-			{
-				return false;
-			}
-		}
-	}
-	return true;
-};
-
-// Ends the players' turn to play white cards and starts the czar's turn to choose
-var start_czar_turn = function(room_id)
-{
-	var room = get_room_by_id(room_id);
-	if (room === undefined)
-		return;
-
-	// Compile and randomize played cards
-	// room.current_game.played_cards = [];
-	// var public_played_cards = [];
-	// for (var i = 0; i < room.player_list.length; i++)
-	// 	room.players[room.player_list[i]].played_cards;
-	// room.current_game.played_cards = random.shuffle(room.current_game.played_cards);
-
-	room.current_game.waiting_for_players = false;
-
-	//room_io.to(room_id).emit('all_cards_played', room.current_game.played_cards);
-};
 
 // Plays a card (or cards) if a card may be played now by that user. If the card's id does not match
 // its hand id, a signal will be emitted to the player to cause a card refresh
@@ -486,7 +552,11 @@ var play_card = function(card_list, user_id)
 	if (room_id === undefined)
 		return;
 	var room = get_room_by_id(room_id);
+	if (!room.started)
+		return;
 	var user_object = room.players[user_id];
+	if (!user_object)
+		return;
 	var played_card_list = [];
 
 	// A few checks before we 'play' the card to make sure the user can play a card now
@@ -511,7 +581,8 @@ var play_card = function(card_list, user_id)
 						id: user_object.current_game.hand[i].id,
 						text: user_object.current_game.hand[i].text,
 						color: user_object.current_game.hand[i].color,
-						deck_name: user_object.current_game.hand[i].deck_name
+						deck_name: user_object.current_game.hand[i].deck_name,
+						hand_id: i
 					};
 				}
 
@@ -548,6 +619,101 @@ room_io.on('connection', function(socket)
 	});
 });
 
+// Returns `true` if all active players in the room have played and `false` if they have not
+// Returns `null` if the room does not exist
+var all_played = function(room_id)
+{
+	var room = get_room_by_id(room_id);
+	if (room === undefined || !room.started)
+		return null;
+
+	for (var i = 0; i < room.player_list.length; i++)
+	{
+		if (room.players[room.player_list[i]].id !== room.current_game.czar)
+		{
+			if (room.players[room.player_list[i]].current_game.played_cards === null ||
+				room.players[room.player_list[i]].current_game.played_cards.length < room.current_game.black_card.blank_count)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+};
+
+// Ends the players' turn to play white cards and starts the czar's turn to choose
+// `options.return_cards` can be set to true to prevent the socket from sending the
+// cards via socket in favor of just returning them
+var start_czar_turn = function(room_id, options)
+{
+	if (!options)
+		options = {};
+	var room = get_room_by_id(room_id);
+	if (room === undefined || !room.started)
+		return;
+
+	// We are now waiting for the czar
+	room.current_game.waiting_for_players = false;
+
+	// Compile played cards. For each set of cards, we need to know who played them
+	// and what the cards are. For each card, we need enough card object to display it
+	// and the hand id so we can find it in the player's hand later
+	room.current_game.played = [];
+	for (var i = 0; i < room.player_list.length; i++) // For each player...
+	{
+		var player_object = room.players[room.player_list[i]];
+		if (player_object.id !== room.current_game.czar)
+		{
+			var played_object = {};
+			played_object.player = player_object.id;
+			played_object.cards = [];
+			var player_cards = player_object.current_game.played_cards;
+			for (var j = 0; j < player_cards.length; j++) // For each card played by this player...
+			{
+				var card_object = player_object.current_game.hand[player_cards[j].hand_id];
+				var bare_card = {
+					id        : card_object.id,
+					color     : card_object.color,
+					text      : card_object.text,
+					deck_name : card_object.deck_name
+				};
+				played_object.cards[j] = {
+					hand_id: player_cards[j].hand_id,
+					card_object: bare_card
+				};
+			}
+			room.current_game.played.push(played_object);
+		}
+	}
+
+	// Shuffle the player order of the played cards
+	room.current_game.played = random.shuffle(room.current_game.played);
+
+	// Compile just the cards to send to clients for display
+	// Also, add the player id to all cards
+	var played_cards = [];
+	for (var i = 0; i < room.current_game.played.length; i++)
+	{
+		// By assigning each set of cards a player id (rather than just using the index),
+		// we ensure that if a player leaves, shifting the indicies, that the player ids
+		// remain unchanged
+		room.current_game.played[i].player_id = i;
+		var player_cards = room.current_game.played[i].cards;
+		var card_objects = [];
+		for (var j = 0; j < player_cards.length; j++)
+		{
+			card_objects[j] = player_cards[j].card_object;
+			card_objects[j].player_id = room.current_game.played[i].player_id;
+		}
+		played_cards[i] = card_objects;
+	}
+
+	if (options.return_cards)
+		return played_cards
+	else
+		room_io.to(room_id).emit('all_cards_played', played_cards);
+};
+
 // Unplays all cards played by the current user
 var unplay_cards = function(user_id)
 {
@@ -555,6 +721,8 @@ var unplay_cards = function(user_id)
 	if (room_id === undefined)
 		return;
 	var room = get_room_by_id(room_id);
+	if (!room.started)
+		return;
 	var user_object = room.players[user_id];
 
 	// A few checks to make sure we *can* 'unplay' the card
@@ -573,6 +741,247 @@ room_io.on('connection', function(socket)
 		unplay_cards(socket.request.user.id);
 	});
 });
+
+// Returns the played object with the specified player id
+// If none can be found, null is returned
+var get_played_by_id = function(room_id, player_id)
+{
+	var room = get_room_by_id(room_id);
+	if (!room || !room.started)
+		return null;
+
+	// Check the played item with the same index as player id. This should be the right location unless
+	// a user left, causing the indicies to shift
+	if (room.current_game.played[player_id] && room.current_game.played[player_id].player_id === player_id)
+		return room.current_game.played[player_id];
+
+	// If we didn't find it there, seach the rest of the array
+	for (var i = 0; i < room.current_game.played.length; i++)
+	{
+		if (room.current_game.played[i].player_id === player_id)
+			return room.current_game.played[i];
+	}
+	return null;
+};
+
+// Chooses a winning card and either starts the next turn or ends the game
+var choose_czar_card = function(player_id, user_id)
+{
+	var room_id = get_user_room(user_id);
+	if (room_id === undefined)
+		return;
+	var room = get_room_by_id(room_id);
+	if (!room.started)
+		return;
+
+	if (user_id !== room.current_game.czar)
+		return;
+
+	var win_object = get_played_by_id(room_id, player_id);
+	if (!win_object)
+	{
+		// Looks like a card was chosen from a player that already left.
+		// Better inform the czar that they need to re-pick
+		if (room.players[user_id].socket)
+		{
+			// Compile just the cards to send to clients for display
+			var played_cards = [];
+			for (var i = 0; i < room.current_game.played.length; i++)
+			{
+				var player_cards = room.current_game.played[i].cards;
+				var card_objects = [];
+				for (var j = 0; j < player_cards.length; j++)
+					card_objects[j] = player_cards[j].card_object;
+				played_cards[i] = card_objects;
+			}
+			room.players[user_id].socket.emit('czar_card_desync', played_cards);
+		}
+		return;
+	}
+
+	var winner = win_object.player;
+	var winner_object = room.players[winner];
+	++winner_object.current_game.score;
+
+	// Build the notification string
+	var notify_string = '<i><b>' + html.encode(winner_object.username) + '</b> won: ';
+	var blank_index = 0;
+	var completed_text = room.current_game.black_card.text.replace(card.blank_regex, function(match, capture_group_1)
+	{
+		var replacement = capture_group_1 + '<u>' + win_object.cards[blank_index].card_object.text + '</u>';
+		++blank_index;
+		return replacement;
+	});
+	notify_string += '&quot;' + completed_text + '&quot;</i>';
+	var msg = {type: 'html_notification', text: notify_string};
+	room.chat.push(msg);
+
+	if (winner_object.current_game.score >= room.objective)
+		end_game(room_id, winner_object.id, msg);
+	else
+		next_turn(room_id, winner_object.id, msg);
+};
+room_io.on('connection', function(socket)
+{
+	socket.on('choose_czar_card', function(player_id)
+	{
+		if (typeof player_id === 'number')
+			choose_czar_card(player_id, socket.request.user.id);
+	});
+});
+
+var next_turn = function(room_id, winner, win_msg)
+{
+	var room = get_room_by_id(room_id);
+	if (room === undefined || !room.started)
+		return;
+
+	room.current_game.waiting_for_players = true;
+	room.current_game.played = [];
+
+	// How many cards to deal to replace the cards played
+	var replacement_cards;
+	if (room.current_game.black_card.blank_count === 1)
+		replacement_cards = 1;
+	else if (room.current_game.black_card.blank_count === 2)
+		replacement_cards = 2;
+	else if (room.current_game.black_card.blank_count === 3)
+		replacement_cards = 1;
+
+	// Pick a new black card
+	room.current_game.black_card = room.deck.deal_black();
+	room.current_game.black_card.blank_count = card.blank_count(room.current_game.black_card.text);
+	// And make the bare version to send via socket
+	var bare_black_card = {
+		id: room.current_game.black_card.id,
+		color: room.current_game.black_card.color,
+		text: room.current_game.black_card.text,
+		deck_name: room.current_game.black_card.deck_name
+	};
+
+	// If the new black card has three blanks, deal everyone an extra 2 cards
+	var extra_cards;
+	if (room.current_game.black_card.blank_count === 3)
+		extra_cards = 2;
+	else
+		extra_cards = 0;
+
+	// Pick a new card czar
+	var old_czar = room.current_game.czar;
+	var new_czar_index = (room.player_list.indexOf(old_czar) + 1) % room.player_list.length;
+	var new_czar = room.player_list[new_czar_index];
+	room.current_game.czar = new_czar;
+
+	// Data object to be sent to players
+	var data_object = {
+		winner: winner,
+		msg: win_msg,
+		black_card: bare_black_card,
+		czar: room.current_game.czar
+	};
+
+	for (var i = 0; i < room.player_list.length; i++)
+	{
+		var player_object = room.players[room.player_list[i]];
+		// Remove played cards from hand
+		if (player_object.id !== old_czar)
+		{
+			var index_list = [];
+			for (var j = 0; j < player_object.current_game.played_cards.length; j++)
+				index_list.push(player_object.current_game.played_cards[j].hand_id);
+			// Reverse sort cards so those with the highest index are removed first and do not change the
+			// indicies of lower cards
+			index_list.sort(function(a, b) {return (b - a);});
+			for (var j = 0; j < index_list.length; j++)
+				player_object.current_game.hand.splice(index_list[j], 1);
+		}
+		// Reset played data
+		player_object.current_game.played_cards = null;
+		// Deal players replacement cards and extras (if the next black card has three blanks)
+		var new_cards;
+		if (player_object.id === old_czar)
+			new_cards = room.deck.deal_white(extra_cards);
+		else if (player_object.id === new_czar)
+			new_cards = room.deck.deal_white(replacement_cards);
+		else
+			new_cards = room.deck.deal_white(replacement_cards + extra_cards);
+		// Make the bare cards for the socket data object
+		data_object.new_cards = [];
+		for (var j = 0; j < new_cards.length; j++)
+		{
+			data_object.new_cards.push({
+				id: new_cards[j].id,
+				color: new_cards[j].color,
+				text: new_cards[j].text,
+				deck_name: new_cards[j].deck_name,
+				hand_id: player_object.current_game.hand.length + j
+			});
+		}
+		player_object.current_game.hand = player_object.current_game.hand.concat(new_cards);
+		// Now notify the player of the turn transition and their new cards
+		if (player_object.socket)
+			player_object.socket.emit('choose_czar_card', data_object);
+
+		delete data_object.new_cards;
+	}
+
+	// Also notify waiting players
+	for (var i = 0; i < room.waiting_list.length; i++)
+	{
+		var player_object = room.waiting_players[room.waiting_list[i]];
+		if (player_object.socket)
+			player_object.socket.emit('choose_czar_card', data_object);
+	}
+};
+
+var end_game = function(room_id, winner, win_msg)
+{
+	var room = get_room_by_id(room_id);
+	if (room === undefined)
+		return;
+
+	clean_up_game(room_id);
+
+	room.last_winner = room.players[winner];
+
+	var data_object = {
+		winner: winner,
+		msg: win_msg
+	};
+	room_io.to(room_id).emit('end_game', data_object);
+};
+
+// Cleans up game data when the game is over to get ready for the next game
+// Also moves waiting players to active players
+var clean_up_game = function(room_id)
+{
+	var room = get_room_by_id(room_id);
+	if (room === undefined)
+		return;
+
+	// Reset room data, clearing all memory of the last game
+	delete room.current_game;
+	for (var i = 0; i < room.player_list.length; i++)
+	{
+		var player_object = room.players[room.player_list[i]];
+		delete player_object.current_game;
+	}
+	room.started = false;
+
+	// Add the waiting users in as active users
+	while (room.waiting_list.length > 0)
+	{
+		if (room.player_list.length >= room.max_players)
+			break;
+		// Remove player from waiting list
+		var player_id = room.waiting_list.shift();
+		var player_object = room.waiting_players[player_id];
+		delete room.waiting_players[player_id];
+		// Add to players
+		room.player_list.push(player_id);
+		room.players[player_id] = player_object;
+	}
+};
 
 module.exports = {
 	error                       : room_common.error,
@@ -605,9 +1014,13 @@ module.exports = {
 	active_player               : active_player,
 	kick_user                   : kick_user,
 	start_game                  : start_game,
-	start_user_game             : start_user_game,
+	start_host_game             : start_host_game,
 	all_played                  : all_played,
 	start_czar_turn             : start_czar_turn,
 	play_card                   : play_card,
-	unplay_cards                : unplay_cards
+	unplay_cards                : unplay_cards,
+	choose_czar_card            : choose_czar_card,
+	next_turn                   : next_turn,
+	end_game                    : end_game,
+	clean_up_game               : clean_up_game
 };

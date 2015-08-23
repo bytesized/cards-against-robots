@@ -30,13 +30,22 @@ $(document).ready(function()
 
 	chat.receive_message = function(msg)
 	{
-		chat.window.append('<p><b>' + html.encode(msg.username) + ':</b> ' + html.encode(msg.text) + '</p>');
+		if (msg.type === 'chat')
+			chat.window.append('<p><b>' + html.encode(msg.username) + ':</b> ' + html.encode(msg.text) + '</p>');
+		else if (msg.type === 'notification')
+			chat.window.append('<p><i>' + html.encode(msg.text) + '</i></p>');
+		else if (msg.type === 'html_notification')
+			chat.window.append('<p>' + msg.text + '</p>');
 
 		chat.window.scrollTop(chat.window[0].scrollHeight);
 	};
 	room_socket.on('chat', function(msg)
 	{
 		chat.receive_message(msg);
+	});
+	room_socket.on('choose_czar_card', function(data)
+	{
+		chat.receive_message(data.msg);
 	});
 	chat.window.scrollTop(chat.window[0].scrollHeight);
 });

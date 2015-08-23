@@ -84,6 +84,7 @@ module.exports = {
 	black                : card_common.black,
 	white                : card_common.white,
 	blank_count          : card_common.blank_count,
+	blank_regex          : card_common.blank_regex,
 	check_card_text      : card_common.check_card_text,
 	check_card           : card_common.check_card,
 	create               : create_card

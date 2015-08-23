@@ -1,5 +1,7 @@
 // Requires room_socket,
 //          common/card.js
+//          current_user (defined in layout.jade),
+//          game/player.js
 var game_turn = {};
 
 game_turn.turn_types = ['play_white', 'all_played', 'card_czar_waiting', 'card_czar_playing'];
@@ -89,4 +91,40 @@ $(document).ready(function()
 		game_turn.notify_turn();
 	};
 	game_turn.transition_fns['card_czar_playing'] = game_turn.transition_to_card_czar_playing;
+
+
+	room_socket.on('all_cards_played', function(played_cards)
+	{
+		if (current_user.id === player.czar)
+			game_turn.transition_fns['card_czar_playing']();
+		else
+			game_turn.transition_fns['all_played']();
+	});
+	room_socket.on('choose_czar_card', function(data)
+	{
+		if (current_user.id === data.czar)
+			game_turn.transition_fns['card_czar_waiting']();
+		else
+			game_turn.transition_fns['play_white']();
+	});
+
+	room_socket.on('player_leave', function(data)
+	{
+		if (data.played_cards !== null)
+		{
+			// If `data.played_cards` was defined, it must be the czar's turn (it may or may not have already been)
+			var czar;
+			if (data.new_czar === null)
+				czar = player.czar
+			else
+				czar = data.new_czar;
+			var new_turn_type;
+			if (current_user.id === czar)
+				new_turn_type = 'card_czar_playing';
+			else
+				new_turn_type = 'all_played';
+			if (new_turn_type !== game_turn.turn_type)
+				game_turn.transition_fns[new_turn_type]();
+		}
+	});
 });

@@ -15,7 +15,8 @@ $(document).ready(function()
 		if (count < 3)
 		{
 			var needed = 3 - count;
-			start_game.button.addClass('disabled');
+			if (!start_game.button.is('.disabled'))
+				start_game.button.addClass('disabled');
 			start_game.button.text(needed + ' more players needed');
 		} else
 		{

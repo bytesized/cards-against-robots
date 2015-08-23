@@ -232,7 +232,7 @@ if ((typeof module) === 'undefined')
 	// Sets a card's data and renders it
 	jQuery.fn.set_card = function(card_object)
 	{
-		this.data(card.card_data_key) = card_object;
+		this.data(card.card_data_key, card_object);
 		this.render_card();
 	};
 

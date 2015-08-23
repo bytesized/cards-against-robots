@@ -49,6 +49,11 @@ transform()
 	-webkit-transform : arguments
 	transform         : arguments
 
+border_radius()
+	-moz-border-radius    : arguments
+	-webkit-border-radius : arguments
+	border-radius         : arguments
+
 //////////////////////////////////////
 /////////////// Styles ///////////////
 //////////////////////////////////////
@@ -85,11 +90,12 @@ transform()
 	margin-right: 5px
 	cursor: default
 
-// Sets position to absolute and centers the element horizontally
-.hcentered_absolute
+// Sets position to absolute and centers the element horizontally and vertically
+.centered_absolute
 	position: absolute
 	left: 50%
-	transform(translate(-50%, 0))
+	top: 50%
+	transform(translate(-50%, -50%))
 
 // Chat/Score Window:
 // We want it to float to the right for large screens and take up the whole
@@ -126,6 +132,17 @@ transform()
 	#game_floater
 		width: auto !important
 		height: 300px !important
+
+// For card panels, we will steal the margin from the cards and use it for the card panel's
+// border, padding, and margin
+.card_panel
+	border: 1px solid #C0C0C0
+	border_radius(4px)
+	padding: 1px
+	margin-top: (card_margin - 2)
+	margin-bottom: (card_margin - 2)
+.card_panel .card
+	margin: 0px;
 
 /////////////////////////////////////////
 /////////////// Bootstrap ///////////////
@@ -165,4 +182,79 @@ transform()
 @media (min-width: 1200px)
 	.col-lg-5ths
 		width: 20%;
+		float: left;
+
+.col-xs-2_5ths, .col-sm-2_5ths, .col-md-2_5ths, .col-lg-2_5ths
+	position: relative
+	min-height: 1px
+	padding-right: 10px
+	padding-left: 10px
+
+.col-xs-2_5ths
+	width: 40%
+	float: left
+
+@media (min-width: 768px)
+	.col-sm-2_5ths
+		width: 40%
+		float: left
+
+@media (min-width: 992px)
+	.col-md-2_5ths
+		width: 40%
+		float: left
+
+@media (min-width: 1200px)
+	.col-lg-2_5ths
+		width: 40%;
+		float: left;
+
+.col-xs-3_5ths, .col-sm-3_5ths, .col-md-3_5ths, .col-lg-3_5ths
+	position: relative
+	min-height: 1px
+	padding-right: 10px
+	padding-left: 10px
+
+.col-xs-3_5ths
+	width: 60%
+	float: left
+
+@media (min-width: 768px)
+	.col-sm-3_5ths
+		width: 60%
+		float: left
+
+@media (min-width: 992px)
+	.col-md-3_5ths
+		width: 60%
+		float: left
+
+@media (min-width: 1200px)
+	.col-lg-3_5ths
+		width: 60%;
+		float: left;
+
+.col-xs-4_5ths, .col-sm-4_5ths, .col-md-4_5ths, .col-lg-4_5ths
+	position: relative
+	min-height: 1px
+	padding-right: 10px
+	padding-left: 10px
+
+.col-xs-4_5ths
+	width: 80%
+	float: left
+
+@media (min-width: 768px)
+	.col-sm-4_5ths
+		width: 80%
+		float: left
+
+@media (min-width: 992px)
+	.col-md-4_5ths
+		width: 80%
+		float: left
+
+@media (min-width: 1200px)
+	.col-lg-4_5ths
+		width: 80%;
 		float: left;

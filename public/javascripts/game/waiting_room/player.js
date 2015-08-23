@@ -48,7 +48,7 @@ $(document).ready(function()
 		elements.tooltip('destroy');
 	};
 
-	player.add_player = function(new_player)
+	player.add_player = function(new_player, player_waiting)
 	{
 		var player_slot = player.list.find('.' + player.empty_slot_class).first();
 
@@ -56,16 +56,21 @@ $(document).ready(function()
 		player_slot.removeClass(player.empty_slot_class);
 		button.find('.glyphicon').attr('class', 'glyphicon ' + player.kick_glyphicon);
 		player_slot.data(player.user_id_data_key, new_player.id);
-		player_slot.find('.' + player.username_class).html('<b>' + html.encode(new_player.username) + '</b>');
+		var username_html;
+		if (player_waiting)
+			username_html = html.encode(new_player.username);
+		else
+			username_html = '<b>' + html.encode(new_player.username) + '</b>';
+		player_slot.find('.' + player.username_class).html(username_html);
 		button.removeClass(player.dummy_button_class);
 		button.on('click.player', player.kick);
 		player.add_tooltips(player_slot.find('.' + player.kick_button_class));
 
 		player.notify_count_change();
 	};
-	room_socket.on('player_join', function(new_player)
+	room_socket.on('player_join', function(data)
 	{
-		player.add_player(new_player);
+		player.add_player(data.user, data.waiting);
 	});
 
 	// `data` object passed in through the socket

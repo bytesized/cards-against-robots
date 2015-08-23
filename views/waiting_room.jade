@@ -2,6 +2,8 @@ extends layout
 
 block headers
 	title Waiting Room - #{config.site_name}
+	link(rel='stylesheet', href='https://code.jquery.com/ui/1.11.4/themes/cupertino/jquery-ui.css')
+	link(rel='stylesheet', href='/stylesheets/card.css')
 
 block scripts
 	script(src='/javascripts/html.js')
@@ -15,6 +17,9 @@ block scripts
 	script(src='/javascripts/game/chat.js')
 	script(src='/javascripts/game/waiting_room/player.js')
 	script(src='/javascripts/game/waiting_room/start_game.js')
+	script(src='/javascripts/game/end_game.js')
+	script(src='/javascripts/notification_dialog.js')
+	script(src='/javascripts/dup_connection.js')
 
 
 block content
@@ -27,6 +32,9 @@ block content
 					+flash_messages
 				ul.list-group
 					+validation_errors
+				if room.last_winner
+					ul.list-group
+						li.list-group-item.list-group-item-info #{room.last_winner.username} has won the game!
 		.panel.panel-default
 			.panel-body
 				.row
@@ -66,7 +74,7 @@ block content
 						.list-group-item.player_list_item(data-user_id=player_id)
 							.flex_container
 								.flex_noexpand(style=(user.id === room.host ? '' : 'display: none;'))
-									if player_id === user.id
+									if player_id === room.host
 										span.kick_player.btn.btn-default.dummy_btn(style='margin-right: 7px;')
 											span.glyphicon.glyphicon-star(style='margin-left: 2px; margin-right: 2px;')
 									else
@@ -75,7 +83,19 @@ block content
 								.flex_expand.hard_wrap(style='margin-top: 7px; margin-bottom: 7px;')
 									span.username_text
 										b #{room.players[player_id].username}
-					- blank_rows = room.max_players - room.player_list.length;
+					each player_id in room.waiting_list
+						.list-group-item.player_list_item(data-user_id=player_id)
+							.flex_container
+								.flex_noexpand(style=(user.id === room.host ? '' : 'display: none;'))
+									if player_id === room.host
+										span.kick_player.btn.btn-default.dummy_btn(style='margin-right: 7px;')
+											span.glyphicon.glyphicon-star(style='margin-left: 2px; margin-right: 2px;')
+									else
+										span.kick_player.btn.btn-default(style='margin-right: 7px;')
+											span.glyphicon.glyphicon-remove(style='margin-left: 2px; margin-right: 2px;')
+								.flex_expand.hard_wrap(style='margin-top: 7px; margin-bottom: 7px;')
+									span.username_text #{room.waiting_players[player_id].username}
+					- blank_rows = room.max_players - room.player_list.length - room.waiting_list.length;
 					while blank_rows > 0
 						.list-group-item.player_list_item.empty_player_slot
 							.flex_container
@@ -92,9 +112,15 @@ block content
 						.flex_vcontainer(style='height: 100%;')
 							#chat-window.flex_expand.hard_wrap(style='width: 100%; overflow-y: scroll;')
 								each msg in room.chat
-									p
-										b #{msg.username}: 
-										| #{msg.text}
+									if msg.type === 'chat'
+										p
+											b #{msg.username}: 
+											| #{msg.text}
+									if msg.type === 'notification'
+										p
+											i #{msg.text}
+									if msg.type === 'html_notification'
+										p !{msg.text}
 							.flex_noexpand(role='form', style='width: 100%;')
 								.input-group
 									input#chat-input.form-control(type='text', autocomplete="off")
