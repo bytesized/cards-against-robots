@@ -16,11 +16,16 @@ block scripts
 		| var room_socket = io(window.location.origin + '/room');
 	script(src='/javascripts/game/chat.js')
 	script(src='/javascripts/game/waiting_room/player.js')
+	script
+		| player.init(!{JSON.stringify(user.id === room.host)});
 	script(src='/javascripts/game/waiting_room/start_game.js')
 	script(src='/javascripts/game/end_game.js')
 	script(src='/javascripts/notification_dialog.js')
 	script(src='/javascripts/dup_connection.js')
-
+	script(src='/javascripts/yes_no_dialog.js')
+	script(src='/javascripts/game/waiting_room/timeout.js')
+	script
+		| timeout.init(!{JSON.stringify(room.timer_expiration - Date.now())});
 
 block content
 	.container

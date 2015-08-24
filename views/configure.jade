@@ -21,11 +21,12 @@ block content
 	- if (typeof form_data.mysql.connection_limit === 'undefined')  form_data.mysql.connection_limit = '100';
 	- if (typeof form_data.invitations_required === 'undefined')    form_data.invitations_required   = true;
 	- if (!form_data.field_sizes) form_data.field_sizes = {};
-	- if (typeof form_data.field_sizes.token === 'undefined')       form_data.field_sizes.token           = '50';
-	- if (typeof form_data.field_sizes.username === 'undefined')    form_data.field_sizes.username        = '63';
-	- if (typeof form_data.field_sizes.deck_name === 'undefined')   form_data.field_sizes.deck_name       = '63';
-	- if (typeof form_data.field_sizes.card_text === 'undefined')   form_data.field_sizes.card_text       = '500';
-	- if (typeof form_data.field_sizes.room_name === 'undefined')   form_data.field_sizes.room_name       = '63';
+	- if (typeof form_data.field_sizes.token === 'undefined')       form_data.field_sizes.token      = '50';
+	- if (typeof form_data.field_sizes.username === 'undefined')    form_data.field_sizes.username   = '63';
+	- if (typeof form_data.field_sizes.deck_name === 'undefined')   form_data.field_sizes.deck_name  = '63';
+	- if (typeof form_data.field_sizes.card_text === 'undefined')   form_data.field_sizes.card_text  = '500';
+	- if (typeof form_data.field_sizes.room_name === 'undefined')   form_data.field_sizes.room_name  = '63';
+	- if (typeof form_data.player_timeout === 'undefined')          form_data.player_timeout         = '10';
 	- if (typeof form_data.super_user_name === 'undefined')         form_data.super_user_name        = '';
 	//- Omit super user password
 
@@ -143,6 +144,16 @@ block content
 			.col-xs-10
 				input(type='text', class='form-control', id='room_name_length_input', name='room_name_length', placeholder='Length', value=form_data.field_sizes.room_name, readonly=inputs_disabled)
 				span(class='help-block') Maximum number of characters allowed in room names.
+		.form-group(class=input_status.room_name_length)
+			label(for='player_timeout_input', class='control-label col-xs-2') Player Timeout
+			.col-xs-10
+				.input-group
+					input(type='text', class='form-control', id='player_timeout_input', name='player_timeout', placeholder='Length', value=form_data.field_sizes.room_name, readonly=inputs_disabled)
+					span(class='input-group-addon') minutes
+				span(class='help-block')
+					| This timeout controls two things. If a user in an active game has been idle for this long, they are kicked out. Additionally,
+					| if a game stays in the waiting room for this long, the users are disconnected and the game is closed. In this case, the game
+					| host will be given the option to reset this timer in the event that the players are waiting for another player.
 		.form-group(class=input_status.super_user_name)
 			label(for='super_user_name_input', class='control-label col-xs-2') Username
 			.col-xs-10

@@ -106,6 +106,93 @@ var sanitize_decks = function(dirty_decks)
 	return clean_decks;
 };
 
+// Sets the timer for the room using the time stored in `config.player_timeout`
+// If the room has not started yet, the players will be notified that the timer has been reset
+var reset_timer = function(room_id)
+{
+	var room = get_room_by_id(room_id);
+	if (!room)
+		return;
+
+	if (room.timer)
+		clearTimeout(room.timer);
+	room.timer_expiration = Date.now() + config.player_timeout;
+	room.timer = setTimeout(timeout_expired, config.player_timeout, room_id);
+
+	if (!room.started)
+		room_io.to(room_id).emit('reset_timer');
+};
+room_io.on('connection', function(socket)
+{
+	socket.on('reset_timer', function(msg)
+	{
+		var user_id = socket.request.user.id;
+		var room_id = get_user_room(user_id);
+		if (room_id === undefined)
+			return;
+		var room = get_room_by_id(room_id);
+
+		if (!room.started && room.host === user_id)
+			reset_timer(room_id);
+	});
+});
+
+// Called when the timeout expires for a room. If the game has started, any players
+// that are being waited for are kicked. If the game is not started, all players are
+// kicked and the room is closed.
+var timeout_expired = function(room_id)
+{
+	var room = get_room_by_id(room_id);
+	if (!room)
+		return;
+
+	if (room.started)
+	{
+		// Find out who the room is waiting on and kick them!
+		if (room.current_game.waiting_for_players)
+		{
+			// Kick all players who haven't played
+			// First send all signals, then kick all players
+			var players_to_kick = [];
+			for (var i = 0; i < room.player_list.length; i++)
+			{
+				var user_object = room.players[room.player_list[i]];
+				if (user_object.id !== room.current_game.czar)
+				{
+					if (user_object.current_game.played_cards === null ||
+						user_object.current_game.played_cards.length < room.current_game.black_card.blank_count)
+					{
+						// Kick the player
+						if (user_object.socket)
+							user_object.socket.emit('timeout_expired');
+						players_to_kick.push(user_object.id);
+					}
+				}
+			}
+			for (var i = 0; i < players_to_kick.length; i++)
+			{
+				var user_object = room.players[players_to_kick[i]];
+				leave_room(user_object.id);
+			}
+		} else
+		{
+			// Kick the czar
+			var user_id = room.current_game.czar;
+			var user_object = room.players[user_id];
+			if (user_object.socket)
+				user_object.socket.emit('timeout_expired');
+			leave_room(user_object.id);
+		}
+
+		reset_timer(room_id);
+	} else
+	{
+		// If the room has not started and the timer expires, close the room.
+		room_io.to(room_id).emit('timeout_expired');
+		close_room(room_id);
+	}
+};
+
 // Attempts to create a room. Returns a Promise. The promise may be rejected
 // with a room error if, for example, there are no cards of either color in
 // the selected decks
@@ -146,6 +233,8 @@ var create_room = function(room_object)
 			room_lookup[lookup_id] = [];
 		room_lookup[lookup_id].push(room_object.id);
 
+		reset_timer(room_object.id);
+
 		return room_object;
 	});
 };
@@ -182,7 +271,8 @@ var get_player = function(player_id, room_id, active_only)
 };
 
 // Causes the user specified to leave the room
-// Does not send a signal to the user who is leaving
+// Does not send a signal to the user who is leaving (as their socket will have been
+// removed from the room)
 var leave_room = function(user_id)
 {
 	var room_id = user_rooms[user_id];
@@ -199,6 +289,8 @@ var leave_room = function(user_id)
 	socket_data_object.new_czar = null;
 	socket_data_object.new_czar_username = null;
 	socket_data_object.played_cards = null;
+	socket_data_object.new_host = null;
+
 
 	var active_player_index;
 	if(room.players[user_id])
@@ -350,6 +442,8 @@ var close_room = function(room_id)
 };
 
 // Will throw an error if the room cannot be joined
+// Does not reset the timer simply because the timer is reset whenever the waiting
+// room is loaded (which already happens when the room is joined)
 var join_room = function(user_object, room_id)
 {
 	if (!rooms[room_id])
@@ -441,6 +535,7 @@ var handle_chat_msg = function(user, msg)
 	var room = get_room_by_id(room_id);
 	var msg_object = {type: 'chat', user_id: user.id, username: user.username, text: msg};
 
+	reset_timer(room_id);
 	room.chat.push(msg_object);
 	room_io.to(room_id).emit('chat', msg_object);
 };
@@ -522,6 +617,8 @@ var start_game = function(room_id)
 	// We are always either waiting for players or waiting for the card czar
 	room.current_game.waiting_for_players = true;
 
+	reset_timer(room_id);
+
 	room_io.to(room_id).emit('start_game');
 };
 // Starts the game that belongs to the host with the given user id
@@ -588,6 +685,7 @@ var play_card = function(card_list, user_id)
 
 				user_object.socket.emit('hand_desync', hand);
 			}
+			reset_timer(room_id);
 			return;
 		}
 
@@ -600,9 +698,14 @@ var play_card = function(card_list, user_id)
 	user_object.current_game.played_cards = played_card_list;
 
 	if (all_played(room_id))
+	{
+		// Don't bother resetting the timer here, it will be reset when the czar's turn starts
 		start_czar_turn(room_id);
-	else
+	} else
+	{
+		reset_timer(room_id);
 		room_io.to(room_id).emit('play_card', user_id);
+	}
 };
 room_io.on('connection', function(socket)
 {
@@ -708,6 +811,8 @@ var start_czar_turn = function(room_id, options)
 		played_cards[i] = card_objects;
 	}
 
+	reset_timer(room_id);
+
 	if (options.return_cards)
 		return played_cards
 	else
@@ -732,6 +837,7 @@ var unplay_cards = function(user_id)
 		return;
 
 	user_object.current_game.played_cards = null;
+	reset_timer(room_id);
 	room_io.to(room_id).emit('unplay_card', user_id);
 };
 room_io.on('connection', function(socket)
@@ -796,6 +902,7 @@ var choose_czar_card = function(player_id, user_id)
 			}
 			room.players[user_id].socket.emit('czar_card_desync', played_cards);
 		}
+		reset_timer(room_id);
 		return;
 	}
 
@@ -816,6 +923,7 @@ var choose_czar_card = function(player_id, user_id)
 	var msg = {type: 'html_notification', text: notify_string};
 	room.chat.push(msg);
 
+	// Don't bother resetting the timer here, both of the following functions do it anyways
 	if (winner_object.current_game.score >= room.objective)
 		end_game(room_id, winner_object.id, msg);
 	else
@@ -925,6 +1033,8 @@ var next_turn = function(room_id, winner, win_msg)
 		delete data_object.new_cards;
 	}
 
+	reset_timer(room_id);
+
 	// Also notify waiting players
 	for (var i = 0; i < room.waiting_list.length; i++)
 	{
@@ -953,6 +1063,7 @@ var end_game = function(room_id, winner, win_msg)
 
 // Cleans up game data when the game is over to get ready for the next game
 // Also moves waiting players to active players
+// This function resets the timer
 var clean_up_game = function(room_id)
 {
 	var room = get_room_by_id(room_id);
@@ -981,6 +1092,8 @@ var clean_up_game = function(room_id)
 		room.player_list.push(player_id);
 		room.players[player_id] = player_object;
 	}
+
+	reset_timer(room_id);
 };
 
 module.exports = {
@@ -1002,6 +1115,8 @@ module.exports = {
 	validate_decks_field        : validate_decks_field,
 	check_room                  : room_common.check_room,
 	sanitize_decks              : sanitize_decks,
+	reset_timer                 : reset_timer,
+	timeout_expired             : timeout_expired,
 	room_ids                    : room_ids,
 	create                      : create_room,
 	get_by_id                   : get_room_by_id,

@@ -10,12 +10,13 @@ var router = express.Router();
 /* GET room page. */
 router.get('/:id', ensure_user.authenticated, function(req, res, next)
 {
-	var room_object = room.get_by_id(req.params.id);
+	var room_id = req.params.id
+	var room_object = room.get_by_id(room_id);
 	if (!room_object)
 	{
 		// If the room object could not be found, attempt to lookup the ID given
 		// (it may be a case issue: 'roomname' instead of 'RoomName')
-		var resolved = room.lookup(req.params.id);
+		var resolved = room.lookup(room_id);
 		if (resolved === null)
 			return next();
 		else
@@ -48,10 +49,17 @@ router.get('/:id', ensure_user.authenticated, function(req, res, next)
 		}
 
 		// User is now registered as a room member
-		if (room_object.started && room.active_player(req.user.id, room_object.id))
+		var active_player = room.active_player(req.user.id, room_object.id)
+		if (room_object.started && active_player)
+		{
 			res.render('game_room', {room: room_object});
-		else
+		} else
+		{
+			// If someone loads the waiting room page, the game must not be idle
+			if (active_player)
+				room.reset_timer(room_object.id);
 			res.render('waiting_room', {room: room_object, card: {white: card.white, black: card.black}});
+		}
 	}
 });
 

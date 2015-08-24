@@ -42,6 +42,7 @@ block scripts
 		| game_turn.init(!{JSON.stringify(current_turn)});
 	script(src='/javascripts/game/end_game.js')
 	script(src='/javascripts/dup_connection.js')
+	script(src='/javascripts/game/timeout.js')
 
 block content
 	//- This doesn't seem to carry across blocks, so I will do it in both blocks.

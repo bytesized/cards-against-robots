@@ -154,6 +154,14 @@ var config_fields =
 		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
 	},
 	{
+		name: 'player_timeout',
+		form_name: 'player_timeout',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Player timeout must be a positive integer').custom_int({positive: true}); },
+		// When sanitizing this for storage in config, convert minutes to milliseconds
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10) * 60 * 1000; }
+	},
+	{
 		name: 'super_user_name',
 		form_name: 'super_user_name',
 		validate: function(req, name)
@@ -225,24 +233,28 @@ router.post('/', function(req, res, next)
 		var new_user = new user.user_object;
 		new_user.username = req.body.super_user_name;
 		new_user.password = req.body.super_user_password
-		return user.create_primary_superuser(new_user);
-	}).then(function()
-	{
-		// No MYSQL errors!
-		on_configuration_complete(res);
-	}).catch(function(err)
-	{
-		// Got an error sent from the user module
-		if (err instanceof user.error && err.code === 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
+		return user.create_primary_superuser(new_user).then(function()
 		{
-			// If the only error is that the primary super user already exists, the configuration is complete,
-			// just warn the user that no new user was created
-			on_configuration_complete(res, ["Primary Superuser already exists and so was not created"]);
-		} else {
-			var errors = interpret_user_error(err);
+			// No errors!
+			on_configuration_complete(res);
+		}).catch(function(err)
+		{
+			// Got an error sent from the user module
+			if (err instanceof user.error && err.code === 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
+			{
+				// If the only error is that the primary super user already exists, the configuration is complete,
+				// just warn the user that no new user was created
+				on_configuration_complete(res, ["Primary Superuser already exists and so was not created"]);
+			} else {
+				var errors = interpret_user_error(err);
 
-			configuration_error(res, errors);
-		}
+				configuration_error(res, errors);
+			}
+		});
+	}, function(err) // Catch mysql errors
+	{
+		var errors = interpret_mysql_error(err);
+		configuration_error(res, errors);
 	});
 });
 

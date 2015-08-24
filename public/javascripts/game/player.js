@@ -168,5 +168,9 @@ $(document).ready(function()
 			player.played_count.text(player.get_played_count());
 			player.must_play_count.text(player.list.length - 1);
 		}
+		if (data.new_host !== null)
+		{
+			player.host = data.new_host;
+		}
 	});
 });

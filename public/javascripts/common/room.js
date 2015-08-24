@@ -42,6 +42,8 @@ room.room_object = (function() {
 		this.started              = false;
 		this.chat                 = [];
 		this.current_game         = {};
+		this.timer                = null;
+		this.timer_expiration     = null;
 	};
 	return room_object;
 })();

@@ -141,6 +141,18 @@ router.get('/kicked', ensure_user.authenticated, function(req, res, next)
 	res.redirect('/game/');
 });
 
+router.get('/game_timeout_expired', ensure_user.authenticated, function(req, res, next)
+{
+	req.flash('error', 'Your game has been closed due to inactivity');
+	res.redirect('/game/');
+});
+
+router.get('/user_timeout_expired', ensure_user.authenticated, function(req, res, next)
+{
+	req.flash('error', 'You have been ejected from the game due to inactivity');
+	res.redirect('/game/');
+});
+
 router.get('/list', ensure_user.authenticated, function(req, res, next)
 {
 	res.render('game_list', {room: room});

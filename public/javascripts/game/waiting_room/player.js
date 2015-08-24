@@ -18,6 +18,13 @@ player.open_slot_html = '<i>Open Slot</i>';
 
 player.count_change_fns = [];
 
+player.is_host = false;
+
+player.init = function(is_host)
+{
+	player.is_host = is_host;
+};
+
 $(document).ready(function()
 {
 	player.list = $(player.list_seletor);
@@ -132,6 +139,7 @@ $(document).ready(function()
 
 	player.become_host = function()
 	{
+		player.is_host = true;
 		player.list.find('.' + player.kick_button_class).closest(player.kick_button_container_selector).show();
 		player.start_button.show();
 	};
