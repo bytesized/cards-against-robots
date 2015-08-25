@@ -279,6 +279,11 @@ var leave_room = function(user_id)
 	if (room_id === undefined)
 		return;
 	var room = rooms[room_id];
+	if (room === undefined)
+	{
+		delete user_rooms[user_id];
+		return;
+	}
 
 	// The data object that will be sent to the clients to notify that a player has left
 	var socket_data_object = {};
