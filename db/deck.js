@@ -152,32 +152,41 @@ var add_card_to_deck = function(card_id, deck_id, quantity)
 {
 	return database.with_transaction(function(connection)
 	{
-		return connection.queryAsync('INSERT INTO deck_descriptions (deck, card, quantity) VALUES (?, ?, ?);',
-			[deck_id, card_id, quantity]).spread(function(results, fields)
-		{
-			return Promise.join(
-				connection.queryAsync('UPDATE cards SET deck_count = deck_count+1 WHERE id = ? ;', [card_id]),
-				connection.queryAsync('UPDATE deck_list SET card_count = card_count+1 WHERE id = ? ;', [deck_id]),
-				function(card_results, deck_results)
-				{
-					// Nothing to do. Database has been updated, transaction will automatically rollback if either
-					// query fails
-					return;
-				}
-			);
-		}, function(err)
-		{
-			// Catch duplicate entry error. If we get one, that means this card is already in this deck.
-			// Do not update the card's deck count or the deck's card count, just update the quantity
-			if (err.code === 'ER_DUP_ENTRY')
+		return add_card_to_deck_no_transaction(card_id, deck_id, quantity, connection);
+	});
+};
+
+// Returns a Promise. This function is identical to `add_card_to_deck`, but does NOT use a transaction
+// a transaction MUST be used with this function. This function exists for use ONLY if it is being called
+// from a function that is providing a transaction and wants this functionality as part of a larger
+// transaction
+var add_card_to_deck_no_transaction = function(card_id, deck_id, quantity, connection)
+{
+	return connection.queryAsync('INSERT INTO deck_descriptions (deck, card, quantity) VALUES (?, ?, ?);',
+		[deck_id, card_id, quantity]).spread(function(results, fields)
+	{
+		return Promise.join(
+			connection.queryAsync('UPDATE cards SET deck_count = deck_count+1 WHERE id = ? ;', [card_id]),
+			connection.queryAsync('UPDATE deck_list SET card_count = card_count+1 WHERE id = ? ;', [deck_id]),
+			function(card_results, deck_results)
 			{
-				return connection.queryAsync('UPDATE deck_descriptions SET quantity = ? WHERE card = ? AND deck = ? ;',
-					[quantity, card_id, deck_id]);
-			} else
-			{
-				throw err;
+				// Nothing to do. Database has been updated, transaction will automatically rollback if either
+				// query fails
+				return;
 			}
-		});
+		);
+	}, function(err)
+	{
+		// Catch duplicate entry error. If we get one, that means this card is already in this deck.
+		// Do not update the card's deck count or the deck's card count, just update the quantity
+		if (err.code === 'ER_DUP_ENTRY')
+		{
+			return connection.queryAsync('UPDATE deck_descriptions SET quantity = ? WHERE card = ? AND deck = ? ;',
+				[quantity, card_id, deck_id]);
+		} else
+		{
+			throw err;
+		}
 	});
 };
 
@@ -243,16 +252,17 @@ var compile_decks = function(deck_ids)
 };
 
 module.exports = {
-	init_db               : init_db,
-	error                 : deck_common.error,
-	deck_object           : deck_common.deck_object,
-	check_deck_name       : deck_common.check_deck_name,
-	check_deck            : deck_common.check_deck,
-	get_all_by_user_id    : get_decks_by_user_id,
-	create                : create_deck,
-	get_cards             : get_cards,
-	get_by_id             : get_deck_by_id,
-	ensure_user_ownership : ensure_user_ownership,
-	add_card              : add_card_to_deck,
-	compile_decks         : compile_decks
+	init_db                 : init_db,
+	error                   : deck_common.error,
+	deck_object             : deck_common.deck_object,
+	check_deck_name         : deck_common.check_deck_name,
+	check_deck              : deck_common.check_deck,
+	get_all_by_user_id      : get_decks_by_user_id,
+	create                  : create_deck,
+	get_cards               : get_cards,
+	get_by_id               : get_deck_by_id,
+	ensure_user_ownership   : ensure_user_ownership,
+	add_card                : add_card_to_deck,
+	add_card_no_transaction : add_card_to_deck_no_transaction,
+	compile_decks           : compile_decks
 };
