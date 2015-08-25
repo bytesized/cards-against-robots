@@ -6,12 +6,7 @@ var html = {};
 
 html.encode = function(value)
 {
-	return $('<div/>').text(value).html();
-};
-
-html.decode = function(value)
-{
-	return $('<div/>').html(value).text();
+	return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 };
 
 // Given an html string, removes elements that match removal_selector from that

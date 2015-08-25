@@ -3,7 +3,8 @@
 //          current_user (defined in layout.jade),
 //          notification_dialog.js,
 //          game/game_turn.js,
-//          game/player.js
+//          game/player.js,
+//          html.js
 var game_card = {};
 game_card.hand_card_class = 'game_card-hand_card';
 game_card.hand_card_selector = '.' + game_card.hand_card_class;
@@ -180,7 +181,7 @@ $(document).ready(function()
 		{
 			$(game_card.hand_container_selector).append(
 				'<div class=\'' + game_card.card_parent_classes + '\' ' + hidden_string + '>' +
-					'<div class=\'card ' + game_card.hand_card_class + ' ' + game_card.clickable_class + '\' data-' + card.card_data_key + '=\'' + JSON.stringify(hand[i]) +'\'>' +
+					'<div class=\'card ' + game_card.hand_card_class + ' ' + game_card.clickable_class + '\' data-' + card.card_data_key + '="' + html.encode(JSON.stringify(hand[i])) +'">' +
 					'</div>' + 
 				'</div>'
 				);
@@ -223,17 +224,17 @@ $(document).ready(function()
 		{
 			var player_cards = played_cards[i];
 			// Add outer container
-			var html = '<div class=\'' + game_card.czar_card_container_classes.outer[player_cards.length] + ' ' + game_card.czar_card_group_class + '\'>';
+			var html_str = '<div class=\'' + game_card.czar_card_container_classes.outer[player_cards.length] + ' ' + game_card.czar_card_group_class + '\'>';
 			var closing_tags = '</div>';
 
 			// Add panel
 			var div_attrs = '';
 			if (player_cards.length > 1)
 				div_attrs = 'class=\'card_panel\'';
-			html += '<div ' + div_attrs + '>'
+			html_str += '<div ' + div_attrs + '>'
 			closing_tags = '</div>' + closing_tags;
 			// row...
-			html += '<div class=\'row\'>'
+			html_str += '<div class=\'row\'>'
 			closing_tags = '</div>' + closing_tags;
 
 			for (var j = 0; j < player_cards.length; j++)
@@ -248,14 +249,14 @@ $(document).ready(function()
 				var card_classes = 'card ' + game_card.czar_card_class
 				if (is_czar)
 					card_classes += ' ' + game_card.clickable_class;
-				card_html += '<div class=\'' + card_classes + '\' data-' + card.card_data_key + '=\'' + JSON.stringify(card_object) + '\'>';
+				card_html += '<div class=\'' + card_classes + '\' data-' + card.card_data_key + '="' + html.encode(JSON.stringify(card_object)) + '">';
 				card_closing_tags = '</div>' + card_closing_tags;
 
-				html += card_html;
-				html += card_closing_tags;
+				html_str += card_html;
+				html_str += card_closing_tags;
 			}
-			html += closing_tags;
-			$(game_card.hand_container_selector).append(html);
+			html_str += closing_tags;
+			$(game_card.hand_container_selector).append(html_str);
 		}
 		$(game_card.czar_card_selector).each(function(index)
 		{
@@ -358,7 +359,8 @@ $(document).ready(function()
 		{
 			$(game_card.hand_container_selector).append(
 				'<div class=\'' + game_card.card_parent_classes + '\' ' + hidden_string + '>' +
-					'<div class=\'card ' + game_card.hand_card_class + ' ' + game_card.clickable_class + '\' data-' + card.card_data_key + '=\'' + JSON.stringify(new_white_cards[i]) +'\'>' +
+					'<div class=\'card ' + game_card.hand_card_class + ' ' + game_card.clickable_class + '\' data-' + card.card_data_key + '="' +
+						html.encode(JSON.stringify(new_white_cards[i])) +'">' +
 					'</div>' + 
 				'</div>'
 				);
