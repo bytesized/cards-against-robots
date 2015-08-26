@@ -2,7 +2,7 @@ extends layout
 
 block headers
 	title Playing Game - #{config.site_name}
-	link(rel='stylesheet', href='https://code.jquery.com/ui/1.11.4/themes/cupertino/jquery-ui.css')
+	link(rel='stylesheet', href='/stylesheets/jquery-ui.css')
 	link(rel='stylesheet', href='/stylesheets/card.css')
 
 block scripts
@@ -17,7 +17,7 @@ block scripts
 		else
 			- current_turn = 'all_played';
 
-	script(src='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js')
+	script(src='/javascripts/jquery-ui.min.js')
 	script(src='/javascripts/game/float_window.js')
 	script(src='/javascripts/notification_dialog.js')
 	script(src='/javascripts/html.js')

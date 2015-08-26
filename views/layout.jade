@@ -4,7 +4,7 @@ html
 		meta(charset='utf-8')
 		meta(http-equiv='X-UA-Compatible' content='IE=edge')
 		meta(name='viewport', content='width=device-width, initial-scale=1')
-		link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css')
+		link(rel='stylesheet', href='/stylesheets/bootstrap.css')
 		link(rel='stylesheet', href='/stylesheets/bootstrap-theme.css')
 		link(rel='stylesheet', href='/stylesheets/style.css')
 		link(rel='stylesheet', href='/stylesheets/theme.css')
@@ -83,6 +83,12 @@ html
 
 			block content
 
+		// Only put the footer if configured
+		if config && config.properties.is_configured
+			#footer
+
+
+
 		//- Some config settings need to be available in client javascript.
 		//- Only expictly pass in the values we need. We don't want to reveal
 		//- things like the database password
@@ -112,6 +118,6 @@ html
 				| current_user.superuser = !{JSON.stringify(user.superuser)};
 
 		script(src='/javascripts/polyfills.js')
-		script(src='http://code.jquery.com/jquery-1.11.3.min.js')
-		script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
+		script(src='/javascripts/jquery-1.11.3.min.js')
+		script(src='/javascripts/bootstrap.min.js')
 		block scripts
