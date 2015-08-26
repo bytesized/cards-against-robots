@@ -8,6 +8,8 @@ var router = express.Router();
 var configuration = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var user = require(path.normalize(path.join(__dirname, '..', 'db', 'user')));
 var object_attribute = require(path.normalize(path.join(__dirname, '..', 'common', 'object_attribute')));
+var card = require(path.normalize(path.join(__dirname, '..', 'db', 'card')));
+var deck = require(path.normalize(path.join(__dirname, '..', 'db', 'deck')));
 
 var states = {
 	unconfigured: 'unconfigured',
@@ -233,8 +235,16 @@ router.post('/', function(req, res, next)
 		var new_user = new user.user_object;
 		new_user.username = req.body.super_user_name;
 		new_user.password = req.body.super_user_password
-		return user.create_primary_superuser(new_user).then(function()
+		return user.create_primary_superuser(new_user).then(function(data)
 		{
+			var inserted_user = data[0];
+			var added_decks = data[1];
+			// Make an array of the standard deck ids
+			var standard_deck_ids = [];
+			for (var i = 0; i < added_decks.length; i++)
+				standard_deck_ids.push(added_decks[i].id);
+			configuration.methods.set('standard_decks', standard_deck_ids);
+			configuration.methods.set('default_decks', standard_deck_ids);
 			// No errors!
 			on_configuration_complete(res);
 		}).catch(function(err)
@@ -245,7 +255,15 @@ router.post('/', function(req, res, next)
 				// If the only error is that the primary super user already exists, the configuration is complete,
 				// just warn the user that no new user was created
 				on_configuration_complete(res, ["Primary Superuser already exists and so was not created"]);
-			} else {
+			} else if (err instanceof card.error || err instanceof deck.error)
+			{
+				var errors = [{
+					param : [],
+					msg   : 'Error creating standard decks: ' + err.message,
+					value : ''}];
+				configuration_error(res, errors);
+			} else
+			{
 				var errors = interpret_user_error(err);
 
 				configuration_error(res, errors);

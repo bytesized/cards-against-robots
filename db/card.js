@@ -53,12 +53,18 @@ var init_db = function()
 //    and then the object will be returned
 var create_card = function(card)
 {
+	return create_card_with_connection(card, database.pool);
+};
+
+// Same as `create_card`, but uses the connection given
+var create_card_with_connection = function(card, connection)
+{
 	return Promise.try(function()
 	{
 		card_common.check_card(card);
 	}).then(function()
 	{
-		return database.pool.queryAsync('INSERT INTO cards (text, color, creator) VALUES (?, ?, ?);',
+		return connection.queryAsync('INSERT INTO cards (text, color, creator) VALUES (?, ?, ?);',
 			[card.text, card.color, card.creator]);
 	}).spread(function(results, fields)
 	{
@@ -67,7 +73,7 @@ var create_card = function(card)
 	}).catch(function(err)
 	{
 		if (err.code == 'ER_DUP_ENTRY')
-			return database.pool.queryAsync('SELECT * FROM cards WHERE text = ? AND color = ? ;',
+			return connection.queryAsync('SELECT * FROM cards WHERE text = ? AND color = ? ;',
 				[card.text, card.color]).spread(function(results, fields)
 			{
 				return results[0];
@@ -78,14 +84,15 @@ var create_card = function(card)
 };
 
 module.exports = {
-	init_db              : init_db,
-	error                : card_common.error,
-	card_object          : card_common.card_object,
-	black                : card_common.black,
-	white                : card_common.white,
-	blank_count          : card_common.blank_count,
-	blank_regex          : card_common.blank_regex,
-	check_card_text      : card_common.check_card_text,
-	check_card           : card_common.check_card,
-	create               : create_card
+	init_db                : init_db,
+	error                  : card_common.error,
+	card_object            : card_common.card_object,
+	black                  : card_common.black,
+	white                  : card_common.white,
+	blank_count            : card_common.blank_count,
+	blank_regex            : card_common.blank_regex,
+	check_card_text        : card_common.check_card_text,
+	check_card             : card_common.check_card,
+	create                 : create_card,
+	create_with_connection : create_card_with_connection
 };

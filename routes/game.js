@@ -2,6 +2,7 @@
 var express = require('express');
 var path = require('path');
 var Promise = require('bluebird');
+var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var deck = require(path.normalize(path.join(__dirname, '..', 'db', 'deck')));
 var room = require(path.normalize(path.join(__dirname, '..', 'db', 'room')));
 var ensure_user = require(path.normalize(path.join(__dirname, '..', 'common', 'ensure_user')));
@@ -17,7 +18,13 @@ router.get('/create', ensure_user.authenticated, function(req, res, next)
 {
 	deck.get_all_by_user_id(req.user.id).then(function(user_decks)
 	{
-		res.render('create_game', {form_data: {}, user_decks: user_decks, auto_load_decks: []});
+		return deck.get_standard_and_default().spread(function(standard_decks, default_decks)
+		{
+			return [user_decks, standard_decks, default_decks];
+		});
+	}).spread(function(user_decks, standard_decks, default_decks)
+	{
+		res.render('create_game', {form_data: {}, user_decks: user_decks, auto_load_decks: default_decks, standard_decks: standard_decks});
 	}, function(err)
 	{
 		next(err);
@@ -110,19 +117,26 @@ router.post('/create', ensure_user.authenticated, function(req, res, next)
 
 function send_create_game_failure(req, res, auto_load_decks)
 {
-	var promises = [];
-	promises.push(deck.get_all_by_user_id(req.user.id));
-	for (var i = 0; i < auto_load_decks.length; i++)
+	deck.get_all_by_user_id(req.user.id).then(function(user_decks)
 	{
-		promises.push(deck.get_by_id(auto_load_decks[i].id));
-	};
-	Promise.all(promises).then(function(results)
+		var promises = [];
+		for (var i = 0; i < auto_load_decks.length; i++)
+		{
+			promises.push(deck.get_by_id(auto_load_decks[i].id));
+		};
+		return Promise.all(promises).then(function(auto_load_decks)
+		{
+			return [user_decks, auto_load_decks];
+		});
+	}).spread(function(user_decks, auto_load_decks)
 	{
-		// The first result is the user decks
-		var user_decks = results.shift();
-		// Now `results` is an array of decks that were selected by the user,
-		// return these as the auto load decks
-		res.render('create_game', {form_data: req.body, user_decks: user_decks, auto_load_decks: results});
+		return deck.get_standard_and_default().spread(function(standard_decks, default_decks)
+		{
+			return [user_decks, auto_load_decks, standard_decks, default_decks];
+		});
+	}).spread(function(user_decks, auto_load_decks, standard_decks, default_decks)
+	{
+		res.render('create_game', {form_data: req.body, user_decks: user_decks, auto_load_decks: auto_load_decks, standard_decks: standard_decks});
 	}, function(err)
 	{
 		next(err);

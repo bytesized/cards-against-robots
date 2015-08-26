@@ -7,6 +7,7 @@ var bcrypt = require('bcrypt');
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var database = require(path.join(__dirname, 'database'));
 var user_common = require(path.normalize(path.join(__dirname, '..', 'public', 'javascripts', 'common', 'user')));
+var standard_decks = require(path.normalize(path.join(__dirname, '..', 'common', 'standard_decks')));
 
 // Creates tables necessary for the site to run. Returns a Promise.
 // The Promise will be rejected only if the tables still do not exist (that is to say,
@@ -96,37 +97,51 @@ var create_user = function(user, override_invitation)
 // The promise will be rejected if a user with ID=1 already exists
 // The id of the new user will be passed to the fulfillment handler.
 // The password that is passed in will be encrypted before it is stored.
+// This function also adds the standard decks to the primary superuser's deck list
+// The Promise, if fulfilled, will yield an array. The first array item will be the
+// user object of the created user. The second item will be an array of decks objects
+// describing the decks created for the user
 var create_primary_superuser = function(user)
 {
-	user.admin = true;
-	user.superuser = true;
-	return Promise.try(function()
+	return database.with_transaction(function(connection)
 	{
-		user_common.check_user(user);
-	}).then(function()
-	{
-		return bcrypt.genSaltAsync(10);
-	}).then(function(salt)
-	{
-		return bcrypt.hashAsync(user.password, salt);
-	}).then(function(password_hash)
-	{
-		return database.pool.queryAsync(
-			"INSERT INTO users (id, username,  password,  admin,  superuser,  locked) " +
-			           "VALUES ( 1,        ?,         ?,   TRUE,       TRUE,   FALSE);",
-			[user.username, password_hash]);
-	}).catch(function(err)
-	{
-		// Need to distinguish between duplicate user and duplicate id
-		if (err.code == 'ER_DUP_ENTRY')
+		user.admin = true;
+		user.superuser = true;
+		return Promise.try(function()
 		{
-			if (err.message == 'ER_DUP_ENTRY: Duplicate entry \'1\' for key \'PRIMARY\'')
-				throw new user_common.error('Primary Super User already exists', 'BAD_REQUEST');
-			else
-				throw new user_common.error('That username is in use', 'BAD_USERNAME');
-		} else {
-			throw err;
-		}
+			user_common.check_user(user);
+		}).then(function()
+		{
+			return bcrypt.genSaltAsync(10);
+		}).then(function(salt)
+		{
+			return bcrypt.hashAsync(user.password, salt);
+		}).then(function(password_hash)
+		{
+			return connection.queryAsync(
+				"INSERT INTO users (id, username,  password,  admin,  superuser,  locked) " +
+				           "VALUES ( 1,        ?,         ?,   TRUE,       TRUE,   FALSE);",
+				[user.username, password_hash]).catch(function(err)
+			{
+				// Need to distinguish between duplicate user and duplicate id
+				if (err.code == 'ER_DUP_ENTRY')
+				{
+					if (err.message == 'ER_DUP_ENTRY: Duplicate entry \'1\' for key \'PRIMARY\'')
+						throw new user_common.error('Primary Super User already exists', 'BAD_REQUEST');
+					else
+						throw new user_common.error('That username is in use', 'BAD_USERNAME');
+				} else {
+					throw err;
+				}
+			});
+		}).then(function(result)
+		{
+			user.id = 1;
+			return standard_decks.add(user.id, connection).then(function(decks)
+			{
+				return [user, decks];
+			});
+		});
 	});
 };
 

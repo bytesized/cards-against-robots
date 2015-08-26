@@ -123,7 +123,7 @@ block content
 			.panel.panel-default
 				.panel-body
 					.row
-						.col-sm-12.col-md-6
+						.col-md-12.col-lg-6
 							ul.nav.nav-tabs
 								li.active
 									a(data-toggle='tab', href='#my_decks_tab') My Decks
@@ -133,6 +133,8 @@ block content
 									a(data-toggle='tab', href='#top_decks_tab') Popular
 								li
 									a(data-toggle='tab', href='#search_decks_tab') Search
+								li
+									a(data-toggle='tab', href='#standard_decks_tab') Standard
 							.tab-content
 								#my_decks_tab.tab-pane.fade.in.active
 									if user_decks.length === 0
@@ -147,7 +149,14 @@ block content
 									h3 Coming Soon
 								#search_decks_tab.tab-pane.fade
 									h3 Coming Soon
-						.col-sm-12.col-md-6
+								#standard_decks_tab.tab-pane.fade
+									if standard_decks.length === 0
+										.list-group
+											.list-group-item
+												i There are no standard decks
+									else
+										+deck_list(standard_decks, {class: 'deck_row_manager-add_list', add_button: true})
+						.col-md-12.col-lg-6
 							h3 Selected Decks
 							input#selected_decks-input(type='hidden', name='decks', value='[]')
 							//- Make an empty list which we will put things in with Javascript

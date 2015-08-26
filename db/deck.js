@@ -82,12 +82,18 @@ var init_deck_descriptions = function()
 // is not valid
 var create_deck = function(deck)
 {
+	return create_deck_with_connection(deck, database.pool);
+};
+
+// Same as `create_deck`, but uses the connection given
+var create_deck_with_connection = function(deck, connection)
+{
 	return Promise.try(function()
 	{
 		deck_common.check_deck(deck);
 	}).then(function()
 	{
-		return database.pool.queryAsync('INSERT INTO deck_list (name, creator) VALUES (?, ?);', [deck.name, deck.creator]);
+		return connection.queryAsync('INSERT INTO deck_list (name, creator) VALUES (?, ?);', [deck.name, deck.creator]);
 	}).spread(function(results, fields)
 	{
 		deck.id = results.insertId
@@ -251,18 +257,69 @@ var compile_decks = function(deck_ids)
 	});
 };
 
+// Returns a Promise. The promise, if fulfilled, will yield an array. The first element will be
+// an array of deck objects representing the standard decks. The second element will be an array
+// of deck objects representing the default decks
+// This function gets both because there is likely a lot (if not 100%) overlap between the two
+// lists and often when we want one, we want the other as well
+// The decks objects returned are bare. They only have id, text, and card_count attributes.
+var get_standard_and_default = function()
+{
+	// Make a unique list of the default decks and standard decks we will need since there is
+	// likely a lot of overlap
+	var decks = config.default_decks.concat(config.standard_decks);
+	decks.sort().filter(function(item, pos, data)
+	{
+		return !pos || item != data[pos - 1];
+	});
+
+	var promises = [];
+	for (var i = 0; i < decks.length; i++)
+		promises.push(get_deck_by_id(decks[i]));
+
+	return Promise.all(promises).then(function(deck_objects)
+	{
+		// The default decks will be sent in JSON format, so we will strip out unnecessary data
+		var bare_decks = [];
+		for (var i = 0; i < deck_objects.length; i++)
+		{
+			bare_decks.push({
+				id: deck_objects[i].id,
+				name: deck_objects[i].name,
+				card_count: deck_objects[i].card_count
+			});
+		}
+		// Make a lookup table for the decks
+		var lookup = {};
+		for (var i = 0; i < bare_decks.length; i++)
+			lookup[bare_decks[i].id] = bare_decks[i];
+		// Make the array of default decks
+		var default_decks = [];
+		for (var i = 0; i < config.default_decks.length; i++)
+			default_decks.push(lookup[config.default_decks[i]]);
+		// Make the array of standard decks
+		var standard_decks = [];
+		for (var i = 0; i < config.standard_decks.length; i++)
+			standard_decks.push(lookup[config.standard_decks[i]]);
+
+		return [default_decks, standard_decks];
+	});
+};
+
 module.exports = {
-	init_db                 : init_db,
-	error                   : deck_common.error,
-	deck_object             : deck_common.deck_object,
-	check_deck_name         : deck_common.check_deck_name,
-	check_deck              : deck_common.check_deck,
-	get_all_by_user_id      : get_decks_by_user_id,
-	create                  : create_deck,
-	get_cards               : get_cards,
-	get_by_id               : get_deck_by_id,
-	ensure_user_ownership   : ensure_user_ownership,
-	add_card                : add_card_to_deck,
-	add_card_no_transaction : add_card_to_deck_no_transaction,
-	compile_decks           : compile_decks
+	init_db                  : init_db,
+	error                    : deck_common.error,
+	deck_object              : deck_common.deck_object,
+	check_deck_name          : deck_common.check_deck_name,
+	check_deck               : deck_common.check_deck,
+	get_all_by_user_id       : get_decks_by_user_id,
+	create                   : create_deck,
+	create_with_connection   : create_deck_with_connection,
+	get_cards                : get_cards,
+	get_by_id                : get_deck_by_id,
+	ensure_user_ownership    : ensure_user_ownership,
+	add_card                 : add_card_to_deck,
+	add_card_no_transaction  : add_card_to_deck_no_transaction,
+	compile_decks            : compile_decks,
+	get_standard_and_default : get_standard_and_default
 };

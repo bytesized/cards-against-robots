@@ -66,14 +66,14 @@ card.card_text_validation_fns =
 	{
 		fn: function(card_text)
 		{
-			if (card_text.match(/^[-a-zA-Z0-9_+=:().&%$^*!?'" ]*$/) == null)
+			if (card_text.match(/^[-a-zA-Z0-9_+=:().&%$^*!?'",;:\/ ]*$/) == null)
 				return false;
 			else
 				return true;
 		},
 		msg: function(card_text)
 		{
-			return "Card text may only contain letters, numbers, spaces, and these special characters: -,_,+,=,:,(,),.,&,%,$,^,*,!,?,',\"";
+			return "Card text may only contain letters, numbers, spaces, commas, and these special characters: -,_,+,=,:,(,),.,&,%,$,^,*,!,?,',\",;,:,/";
 		}
 	}
 ];
