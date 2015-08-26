@@ -8,16 +8,24 @@ var words = JSON.parse(fs.readFileSync(filename));
 
 // Enforce standardized capitalization
 for (var word_type in words)
-	for (var i = 0; i < words[word_type].length; i++)
-		words[word_type][i] = words[word_type][i].charAt(0).toUpperCase() + words[word_type][i].slice(1).toLowerCase();
+{
+	if (words.hasOwnProperty(word_type))
+	{
+		for (var i = 0; i < words[word_type].length; i++)
+			words[word_type][i] = words[word_type][i].charAt(0).toUpperCase() + words[word_type][i].slice(1).toLowerCase();
+	}
+}
 
 // Enforce uniqueness
 for (var word_type in words)
 {
-	words[word_type].sort().filter(function(item, pos, data)
+	if (words.hasOwnProperty(word_type))
 	{
-		return !pos || item != data[pos - 1];
-	});
+		words[word_type].sort().filter(function(item, pos, data)
+		{
+			return !pos || item != data[pos - 1];
+		});
+	}
 }
 
 module.exports = words;
