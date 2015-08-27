@@ -86,8 +86,22 @@ html
 		// Only put the footer if configured
 		if config && config.properties.is_configured
 			#footer
-
-
+				.container
+					.row
+						.col-xs-12
+							.flex_container
+								.flex_expand
+								.flex_noexpand
+									ul.list-inline
+										li
+											a(href='/about') About
+										li
+											a(href='/contact') Contact
+										li
+											a(href='/terms') Terms of Service
+										li
+											a(href='/privacy') Privacy Policy
+								.flex_expand
 
 		//- Some config settings need to be available in client javascript.
 		//- Only expictly pass in the values we need. We don't want to reveal

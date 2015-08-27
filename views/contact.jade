@@ -1,0 +1,35 @@
+extends layout
+
+block headers
+	title Contact - #{config.site_name}
+
+block content
+	.container
+		//- If a user is logged in, show the navbar
+		if user
+			.row
+				+game_navbar()
+		.row
+			.col-xs-12.col-sm-8.col-sm-offset-2
+				h1 Contact
+				ul.list-group
+					+flash_messages
+				ul.list-group
+					+validation_errors
+		form.form-horizontal(method='POST')
+			.form-group(class=input_status.name)
+				label.control-label.col-xs-12.col-sm-2(for='name_input') Name (optional)
+				.col-xs-12.col-sm-8.col-md-5.col-lg-4
+					input.form-control(type='text', id='name_input', name='name', placeholder='Name', value=form_data.name)
+			.form-group(class=input_status.email)
+				label.control-label.col-xs-12.col-sm-2(for='email_input') Email (optional)
+				.col-xs-12.col-sm-8.col-md-5.col-lg-4
+					input.form-control(type='text', id='email_input', name='email', placeholder='Email', value=form_data.email)
+			.form-group(class=input_status.message)
+				label.control-label.col-xs-12.col-sm-2(for='email_input') Message
+				.col-xs-12.col-sm-8
+					textarea.form-control(name='message', placeholder='Enter Message...', style='height: 100px;')
+						| #{form_data.message}
+			.form-group
+				.col-xs-4.col-sm-offset-1.col-sm-2.col-md-offset-2
+					button.btn.btn-primary(type='submit') Submit

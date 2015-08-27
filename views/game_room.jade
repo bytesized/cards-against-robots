@@ -24,7 +24,7 @@ block scripts
 	script(src='/javascripts/common/card.js')
 	script(src='/socket.io/socket.io.js')
 	script
-		| var room_socket = io(window.location.origin + '/room');
+		| var room_socket = io(window.location.origin + '/room', {secure: true});
 	script(src='/javascripts/game/chat.js')
 	script(src='/javascripts/game/player.js')
 	- player_list = [];

@@ -1,0 +1,209 @@
+extends layout
+
+block headers
+	title Privacy Policy - #{config.site_name}
+
+block content
+	.container
+		//- If a user is logged in, show the navbar
+		if user
+			.row
+				+game_navbar()
+		.row
+			.col-xs-12
+				h1 Privacy Policy 
+					small (Covering My Ass Statement #2)
+				ul.list-group
+					+flash_messages
+				ul.list-group
+					+validation_errors
+		.row
+			.col-xs-12
+				p
+					strong Last Updated:
+					|  August, 2015
+				p
+					| Your privacy is important to us. This privacy statement explains what personal data we 
+					| collect from you and how we use it. It applies to all services hosted on this domain. 
+					| References to our services in this statement include the website and the game hosted on it.
+				h3 Personal Data We Collect
+				p
+					| We collect data to operate effectively and provide you the best experiences with our 
+					| services. You provide some of this data directly, such as when you create an account, 
+					| create decks or cards, or contact us for support. We get some of it by recording how you 
+					| interact with our services by, for example, using technologies like cookies.
+				p
+					| We may also obtain data from third parties (including other companies). For example, we 
+					| may supplement the data we collect by purchasing demographic data from other companies. 
+					| We also use services from other companies to help us determine a location based on your 
+					| IP address in order to customize certain services to your location.
+				p The data we collect depends on the services and features you use, and includes the following.
+				p
+					b Name and contact data.
+					|  We may collect your first and last name, email address, postal address, phone number, and other similar contact data.
+				p 
+					b Credentials.
+					|  We may collect passwords, password hints, and similar security information used for authentication and account access.
+				p
+					b Demographic data.
+					|  We may collect data about you such as your age, gender, country and preferred language.
+				p
+					b Interests and favorites.
+					|  We may collect data about your interests and favorites, such as which decks you use and mark as favorites and which cards you 
+					| play. In addition to those you explicitly provide, your interests and favorites may also be inferred or derived from other data 
+					| we collect.
+				p
+					b Payment data.
+					|  We may collect data necessary to process your payment if you make purchases, such as your payment instrument number (such as a 
+					| credit card number), and the security code associated with your payment instrument.
+				p
+					b Usage data.
+					|  We may collect data about how you interact with our services. This may include data, such as the features you use, the items you 
+					| purchase, the web pages you visit, and the search terms you enter. This may also include data about your device, including IP 
+					| address, device identifiers, regional and language settings, and data about the network, operating system, browser or other 
+					| software you use to connect to the services. And it also includes data about the performance of the services and any problems 
+					| you experience with them.
+				p
+					b Contacts and relationships.
+					|  We may collect data about your contacts and relationships if you use our service to manage contacts, or to communicate or 
+					| interact with other people or organizations.
+				p
+					b Content.
+					|  We may collect content of your files and communications when necessary to provide you with the services you use. This includes: 
+					| the content of your cards and decks you upload to our service. It may also include the content of your communications sent or 
+					| received using our services, such as the content, sender, and recipients of chat messages you send or receive.
+				p
+					| Additionally, when you contact us, such as for customer support, phone conversations, email, or chat sessions with our 
+					| representatives may be monitored and recorded.
+				p
+					| You have choices about the data we collect. When you are asked to provide personal data, you may decline. But if you choose 
+					| not to provide data that is necessary to provide a service, you may not be able to use some features or services.
+				h3 How We Use Personal Data
+				p
+					| We use the data we collect for two basic purposes, described in more detail below: (1) to operate our business and provide 
+					| (including improving and personalizing) the services we offer, (2) to send communications, including promotional communications.
+				p
+					b Providing and improving our services.
+					|  We may use data to provide and improve the services we offer and perform essential business operations. This includes operating 
+					| the services, maintaining and improving the performance of the services, including developing new features, research, and providing customer support. Examples of such uses include the following.
+				ul
+					li 
+						b Providing the Services.
+						|  We use data to carry out your transactions with us and to provide our services to you. 
+						| Those services may include personalized features and recommendations that enhance your 
+						| productivity and enjoyment, and tailor your service experiences based on your activities, 
+						| interests and location.
+					li
+						b Service Improvement.
+						|  We use data to continually improve our services, including adding new features or 
+						| capabilities.
+					li
+						b Security, Safety and Dispute Resolution.
+						|  We use data to protect the security and safety of our services and our customers, to 
+						| detect and prevent fraud, and to resolve disputes and enforce our agreements. Our 
+						| communications services may systematically scan content in an automated manner to 
+						| identify suspected spam, viruses, abusive actions, or URLs that have been flagged as 
+						| fraud, phishing or malware links. We may block delivery of a communication or remove 
+						| content if it violates our terms.
+					li
+						b Business Operations.
+						|  We may use data to develop aggregate analysis and business intelligence that enable 
+						| us to operate, protect, make informed decisions, and report on the performance of our 
+						| business.
+				p 
+					b Communications.
+					|  We may use data we collect to deliver and personalize our communications with you. For 
+					| example, we may contact you by email or other means to inform you when a subscription is 
+					| ending, remind you about items left in your online shopping cart, or tell you that you 
+					| need to take action to keep your account active.
+				h3 Sharing of Personal Data
+				p
+					b We will never share or sell your personal data outside of this site.
+					|  The only way others can get your personal data from us is if you personally post it in 
+					| a public area of the site. Examples of public areas include card text, deck names, 
+					| personal profiles, and chat.
+				h3 How to Access &amp; Control Your Personal Data
+				p You can view or edit your personal data online for our services through your profile.
+				p
+					| If you cannot access personal data collected by our services, you can always contact us 
+					| by using our 
+					a(href='/contact') web form
+					| . We will respond to requests to access or delete your personal data within 30 days.
+				p
+					b Browser-Based Controls
+				ul
+					li
+						b Cookie Controls.
+						|  Relevant browser-based cookie controls are described in the Cookies section of this 
+						| privacy statement.
+					li
+						b Browser Controls for &quot;Do Not Track.&quot;
+						|  Some browsers have incorporated "Do Not Track" (DNT) features that can send a signal 
+						| to the websites you visit indicating you do not wish to be tracked. Because there is 
+						| not yet a common understanding of how to interpret the DNT signal, we do not currently 
+						| respond to browser DNT signals on our own websites or online services.
+				p
+					b Cookies & Similar Technologies 
+				p
+					| We use cookies (small text files placed on your device) and similar technologies to 
+					| provide our services and help collect data. The text in a cookie often consists of a 
+					| string of numbers and letters that uniquely identifies your computer, but it can contain 
+					| other information as well.
+				p
+					b Our Use of Cookies and Similar Technologies
+				p
+					| We use cookies and similar technologies for Sign-in and Authentication. When you sign
+					| into a site using your account, we store a unique ID, in a cookie on your device. This 
+					| cookie allows you to move from page to page within the site without having to sign in again 
+					| on each page. An additional cookie is used to keep track of your websocket (or emulated
+					| websocket) in order to allow us to properly send data (such as a notification that
+					| you have received a chat message) to your browser without having to refresh the page.
+				p
+					| In addition to the cookies Microsoft sets when you visit our websites, third parties may 
+					| also set cookies when you visit our site. This is because our web pages may contain content 
+					| from third parties, such as videos or news content. Because your browser connects to those 
+					| third parties&#39; web servers to retrieve that content, those third parties are able to set or 
+					| read their own cookies on your device and may collect information about your online activities 
+					| across websites or online services.
+				p
+					b How to Control Cookies
+					| Most web browsers automatically accept cookies but provide controls that allow you to 
+					| block or delete them. Instructions for blocking or deleting cookies in other browsers 
+					| may be available in each browser&#39;s privacy or help documentation.
+				p
+					| Certain features of our services depend on cookies. Please be aware that if you choose to 
+					| block cookies, you may not be able to sign in or use those features.
+				h3 Your Account
+				p
+					| With an account, you can sign into our services.
+				p
+					b Creating and using your account.
+					|  When you create an account, you will be asked for certain personal data and we will 
+					| assign a unique ID number to identify your account and associated information. While 
+					| some services, such as those involving payment, may require a real name, you can sign 
+					| into and use some services without providing your real name. When you sign into your
+					| account, we create a record of your sign-in, which may include the date and time, 
+					| information about the service you signed into, your sign-in name, the unique number 
+					| assigned to your account, a unique identifier assigned to your device, your IP address, 
+					| and your operating system and browser version.
+				h3 Collection of Data From Children 
+				p
+					| We are in compliance with the requirements of 
+					| COPPA (Childrens Online Privacy Protection Act), we do not collect any information from 
+					| anyone under 13 years of age. Our website, products and services are all directed to people 
+					| who are at least 13 years old or older. Anyone under the age of 13 must not create an 
+					| account on this site.
+				h3 Changes to This Privacy Statement
+				p
+					| We will update this privacy statement when necessary to reflect customer feedback and 
+					| changes in our services. When we post changes to this statement, we will revise the 
+					| "last updated" date at the top of the statement. If there are material changes to the 
+					| statement or in how we will use your personal data, we will notify you either by 
+					| prominently posting a notice of such changes before they take effect or by directly 
+					| sending you a notification. We encourage you to periodically review this privacy statement 
+					| to learn how we are protecting your information.
+				h3 How to Contact Us
+				p
+					| If you have a technical or support question, please contact us through our 
+					a(href='/contact') web form
+					| .

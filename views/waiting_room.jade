@@ -9,11 +9,7 @@ block scripts
 	script(src='/javascripts/html.js')
 	script(src='/socket.io/socket.io.js')
 	script
-		| if (!window.location.origin)
-		| {
-		| 	window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
-		| }
-		| var room_socket = io(window.location.origin + '/room');
+		| var room_socket = io(window.location.origin + '/room', {secure: true});
 	script(src='/javascripts/game/chat.js')
 	script(src='/javascripts/game/waiting_room/player.js')
 	script

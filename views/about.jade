@@ -1,0 +1,51 @@
+extends layout
+
+block headers
+	title About - #{config.site_name}
+
+block content
+	.container
+		//- If a user is logged in, show the navbar
+		if user
+			.row
+				+game_navbar()
+		.row
+			.col-xs-12
+				h1 About
+				ul.list-group
+					+flash_messages
+				ul.list-group
+					+validation_errors
+		.row
+			.col-xs-12
+				h3 Credit Where Credit is Due
+				p 
+					a(href='http://www.cardsagainsthumanity.com/', target="_blank") Cards Against Humanity&#0153;
+					|  created the original card game including the 
+					a(href='http://s3.amazonaws.com/cah/CAH_Rules.pdf', target="_blank") rules
+					| , the original cards, and every part of the gameplay found on this site. 
+					| The original cards created by them can be found in the &quot;Default&quot; 
+					| tab of the &quot;Create Game&quot; page.
+				h3 Card Content
+				p
+					| The original Cards Against Humanity&#0153; cards can be found in the 
+					| &quot;Default&quot; tab of the &quot;Create Game&quot; page. 
+					| Other user-created decks may include the cards from these decks and 
+					| user-created cards with pretty much any content they like (as long as it 
+					| is legal for them to use this content).
+				p
+					| That being said, the maintainers of this site reserve the right to remove 
+					| cards at their discretion. Cards may be removed if they contain content 
+					| that was not posted legally, or for any other reason or even for no reason.
+				h3 License
+				p
+					| This game falls under the 
+					a(href='https://creativecommons.org/licenses/by-nc-sa/2.0/', target="_blank") Creative Commons BY-NC-SA 2.0 license
+				h3 Terms and Conditions
+				p
+					| The terms and conditions for this site may be found on the 
+					a(href='/terms') Terms And Conditions page
+				h3 Privacy Policy
+				p
+					| The privacy policy for this site may be found on the 
+					a(href='/privacy') Privacy Policy Page

@@ -13,6 +13,10 @@ module.exports = function(app)
 	app.use('/deck',      require(path.join(__dirname, '..', 'routes', 'deck')));
 	app.use('/ajax/deck', require(path.join(__dirname, '..', 'routes', 'ajax', 'deck')));
 	app.use('/room',      require(path.join(__dirname, '..', 'routes', 'room')));
+	app.use('/contact',   require(path.join(__dirname, '..', 'routes', 'contact')));
+	app.use('/about',     require(path.join(__dirname, '..', 'routes', 'about')));
+	app.use('/terms',     require(path.join(__dirname, '..', 'routes', 'terms')));
+	app.use('/privacy',   require(path.join(__dirname, '..', 'routes', 'privacy')));
 
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next)

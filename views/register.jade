@@ -43,7 +43,15 @@ block content
 					label.control-label.col-xs-12.col-sm-offset-1.col-sm-2.col-md-offset-2(for='password_confirm_input') Confirm Password
 					.col-xs-12.col-sm-8.col-md-5.col-lg-4
 						input.form-control(type='password', id='password_confirm_input', name='password_confirm', placeholder='Password', value='')
+				.row
+					.col-xs-12.col-sm-8.col-sm-offset-3.col-md-4.col-md-offset-4
+						p
+							| By clicking &quot;Register&quot;, you agree to the 
+							a(href='/terms') Terms of Service
+							|  and the 
+							a(href='/privacy') Privacy Policy
+							| .
 				.form-group
-					.col-xs-4.col-sm-offset-3.col-md-offset-4
+					.col-xs-12.col-sm-8.col-sm-offset-3.col-md-4.col-md-offset-4
 						button.btn.btn-primary(type='submit') Register
 

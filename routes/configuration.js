@@ -4,6 +4,8 @@ var path = require('path');
 var database = require(path.normalize(path.join(__dirname, '..', 'db', 'database')));
 var fs = require('fs');
 var Promise = require('bluebird');
+var nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
 var router = express.Router();
 var configuration = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var user = require(path.normalize(path.join(__dirname, '..', 'db', 'user')));
@@ -98,7 +100,7 @@ var config_fields =
 	{
 		name: 'mysql.password',
 		form_name: 'mysql_password',
-		sanitize: function(req, name) { return req.body.mysql_password },
+		sanitize: function(req, name) { return req.body[name] },
 		omit_form_data: true
 	},
 	{
@@ -164,6 +166,43 @@ var config_fields =
 		sanitize: function(req, name) { return req.sanitize(name).toInt(10) * 60 * 1000; }
 	},
 	{
+		name: 'contact_email',
+		form_name: 'contact_email',
+		validate: function(req, name)
+			{ req.checkBody(name, 'Contact Email must be a valid email address').isEmail(); },
+		sanitize: function(req, name) { return req.sanitize(name).trim(); }
+	},
+	{
+		name: 'smtp.host',
+		form_name: 'smtp_host',
+		sanitize: function(req, name) { return req.sanitize(name).trim(); }
+	},
+	{
+		name: 'smtp.port',
+		form_name: 'smtp_port',
+		validate: function(req, name)
+			{ req.checkBody(name, 'SMTP Port must be a positive integer').custom_int({positive: true}); },
+		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
+	},
+	{
+		name: 'smtp.username',
+		form_name: 'smtp_username',
+		sanitize: function(req, name) { return req.body[name] },
+	},
+	{
+		name: 'smtp.password',
+		form_name: 'smtp_password',
+		sanitize: function(req, name) { return req.body[name] },
+		omit_form_data: true
+	},
+	{
+		name: 'smtp.send_as',
+		form_name: 'smtp_send_as',
+		validate: function(req, name)
+			{ req.checkBody(name, 'SMTP Source Email must be a valid email address').isEmail(); },
+		sanitize: function(req, name) { return req.sanitize(name).trim(); }
+	},
+	{
 		name: 'super_user_name',
 		form_name: 'super_user_name',
 		validate: function(req, name)
@@ -174,7 +213,7 @@ var config_fields =
 		name: 'super_user_password',
 		form_name: 'super_user_password',
 		validate: function(req, name)
-			{ user.validate_password_field(req, 'super_user_password'); },
+			{ user.validate_password_field(req, name); },
 		omit_config: true,
 		omit_form_data: true
 	},
@@ -227,52 +266,82 @@ router.post('/', function(req, res, next)
 		return;
 	}
 
-	// Initialize the tables in the database. This doubles as validating the MYSQL config data
-	// (If the connection fails, the MYSQL configuration is wrong)
-	database.init().then(function()
+	// Try to send an email to make sure the smtp config works
+	var email_transport = nodemailer.createTransport(smtpTransport({
+		host: config.smtp.host,
+		port: config.smtp.port,
+		auth: {
+			user: config.smtp.username,
+			pass: config.smtp.password
+		}
+	}));
+	var email_options = {
+		from: config.smtp.send_as,
+		to: config.contact_email,
+		subject: config.site_name + ' Test Contact',
+		text: 'This is a test message sent while configuring your website, ' + config.site_name
+	};
+	email_transport.sendMail(email_options, function(error, info)
 	{
-		// Now that database and tables exist, create the primary super user.
-		var new_user = new user.user_object;
-		new_user.username = req.body.super_user_name;
-		new_user.password = req.body.super_user_password
-		return user.create_primary_superuser(new_user).then(function(data)
+		if (error)
 		{
-			var inserted_user = data[0];
-			var added_decks = data[1];
-			// Make an array of the standard deck ids
-			var standard_deck_ids = [];
-			for (var i = 0; i < added_decks.length; i++)
-				standard_deck_ids.push(added_decks[i].id);
-			configuration.methods.set('standard_decks', standard_deck_ids);
-			configuration.methods.set('default_decks', standard_deck_ids);
-			// No errors!
-			on_configuration_complete(res);
-		}).catch(function(err)
+			var errors = [{
+				param : ['smtp_host', 'smtp_port', 'smtp_username', 'smtp_password'],
+				msg   : 'Error sending email: ' + error,
+				value : ''}];
+			configuration_error(res, errors);
+		} else
 		{
-			// Got an error sent from the user module
-			if (err instanceof user.error && err.code === 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
+			// Initialize the tables in the database. This doubles as validating the MYSQL config data
+			// (If the connection fails, the MYSQL configuration is wrong)
+			database.init().then(function()
 			{
-				// If the only error is that the primary super user already exists, the configuration is complete,
-				// just warn the user that no new user was created
-				on_configuration_complete(res, ["Primary Superuser already exists and so was not created"]);
-			} else if (err instanceof card.error || err instanceof deck.error)
-			{
-				var errors = [{
-					param : [],
-					msg   : 'Error creating standard decks: ' + err.message,
-					value : ''}];
-				configuration_error(res, errors);
-			} else
-			{
-				var errors = interpret_user_error(err);
+				// Now that database and tables exist, create the primary super user.
+				var new_user = new user.user_object;
+				new_user.username = req.body.super_user_name;
+				new_user.password = req.body.super_user_password
+				return user.create_primary_superuser(new_user).then(function(data)
+				{
+					var inserted_user = data[0];
+					var added_decks = data[1];
+					// Make an array of the standard deck ids
+					var standard_deck_ids = [];
+					for (var i = 0; i < added_decks.length; i++)
+						standard_deck_ids.push(added_decks[i].id);
+					configuration.methods.set('standard_decks', standard_deck_ids);
+					configuration.methods.set('default_decks', standard_deck_ids);
+					// No errors!
+					on_configuration_complete(res);
+				}).catch(function(err)
+				{
+					// Got an error sent from the user module
+					if (err instanceof user.error && err.code === 'BAD_REQUEST' && err.message == 'Primary Super User already exists')
+					{
+						// If the only error is that the primary super user already exists, the configuration is complete,
+						// just warn the user that no new user was created
+						configuration.methods.set('standard_decks', []);
+						configuration.methods.set('default_decks', []);
+						on_configuration_complete(res, ["Primary Superuser already exists and so was not created"]);
+					} else if (err instanceof card.error || err instanceof deck.error)
+					{
+						var errors = [{
+							param : [],
+							msg   : 'Error creating standard decks: ' + err.message,
+							value : ''}];
+						configuration_error(res, errors);
+					} else
+					{
+						var errors = interpret_user_error(err);
 
+						configuration_error(res, errors);
+					}
+				});
+			}, function(err) // Catch mysql errors
+			{
+				var errors = interpret_mysql_error(err);
 				configuration_error(res, errors);
-			}
-		});
-	}, function(err) // Catch mysql errors
-	{
-		var errors = interpret_mysql_error(err);
-		configuration_error(res, errors);
+			});
+		}
 	});
 });
 

@@ -27,6 +27,12 @@ block content
 	- if (typeof form_data.field_sizes.card_text === 'undefined')   form_data.field_sizes.card_text  = '500';
 	- if (typeof form_data.field_sizes.room_name === 'undefined')   form_data.field_sizes.room_name  = '63';
 	- if (typeof form_data.player_timeout === 'undefined')          form_data.player_timeout         = '10';
+	- if (typeof form_data.contact_email === 'undefined')           form_data.contact_email          = '';
+	- if (!form_data.smtp) form_data.smtp = {};
+	- if (typeof form_data.smtp.host === 'undefined')               form_data.smtp.host              = '';
+	- if (typeof form_data.smtp.port === 'undefined')               form_data.smtp.port              = '25';
+	- if (typeof form_data.smtp.username === 'undefined')           form_data.smtp.username          = '';
+	- if (typeof form_data.smtp.send_as === 'undefined')            form_data.smtp.send_as           = '';
 	- if (typeof form_data.super_user_name === 'undefined')         form_data.super_user_name        = '';
 	//- Omit super user password
 
@@ -45,7 +51,7 @@ block content
 							| Congratulations! Your site is up and running. You just need to do some quick configuration.
 						p
 							strong However,
-							|  keep in mind that "Cards Against Humanity" and the CAH logos are trademarks of Cards Against Humanity
+							|  keep in mind that &quot;Cards Against Humanity&quot; and the CAH logos are trademarks of Cards Against Humanity 
 							| LLC. You must use your own name and logos; please do not try to steal theirs.
 					else if state === "configuring"
 						- var inputs_disabled = true;
@@ -56,12 +62,24 @@ block content
 						h1 Configuration done!
 						p Your server has been configured and is ready to use. Restart the server to apply the new configuration.
 						p
-							| Your configuration has been stored in configuration.json. You can change the configuration at any time by
+							| Your configuration has been stored in configuration.json. You can change the configuration at any time by 
 							| editing that file. 
 							strong
-								| However, do not edit any of the length properties (such as Token Length or Username Length). These properties
-								| are used to create MYSQL tables to set the length of the fields. Changing them will not change the lengths of
+								| However, do not edit any of the length properties (such as Token Length or Username Length). These properties 
+								| are used to create MYSQL tables to set the length of the fields. Changing them will not change the lengths of 
 								| the MYSQL fields
+						p
+							| Additionally, an email as been sent via the SMTP configuration that you have given to the contact email
+							| that you have given. 
+							strong
+								| It is very important that this email reaches you.
+							|  If it does not reach you, no one will be able to contact you via the Contact form. If there are any legal 
+							| repercussions of this, the developers of this site cannot be held responsible for your inability to 
+							| properly configure this site.
+						p
+							| Also, a Terms of Service and Privacy Policy have been included to help protect you and your users. It is possible 
+							| that these are not satisfactory for your purposes. If you are not satisfied with them, be sure to change them
+							| to something that serves your purposes.
 					ul.list-group
 						+flash_messages
 					ul.list-group
@@ -144,29 +162,68 @@ block content
 			.col-xs-10
 				input(type='text', class='form-control', id='room_name_length_input', name='room_name_length', placeholder='Length', value=form_data.field_sizes.room_name, readonly=inputs_disabled)
 				span(class='help-block') Maximum number of characters allowed in room names.
-		.form-group(class=input_status.room_name_length)
+		.form-group(class=input_status.player_timeout)
 			label(for='player_timeout_input', class='control-label col-xs-2') Player Timeout
 			.col-xs-10
 				.input-group
-					input(type='text', class='form-control', id='player_timeout_input', name='player_timeout', placeholder='Length', value=form_data.player_timeout, readonly=inputs_disabled)
+					input(type='text', class='form-control', id='player_timeout_input', name='player_timeout', placeholder='Timeout', value=form_data.player_timeout, readonly=inputs_disabled)
 					span(class='input-group-addon') minutes
 				span(class='help-block')
 					| This timeout controls two things. If a user in an active game has been idle for this long, they are kicked out. Additionally,
 					| if a game stays in the waiting room for this long, the users are disconnected and the game is closed. In this case, the game
 					| host will be given the option to reset this timer in the event that the players are waiting for another player.
+		.form-group(class=input_status.contact_email)
+			label(for='contact_email_input', class='control-label col-xs-2') Contact Email
+			.col-xs-10
+				input(type='text', class='form-control', id='contact_email_input', name='contact_email', placeholder='Email', value=form_data.contact_email, readonly=inputs_disabled)
+				span(class='help-block') Email from the &quot;Contact&quot; page will be sent here. The email address itself will not be available to users.
+		.form-group(class=input_status.smtp_host)
+			label(for='smtp_host_input', class='control-label col-xs-2') SMTP Host
+			.col-xs-10
+				input(type='text', class='form-control', id='smtp_host_input', name='smtp_host', placeholder='Hostname', value=form_data.smtp.host, readonly=inputs_disabled)
+				span(class='help-block') The SMTP host to log into to send email
+		.form-group(class=input_status.smtp_port)
+			label(for='smtp_port_input', class='control-label col-xs-2') SMTP Port
+			.col-xs-10
+				input(type='text', class='form-control', id='smtp_port_input', name='smtp_port', placeholder='Port Number', value=form_data.smtp.port, readonly=inputs_disabled)
+		.form-group(class=input_status.smtp_username)
+			label(for='smtp_username_input', class='control-label col-xs-2') SMTP Username
+			.col-xs-10
+				input(type='text', class='form-control', id='smtp_username_input', name='smtp_username', placeholder='Username', value=form_data.smtp.username, readonly=inputs_disabled)
+				span(class='help-block') The username to log into the SMTP server with
+		.form-group(class=input_status.smtp_password)
+			label(for='smtp_password_input', class='control-label col-xs-2') SMTP Password
+			.col-xs-10
+				input(type='password', class='form-control', id='smtp_password_input', name='smtp_password', placeholder='Password', readonly=inputs_disabled)
+				span(class='help-block') These credentials will be stored in plaintext in configuration.json.
+		.form-group(class=input_status.smtp_send_as)
+			label(for='smtp_send_as_input', class='control-label col-xs-2') Source Email
+			.col-xs-10
+				input(type='text', class='form-control', id='smtp_send_as_input', name='smtp_send_as', placeholder='Email', value=form_data.smtp.send_as, readonly=inputs_disabled)
+				span(class='help-block')
+					| This is the email address that emails will be sent from the website as. When anyone receives an email sent from the website, this 
+					| address will be in the &quot;From:&quot; field
 		.form-group(class=input_status.super_user_name)
 			label(for='super_user_name_input', class='control-label col-xs-2') Username
 			.col-xs-10
 				input(type='text', class='form-control', id='super_user_name_input', name='super_user_name', placeholder='Username', value=form_data.super_user_name, readonly=inputs_disabled)
-				span(class='help-block') The username to create for you. This user will be the "primary super user"
+				span(class='help-block') The username to create for you. This user will be the &quot;primary super user&quot;
 		.form-group(class=input_status.super_user_password)
 			label(for='super_user_password_input', class='control-label col-xs-2') Password
 			.col-xs-10
 				input(type='password', class='form-control', id='super_user_password_input', name='super_user_password', placeholder='Password', value='', readonly=inputs_disabled)
+				span(class='help-block')
+					| The primary super user credentials are just about the only thing on this page that will NOT be stored in plaintext in
+					| the configuration.json file
 		.form-group(class=input_status.super_user_password_confirm)
 			label(for='super_user_password_confirm_input', class='control-label col-xs-2') Confirm Password
 			.col-xs-10
 				input(type='password', class='form-control', id='super_user_password_confirm_input', name='super_user_password_confirm', placeholder='Password', value='', readonly=inputs_disabled)
+		.row
+			.col-xs-offset-2.col-xs-10
+				p
+					| By clicking &quot;Configure Site&quot;, you agree that you assume all responsibility for the site you are creating and hold 
+					| the developers of the site blameless for any problems legal or otherwise.
 		.form-group
 			.col-xs-offset-2.col-xs-10
 				button(type='submit', class='btn btn-primary', disabled=inputs_disabled) Configure Site
