@@ -1,6 +1,6 @@
 node_modules/
 npm-debug.log
-public/images
+public/images/card_icon.png
 public/stylesheets/
 configuration.json
 keys/
