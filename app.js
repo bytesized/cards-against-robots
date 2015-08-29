@@ -11,7 +11,7 @@ module.exports = function(app, server)
 	var Promise = require("bluebird");
 	Promise.promisifyAll(require("mysql/lib/Connection").prototype);
 	Promise.promisifyAll(require("mysql/lib/Pool").prototype);
-	Promise.promisifyAll(require('bcrypt'));
+	Promise.promisifyAll(require('bcryptjs'));
 
 	var favicon = require('serve-favicon');
 	var express = require('express');

@@ -3,7 +3,7 @@
 var path = require('path');
 var Promise = require('bluebird');
 var validator = require('validator');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
 var database = require(path.join(__dirname, 'database'));
 var user_common = require(path.normalize(path.join(__dirname, '..', 'public', 'javascripts', 'common', 'user')));
