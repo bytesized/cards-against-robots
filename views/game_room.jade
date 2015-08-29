@@ -162,7 +162,7 @@ block content
 					- inner_container_class[3] = 'col-xs-4';
 					each played_object, index in room.current_game.played
 						- player_cards = played_object.cards
-						div(class=outer_container_class[player_cards.length])
+						div.game_card-czar_card_group(class=outer_container_class[player_cards.length])
 							div(class=(player_cards.length > 1 ? 'card_panel' : ''))
 								.row
 									each card_description in player_cards
