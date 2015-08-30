@@ -68,7 +68,10 @@ html
 									a(href='/deck/edit') Edit Decks
 							ul.nav.navbar-nav.navbar-right
 								li
-									a(href='/user/logout') Logout
+									if user
+										a(href='/user/logout') Logout
+									else
+										a(href='/user/login') Login
 
 		div(style='margin: 20px;')
 			//- Generic modal for scripts to use

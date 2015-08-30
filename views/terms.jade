@@ -4,11 +4,9 @@ block headers
 	title Terms and Conditions - #{config.site_name}
 
 block content
-	.container
-		//- If a user is logged in, show the navbar
-		if user
-			.row
-				+game_navbar()
+	.container=
+		.row
+			+game_navbar()
 		.row
 			.col-xs-12
 				h1 Terms of Service 
