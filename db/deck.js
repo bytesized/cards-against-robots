@@ -302,7 +302,7 @@ var get_standard_and_default = function()
 		for (var i = 0; i < config.standard_decks.length; i++)
 			standard_decks.push(lookup[config.standard_decks[i]]);
 
-		return [default_decks, standard_decks];
+		return [standard_decks, default_decks];
 	});
 };
 
