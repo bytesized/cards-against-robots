@@ -26,6 +26,7 @@ var add = function(user_id, connection)
 
 			var deck_promise = deck.create_with_connection(new_deck, connection).then(function(created_deck)
 			{
+				var deck_name = created_deck.name;
 				var card_promises = [];
 				for (var i = 0; i < decks[deck_name].white.length; i++)
 				{
