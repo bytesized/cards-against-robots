@@ -22,6 +22,11 @@ block content
 					+validation_errors
 		.row
 			.col-xs-12
+				p
+					big
+						| This list does not yet refresh in any fashion. You must refresh the list to see new games.
+		.row
+			.col-xs-12
 				#game_list.list-group
 					- room_count = 0;
 					each room_id in room.room_ids
