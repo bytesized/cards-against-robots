@@ -9,6 +9,7 @@ var path = require('path');
 var debug = require('debug')('cards_against_robots:server');
 var express = require('express');
 var http = require('http');
+var https = require('https');
 var fs = require('fs');
 
 // Create uninitialized express app
@@ -18,14 +19,52 @@ var app = express();
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '80');
-app.set('port', port);
+var key_path = path.normalize(path.join(__dirname, '..', 'keys', 'key.pem'));
+var cert_path = path.normalize(path.join(__dirname, '..', 'keys', 'cert.pem'));
+var ca_path = path.normalize(path.join(__dirname, '..', 'keys', 'ca.crt'));
 
-/**
- * Create HTTPS server.
- */
+var server;
+if (fs.existsSync(key_path) && fs.existsSync(cert_path))
+{
+	var port = normalizePort(process.env.PORT || '443');
+	app.set('port', port);
 
-var server = http.createServer(app);
+	/**
+	 * Create HTTPS server.
+	 */
+
+	var server_options = {
+		key: fs.readFileSync(key_path),
+		cert: fs.readFileSync(cert_path)
+	};
+
+	if (fs.existsSync(ca_path))
+		server_options.ca = fs.readFileSync(ca_path);
+
+	server = https.createServer(server_options, app);
+
+	// Redirect HTTP requests to HTTPS
+	if (port != 80)
+	{
+		http.createServer(function(req, res)
+		{
+			res.writeHead(302, { "Location": "https://" + req.headers['host'] + req.url });
+			res.end();
+		}).listen(80);
+	}
+} else
+{
+	// If keys do not exist, just use regular HTTP (instead of HTTPS)
+	// NOTE: This feature ONLY exists because some hosting services, such as 
+	// Microsoft Azure take care of SSL on their own, so HTTPS can be provided
+	// without configuring it here
+	// HTTP connections are NOT SUPPORTED and WILL NOT WORK because secure cookies
+	// are enabled.
+	var port = normalizePort(process.env.PORT || '80');
+	app.set('port', port);
+
+	server = http.createServer(app);
+}
 
 // Initialize app
 app = require(path.normalize(path.join(__dirname, '..', 'app')))(app, server);
