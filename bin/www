@@ -63,6 +63,27 @@ if (fs.existsSync(key_path) && fs.existsSync(cert_path))
 	var port = normalizePort(process.env.PORT || '80');
 	app.set('port', port);
 
+	// Trick express into recognizing Azure's secure proxy, also redirect insecure urls
+	// to secure ones
+	app.set('trust proxy', 1);
+	app.use(function(req, res, next)
+	{
+		if (req.headers['x-arr-ssl'] && !req.headers['x-forwarded-proto'])
+		{
+			req.headers['x-forwarded-proto'] = 'https';
+			return next();
+		} else if (req.protocol === 'https')
+		{
+			return next();
+		} else
+		{
+			// This is not secure. Forward to a secure url
+			res.writeHead(301, {'Location': 'https://' +  config.redirect_domain + req.url});
+			res.end();
+			return
+		}
+	});
+
 	server = http.createServer(app);
 }
 
