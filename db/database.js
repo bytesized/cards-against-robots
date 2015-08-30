@@ -2,7 +2,9 @@
 var Promise = require('bluebird');
 var path = require('path');
 var mysql = require('mysql');
+var fs = require('fs');
 var config = require(path.normalize(path.join(__dirname, '..', 'configuration')));
+var pfx_path = path.normalize(path.join(__dirname, '..', 'keys', 'mysql.pfx'));
 
 var database_error = function(message, code)
 {
@@ -21,13 +23,16 @@ database_error.prototype.constructor = database_error;
 // the Promise will be fulfilled if the database and tables already exist)
 var init = function()
 {
-	var connection = mysql.createConnection({
+	var settings = {
 		host     : config.mysql.host,
 		port     : config.mysql.port,
 		user     : config.mysql.username,
 		password : config.mysql.password,
 		timezone : 'UTC'
-	});
+	};
+	if (config.mysql.ssl)
+		settings.pfx = fs.readFileSync(pfx_path);
+	var connection = mysql.createConnection(settings);
 	var query = 'CREATE DATABASE IF NOT EXISTS ' + connection.escapeId(config.mysql.database);
 	return connection.queryAsync(query).then(function()
 	{
@@ -56,7 +61,7 @@ var init = function()
 // manually by this module's `init()` during configuration
 var create_pool = function()
 {
-	module.exports.pool = mysql.createPool({
+	var settings = {
 		connectionLimit : config.mysql.connection_limit,
 		host            : config.mysql.host,
 		port            : config.mysql.port,
@@ -71,7 +76,10 @@ var create_pool = function()
 		                  	else
 		                  		return next();
 		                  }
-	});
+	};
+	if (config.mysql.ssl)
+		settings.pfx = fs.readFileSync(pfx_path);
+	module.exports.pool = mysql.createPool(settings);
 };
 
 // Returns a Disposer. Will probably only be used for with_transaction

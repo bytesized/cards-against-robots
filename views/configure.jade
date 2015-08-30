@@ -19,6 +19,7 @@ block content
 	- if (typeof form_data.mysql.username === 'undefined')          form_data.mysql.username         = '';
 	//- Omit MYSQL password
 	- if (typeof form_data.mysql.connection_limit === 'undefined')  form_data.mysql.connection_limit = '100';
+	- if (typeof form_data.mysql.ssl === 'undefined')               form_data.mysql.ssl              = false;
 	- if (typeof form_data.invitations_required === 'undefined')    form_data.invitations_required   = false;
 	- if (!form_data.field_sizes) form_data.field_sizes = {};
 	- if (typeof form_data.field_sizes.token === 'undefined')       form_data.field_sizes.token      = '50';
@@ -85,140 +86,151 @@ block content
 					ul.list-group
 						+validation_errors
 						+messages('list-group-item-info', messages)
-	form(class='form-horizontal', method='POST')
+	form.form-horizontal(method='POST')
 		.form-group(class=input_status.site_name)
-			label(for='site_name_input', class='control-label col-xs-2') Site Name
+			label.control-label.col-xs-2(for='site_name_input') Site Name
 			.col-xs-10
-				input(type='text', class='form-control', id='site_name_input', name='site_name', placeholder='Site Name', value=form_data.site_name, readonly=inputs_disabled)
+				input.form-control.no_transform(type='text', id='site_name_input', name='site_name', placeholder='Site Name', value=form_data.site_name, readonly=inputs_disabled)
 		.form-group(class=input_status.card_icon)
-			label(for='card_icon_input', class='control-label col-xs-2') Card Icon Filename
+			label.control-label.col-xs-2(for='card_icon_input') Card Icon Filename
 			.col-xs-10
-				input(type='text', class='form-control', id='card_icon_input', name='card_icon', placeholder='Filename', value=form_data.card_icon.filename, readonly=inputs_disabled)
-				span(class='help-block')
+				input.form-control.no_transform(type='text', id='card_icon_input', name='card_icon', placeholder='Filename', value=form_data.card_icon.filename, readonly=inputs_disabled)
+				span.help-block
 					| The card icon will be placed in the bottom left corner of each card and must be placed in the public/images directory. Keep in mind that cards are 300px tall by 200px
 					| wide and must also contain the card text. A good size for this icon might be 35px high by 55px wide.
 		.form-group
-			label(for='card_icon_height_input', class='control-label col-xs-2', class=input_status.card_dimensions) Card Icon Dimensions
+			label.control-label.col-xs-2(for='card_icon_height_input', class=input_status.card_dimensions) Card Icon Dimensions
 			.col-xs-5
 				.input-group(class=input_status.card_icon_height)
-					input(type='text', class='form-control', id='card_icon_height_input', name='card_icon_height', placeholder='Height', value=form_data.card_icon.height, readonly=inputs_disabled)
-					span(class='input-group-addon') px
+					input.form-control.no_transform(type='text', id='card_icon_height_input', name='card_icon_height', placeholder='Height', value=form_data.card_icon.height, readonly=inputs_disabled)
+					span.input-group-addon px
 			.col-xs-5
 				.input-group(class=input_status.card_icon_width)
-					input(type='text', class='form-control', id='card_icon_width_input', name='card_icon_width', placeholder='Width', value=form_data.card_icon.width, readonly=inputs_disabled)
-					span(class='input-group-addon') px
+					input.form-control.no_transform(type='text', id='card_icon_width_input', name='card_icon_width', placeholder='Width', value=form_data.card_icon.width, readonly=inputs_disabled)
+					span.input-group-addon px
 		.form-group(class=input_status.mysql_host)
-			label(for='mysql_host_input', class='control-label col-xs-2') MYSQL Host
+			label.control-label.col-xs-2(for='mysql_host_input') MYSQL Host
 			.col-xs-10
-				input(type='text', class='form-control', id='mysql_host_input', name='mysql_host', placeholder='Host', value=form_data.mysql.host, readonly=inputs_disabled)
+				input.form-control.no_transform(type='text', id='mysql_host_input', name='mysql_host', placeholder='Host', value=form_data.mysql.host, readonly=inputs_disabled)
 		.form-group(class=input_status.mysql_port)
-			label(for='mysql_port_input', class='control-label col-xs-2') MYSQL Port
+			label.control-label.col-xs-2(for='mysql_port_input') MYSQL Port
 			.col-xs-10
-				input(type='text', class='form-control', id='mysql_port_input', name='mysql_port', placeholder='Port', value=form_data.mysql.port, readonly=inputs_disabled)
+				input.form-control.no_transform(type='text', id='mysql_port_input', name='mysql_port', placeholder='Port', value=form_data.mysql.port, readonly=inputs_disabled)
 		.form-group(class=input_status.mysql_database)
-			label(for='mysql_database_input', class='control-label col-xs-2') MYSQL DB name
+			label.control-label.col-xs-2(for='mysql_database_input') MYSQL DB name
 			.col-xs-10
-				input(type='text', class='form-control', id='mysql_database_input', name='mysql_database', placeholder='Database', value=form_data.mysql.database, readonly=inputs_disabled)
+				input.form-control.no_transform(type='text', id='mysql_database_input', name='mysql_database', placeholder='Database', value=form_data.mysql.database, readonly=inputs_disabled)
 		.form-group(class=input_status.mysql_username)
-			label(for='mysql_username_input', class='control-label col-xs-2') MYSQL Username
+			label.control-label.col-xs-2(for='mysql_username_input') MYSQL Username
 			.col-xs-10
-				input(type='text', class='form-control', id='mysql_username_input', name='mysql_username', placeholder='Username', value=form_data.mysql.username, readonly=inputs_disabled)
+				input.form-control.no_transform(type='text', id='mysql_username_input', name='mysql_username', placeholder='Username', value=form_data.mysql.username, readonly=inputs_disabled)
 		.form-group(class=input_status.mysql_password)
-			label(for='mysql_password_input', class='control-label col-xs-2') MYSQL Password
+			label.control-label.col-xs-2(for='mysql_password_input') MYSQL Password
 			.col-xs-10
-				input(type='password', class='form-control', id='mysql_password_input', name='mysql_password', placeholder='Password', value='', readonly=inputs_disabled)
-				span(class='help-block') This will be stored in plaintext in configuration.json.
+				input.form-control.no_transform(type='password', id='mysql_password_input', name='mysql_password', placeholder='Password', value='', readonly=inputs_disabled)
+				span.help-block This will be stored in plaintext in configuration.json.
 		.form-group(class=input_status.mysql_connection_limit)
-			label(for='mysql_connection_limit_input', class='control-label col-xs-2') MYSQL Connection Limit
+			label.control-label.col-xs-2(for='mysql_connection_limit_input') MYSQL Connection Limit
 			.col-xs-10
-				input(type='text', class='form-control', id='mysql_connection_limit_input', name='mysql_connection_limit', placeholder='Limit', value=form_data.mysql.connection_limit, readonly=inputs_disabled)
+				input.form-control.no_transform(type='text', id='mysql_connection_limit_input', name='mysql_connection_limit', placeholder='Limit', value=form_data.mysql.connection_limit, readonly=inputs_disabled)
+		.form-group(class=input_status.mysql_ssl)
+			label.control-label.col-xs-2(for='mysql_ssl_checkbox') MYSQL SSL
+			.col-xs-10
+				input.form-control.no_transform(type='checkbox', style='width: auto;', id='mysql_ssl_checkbox', name='mysql_ssl', checked=form_data.mysql.ssl, disabled=inputs_disabled)
+				span.help-block If checked, a PFX key will be loaded from keys/mysql.pfx and used to encrypt the MYSQL connection
 		.form-group(class=input_status.invitations_required)
-			label(for='invitations_required_checkbox', class='control-label col-xs-2') Require Invitations
+			label.control-label.col-xs-2(for='invitations_required_checkbox') Require Invitations
 			.col-xs-10
-				input(type='checkbox', class='form-control', style='width: auto;', id='invitations_required_checkbox', name='invitations_required', checked=form_data.invitations_required, disabled=inputs_disabled)
-				span(class='help-block') If invitations are required, only those invited by administrators can make accounts. If invitations are not required, anyone can make an account
+				input.form-control.no_transform(type='checkbox', style='width: auto;', id='invitations_required_checkbox', name='invitations_required', checked=form_data.invitations_required, disabled=inputs_disabled)
+				span.help-block If invitations are required, only those invited by administrators can make accounts. If invitations are not required, anyone can make an account
 		.form-group(class=input_status.token_length)
-			label(for='token_length_input', class='control-label col-xs-2') Token Length
+			label.control-label.col-xs-2(for='token_length_input') Token Length
 			.col-xs-10
-				input(type='text', class='form-control', id='token_length_input', name='token_length', placeholder='Length', value=form_data.field_sizes.token, readonly=inputs_disabled)
-				span(class='help-block') Length (in characters) of randomly generated tokens used for things like invitation keys. This number must be even.
+				input.form-control.no_transform(type='text', id='token_length_input', name='token_length', placeholder='Length', value=form_data.field_sizes.token, readonly=inputs_disabled)
+				span.help-block Length (in characters) of randomly generated tokens used for things like invitation keys. This number must be even.
 		.form-group(class=input_status.username_length)
-			label(for='username_length_input', class='control-label col-xs-2') Username Length
+			label.control-label.col-xs-2(for='username_length_input') Username Length
 			.col-xs-10
-				input(type='text', class='form-control', id='username_length_input', name='username_length', placeholder='Length', value=form_data.field_sizes.username, readonly=inputs_disabled)
-				span(class='help-block') Maximum number of characters allowed in usernames.
+				input.form-control.no_transform(type='text', id='username_length_input', name='username_length', placeholder='Length', value=form_data.field_sizes.username, readonly=inputs_disabled)
+				span.help-block Maximum number of characters allowed in usernames.
 		.form-group(class=input_status.deck_name_length)
-			label(for='deck_name_length_input', class='control-label col-xs-2') Deck Name Length
+			label.control-label.col-xs-2(for='deck_name_length_input') Deck Name Length
 			.col-xs-10
-				input(type='text', class='form-control', id='deck_name_length_input', name='deck_name_length', placeholder='Length', value=form_data.field_sizes.deck_name, readonly=inputs_disabled)
-				span(class='help-block') Maximum number of characters allowed in deck names.
+				input.form-control.no_transform(type='text', id='deck_name_length_input', name='deck_name_length', placeholder='Length', value=form_data.field_sizes.deck_name, readonly=inputs_disabled)
+				span.help-block Maximum number of characters allowed in deck names.
 		.form-group(class=input_status.card_text_length)
-			label(for='card_text_length_input', class='control-label col-xs-2') Card Text Length
+			label.control-label.col-xs-2(for='card_text_length_input') Card Text Length
 			.col-xs-10
-				input(type='text', class='form-control', id='card_text_length_input', name='card_text_length', placeholder='Length', value=form_data.field_sizes.card_text, readonly=inputs_disabled)
-				span(class='help-block') Maximum number of characters allowed per card.
+				input.form-control.no_transform(type='text', id='card_text_length_input', name='card_text_length', placeholder='Length', value=form_data.field_sizes.card_text, readonly=inputs_disabled)
+				span.help-block Maximum number of characters allowed per card.
 		.form-group(class=input_status.room_name_length)
-			label(for='room_name_length_input', class='control-label col-xs-2') Room Name Length
+			label.control-label.col-xs-2(for='room_name_length_input') Room Name Length
 			.col-xs-10
-				input(type='text', class='form-control', id='room_name_length_input', name='room_name_length', placeholder='Length', value=form_data.field_sizes.room_name, readonly=inputs_disabled)
-				span(class='help-block') Maximum number of characters allowed in room names.
+				input.form-control.no_transform(type='text', id='room_name_length_input', name='room_name_length', placeholder='Length', value=form_data.field_sizes.room_name, readonly=inputs_disabled)
+				span.help-block Maximum number of characters allowed in room names.
 		.form-group(class=input_status.player_timeout)
-			label(for='player_timeout_input', class='control-label col-xs-2') Player Timeout
+			label.control-label.col-xs-2(for='player_timeout_input') Player Timeout
 			.col-xs-10
 				.input-group
-					input(type='text', class='form-control', id='player_timeout_input', name='player_timeout', placeholder='Timeout', value=form_data.player_timeout, readonly=inputs_disabled)
-					span(class='input-group-addon') minutes
-				span(class='help-block')
+					input.form-control.no_transform(type='text', id='player_timeout_input', name='player_timeout', placeholder='Timeout', value=form_data.player_timeout, readonly=inputs_disabled)
+					span.input-group-addon minutes
+				span.help-block
 					| This timeout controls two things. If a user in an active game has been idle for this long, they are kicked out. Additionally,
 					| if a game stays in the waiting room for this long, the users are disconnected and the game is closed. In this case, the game
 					| host will be given the option to reset this timer in the event that the players are waiting for another player.
 		.form-group(class=input_status.contact_email)
-			label(for='contact_email_input', class='control-label col-xs-2') Contact Email
+			label.control-label.col-xs-2(for='contact_email_input') Contact Email
 			.col-xs-10
-				input(type='text', class='form-control', id='contact_email_input', name='contact_email', placeholder='Email', value=form_data.contact_email, readonly=inputs_disabled)
-				span(class='help-block') Email from the &quot;Contact&quot; page will be sent here. The email address itself will not be available to users.
+				input.form-control.no_transform(type='text', id='contact_email_input', name='contact_email', placeholder='Email', value=form_data.contact_email, readonly=inputs_disabled)
+				span.help-block Email from the &quot;Contact&quot; page will be sent here. The email address itself will not be available to users.
 		.form-group(class=input_status.smtp_host)
-			label(for='smtp_host_input', class='control-label col-xs-2') SMTP Host
+			label.control-label.col-xs-2(for='smtp_host_input') SMTP Host
 			.col-xs-10
-				input(type='text', class='form-control', id='smtp_host_input', name='smtp_host', placeholder='Hostname', value=form_data.smtp.host, readonly=inputs_disabled)
-				span(class='help-block') The SMTP host to log into to send email
+				input.form-control.no_transform(type='text', id='smtp_host_input', name='smtp_host', placeholder='Hostname', value=form_data.smtp.host, readonly=inputs_disabled)
+				span.help-block The SMTP host to log into to send email
 		.form-group(class=input_status.smtp_port)
-			label(for='smtp_port_input', class='control-label col-xs-2') SMTP Port
+			label.control-label.col-xs-2(for='smtp_port_input') SMTP Port
 			.col-xs-10
-				input(type='text', class='form-control', id='smtp_port_input', name='smtp_port', placeholder='Port Number', value=form_data.smtp.port, readonly=inputs_disabled)
+				input.form-control.no_transform(type='text', id='smtp_port_input', name='smtp_port', placeholder='Port Number', value=form_data.smtp.port, readonly=inputs_disabled)
 		.form-group(class=input_status.smtp_username)
-			label(for='smtp_username_input', class='control-label col-xs-2') SMTP Username
+			label.control-label.col-xs-2(for='smtp_username_input') SMTP Username
 			.col-xs-10
-				input(type='text', class='form-control', id='smtp_username_input', name='smtp_username', placeholder='Username', value=form_data.smtp.username, readonly=inputs_disabled)
-				span(class='help-block') The username to log into the SMTP server with
+				input.form-control.no_transform(type='text', id='smtp_username_input', name='smtp_username', placeholder='Username', value=form_data.smtp.username, readonly=inputs_disabled)
+				span.help-block The username to log into the SMTP server with
 		.form-group(class=input_status.smtp_password)
-			label(for='smtp_password_input', class='control-label col-xs-2') SMTP Password
+			label.control-label.col-xs-2(for='smtp_password_input') SMTP Password
 			.col-xs-10
-				input(type='password', class='form-control', id='smtp_password_input', name='smtp_password', placeholder='Password', readonly=inputs_disabled)
-				span(class='help-block') These credentials will be stored in plaintext in configuration.json.
+				input.form-control.no_transform(type='password', id='smtp_password_input', name='smtp_password', placeholder='Password', readonly=inputs_disabled)
+				span.help-block These credentials will be stored in plaintext in configuration.json.
 		.form-group(class=input_status.smtp_send_as)
-			label(for='smtp_send_as_input', class='control-label col-xs-2') Source Email
+			label.control-label.col-xs-2(for='smtp_send_as_input') Source Email
 			.col-xs-10
-				input(type='text', class='form-control', id='smtp_send_as_input', name='smtp_send_as', placeholder='Email', value=form_data.smtp.send_as, readonly=inputs_disabled)
-				span(class='help-block')
+				input.form-control.no_transform(type='text', id='smtp_send_as_input', name='smtp_send_as', placeholder='Email', value=form_data.smtp.send_as, readonly=inputs_disabled)
+				span.help-block
 					| This is the email address that emails will be sent from the website as. When anyone receives an email sent from the website, this 
 					| address will be in the &quot;From:&quot; field
+		.form-group(class=input_status.redirect_domain)
+			label.control-label.col-xs-2(for='redirect_domain_input') Force Domain
+			.col-xs-10
+				input.form-control.no_transform(type='text', id='redirect_domain_input', name='redirect_domain', placeholder='Domain', value=form_data.redirect_domain, readonly=inputs_disabled)
+				span.help-block
+					| If this field is not blank, all requests directed at domains that are NOT this will be sent a 301 redirect to this domain
 		.form-group(class=input_status.super_user_name)
-			label(for='super_user_name_input', class='control-label col-xs-2') Username
+			label.control-label.col-xs-2(for='super_user_name_input') Username
 			.col-xs-10
-				input(type='text', class='form-control', id='super_user_name_input', name='super_user_name', placeholder='Username', value=form_data.super_user_name, readonly=inputs_disabled)
-				span(class='help-block') The username to create for you. This user will be the &quot;primary super user&quot;
+				input.form-control.no_transform(type='text', id='super_user_name_input', name='super_user_name', placeholder='Username', value=form_data.super_user_name, readonly=inputs_disabled)
+				span.help-block The username to create for you. This user will be the &quot;primary super user&quot;
 		.form-group(class=input_status.super_user_password)
-			label(for='super_user_password_input', class='control-label col-xs-2') Password
+			label.control-label.col-xs-2(for='super_user_password_input') Password
 			.col-xs-10
-				input(type='password', class='form-control', id='super_user_password_input', name='super_user_password', placeholder='Password', value='', readonly=inputs_disabled)
-				span(class='help-block')
+				input.form-control.no_transform(type='password', id='super_user_password_input', name='super_user_password', placeholder='Password', value='', readonly=inputs_disabled)
+				span.help-block
 					| The primary super user credentials are just about the only thing on this page that will NOT be stored in plaintext in
 					| the configuration.json file
 		.form-group(class=input_status.super_user_password_confirm)
-			label(for='super_user_password_confirm_input', class='control-label col-xs-2') Confirm Password
+			label.control-label.col-xs-2(for='super_user_password_confirm_input') Confirm Password
 			.col-xs-10
-				input(type='password', class='form-control', id='super_user_password_confirm_input', name='super_user_password_confirm', placeholder='Password', value='', readonly=inputs_disabled)
+				input.form-control.no_transform(type='password', id='super_user_password_confirm_input', name='super_user_password_confirm', placeholder='Password', value='', readonly=inputs_disabled)
 		.row
 			.col-xs-offset-2.col-xs-10
 				p
@@ -226,5 +238,5 @@ block content
 					| the developers of the site blameless for any problems legal or otherwise.
 		.form-group
 			.col-xs-offset-2.col-xs-10
-				button(type='submit', class='btn btn-primary', disabled=inputs_disabled) Configure Site
+				button.btn.btn-primary(type='submit', disabled=inputs_disabled) Configure Site
 

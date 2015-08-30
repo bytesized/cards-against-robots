@@ -111,6 +111,18 @@ var config_fields =
 		sanitize: function(req, name) { return req.sanitize(name).toInt(10); }
 	},
 	{
+		name: 'mysql.ssl',
+		form_name: 'mysql_ssl',
+		sanitize: function(req, name)
+		{
+			if (req.body[name])
+				return true;
+			else
+				return false;
+		},
+		is_checkbox: true
+	},
+	{
 		name: 'invitations_required',
 		form_name: 'invitations_required',
 		sanitize: function(req, name)
@@ -201,6 +213,19 @@ var config_fields =
 		validate: function(req, name)
 			{ req.checkBody(name, 'SMTP Source Email must be a valid email address').isEmail(); },
 		sanitize: function(req, name) { return req.sanitize(name).trim(); }
+	},
+	{
+		name: 'redirect_domain',
+		form_name: 'redirect_domain',
+		//validate: function(req, name)
+		//	{ req.checkBody(name, 'Contact Email must be a valid email address').isEmail(); },
+		sanitize: function(req, name)
+		{
+			if (!req.body[name] || req.body[name] === '')
+				return null;
+			else
+				return req.sanitize(name).trim();
+		}
 	},
 	{
 		name: 'super_user_name',

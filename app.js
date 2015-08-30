@@ -32,6 +32,7 @@ module.exports = function(app, server)
 	app_config.flash = require(path.join(__dirname, 'config', 'flash'));
 	app_config.configuration = require(path.join(__dirname, 'config', 'configuration'));
 	app_config.session_middleware = require(path.join(__dirname, 'config', 'session_middleware'));
+	app_config.force_domain = require(path.join(__dirname, 'config', 'force_domain'));
 	// Some modules should be initialized when the server starts, but aren't actually needed
 	// in this file
 	require(path.join(__dirname, 'common', 'words'));
@@ -48,6 +49,8 @@ module.exports = function(app, server)
 	app.use(logger('dev'));
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({ extended: false }));
+
+	app.use(app_config.force_domain);
 
 	app.use(app_config.session_middleware);
 
