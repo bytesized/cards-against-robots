@@ -78,7 +78,7 @@ if (fs.existsSync(key_path) && fs.existsSync(cert_path))
 		} else
 		{
 			// This is not secure. Forward to a secure url
-			res.writeHead(301, {'Location': 'https://' +  config.redirect_domain + req.url});
+			res.writeHead(301, {'Location': 'https://' +  req.get('Host') + req.url});
 			res.end();
 			return
 		}
