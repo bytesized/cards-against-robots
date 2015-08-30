@@ -8,10 +8,19 @@ var room = require(path.normalize(path.join(__dirname, '..', 'db', 'room')));
 var ensure_user = require(path.normalize(path.join(__dirname, '..', 'common', 'ensure_user')));
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', ensure_user.authenticated, function(req, res, next)
+function get_user(req)
 {
-	res.render('game', {});
+	if (req.isAuthenticated())
+		return req.user;
+	else
+		return null;
+};
+
+/* GET home page. */
+router.get('/', function(req, res, next)
+{
+	var user = get_user(req);
+	res.render('game', {user: user});
 });
 
 router.get('/create', ensure_user.authenticated, function(req, res, next)

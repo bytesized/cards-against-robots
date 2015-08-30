@@ -16,5 +16,33 @@ block content
 				ul.list-group
 					+flash_messages
 		.row
-			.col-xs-12
-				h3 Welcome #{user.username}
+			.col-xs-12(class=(user ? '' : 'col-md-6 col-lg-8'), style='margin-bottom: 50px;')
+				if user
+					h3 Welcome #{user.username}
+				else
+					h3
+						| Welcome to 
+						em #{config.site_name}
+						| , a 
+						a(href='http://cardsagainsthumanity.com/') Cards Against Humanity
+						|  Clone
+				p
+					big
+						| This site is still a work in progress; not all features currently work. Please visit 
+						a(href='https://github.com/bytesized/cards-against-robots') GitHub
+						|  for a list of known bugs and future developments
+			if !user
+				.col-xs-12.col-md-6.col-lg-4
+					h3 Login
+					form.form-horizontal(method='POST', action='/user/login')
+						.form-group
+							label.control-label.col-xs-12.col-sm-2.col-md-12(for='username_input', style='text-align: left;') Username
+							.col-xs-12.col-sm-10.col-md-12
+								input.form-control(type='text', id='username_input', name='username', placeholder='Username')
+						.form-group
+							label.control-label.col-xs-12.col-sm-2.col-md-12(for='password_input', style='text-align: left;') Password
+							.col-xs-12.col-sm-10.col-md-12
+								input.form-control(type='password', id='password_input', name='password', placeholder='Password')
+						.form-group
+							.col-xs-12.col-sm-10.col-sm-offset-2.col-md-12.col-md-offset-0
+								button.btn.btn-primary(type='submit') Login
