@@ -66,14 +66,14 @@ card.card_text_validation_fns =
 	{
 		fn: function(card_text)
 		{
-			if (card_text.match(/^[-a-zA-Z0-9_+=:().&%$^*!?'",;:\/ ]*$/) == null)
+			if (card_text.match(/^[-a-zA-Z0-9_+=:().&%$^*!?'",;:\/# ]*$/) == null)
 				return false;
 			else
 				return true;
 		},
 		msg: function(card_text)
 		{
-			return "Card text may only contain letters, numbers, spaces, commas, and these special characters: -,_,+,=,:,(,),.,&,%,$,^,*,!,?,',\",;,:,/";
+			return "Card text may only contain letters, numbers, spaces, commas, and these special characters: -,_,+,=,:,(,),.,&,%,$,^,*,!,?,',\",;,:,/,#";
 		}
 	}
 ];
@@ -194,11 +194,12 @@ if ((typeof module) === 'undefined')
 
 		this.removeClass('card_black');
 		this.removeClass('card_white');
+		var content_html = html.encode(card_object.text);
 		if(card_object.color === card.black)
 		{
 			// If the card color is black, fix consecutive blanks and display them
 			// as 7 underscores
-			card_object.text = card_object.text.replace(card.blank_regex, "$1_______");
+			content_html = content_html.replace(card.blank_regex, "$1<span class='card_blank'>_______</span>");
 			this.addClass('card_black');
 		} else
 		{
@@ -217,7 +218,7 @@ if ((typeof module) === 'undefined')
 
 		this.prepend("<div class='card_spacer'></div><div class='card_icon'></div>" +
 			"<div class='deck_name'>" + deck_name + "</div><span class='card_text'>" + 
-			html.encode(card_object.text) + "</span>");
+			content_html + "</span>");
 
 		var deck_name_div = this.find(".deck_name");
 		this.find(".card_icon").hover(function()
