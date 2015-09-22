@@ -1,4 +1,168 @@
 /*
- * This theme file is intended to allow customization of the site
- * IMPORTANT: It MUST BE RENAMED TO theme.styl TO TAKE EFFECT
+ * The theme file is intended to allow customization of the site.
+ * This template contains suggested selectors and CSS.
+ * 
+ * This file is written in stylus rather than CSS, for more
+ * information, see: http://learnboost.github.io/stylus/
+ * 
+ * IMPORTANT: THIS FILE MUST BE RENAMED TO theme.styl TO TAKE EFFECT
  */
+#logo
+	display: block
+	width: 
+	height: 
+	background-image: url(/images/logo_filename.png)
+	background-repeat: no-repeat
+	// The following should be used if the image needs to be scaled down to size
+	-webkit-background-size: contain
+	-moz-background-size: contain
+	-o-background-size: contain
+	background-size: contain
+
+body
+	background: 
+
+p, li
+
+a
+
+a:hover
+
+h1
+
+h2
+
+h2 small
+
+h3
+
+.navbar
+
+.navbar .navbar-nav > .active > a
+	// Active navbar tab
+
+.navbar .navbar-nav > li > a
+	// Inactive navbar tabs
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus
+	// Active nav-tab such as the
+	//     My Decks | Favorites | Popular | Search | Standard
+	// tabs on the Create Game page
+
+.nav-tabs > li > a:hover
+	// nav-tab on hover
+
+.nav-tabs > li.active > a,
+.nav-tabs > li > a
+	// All nav-tabs
+
+.nav > li > a:hover,
+.nav > li > a:focus
+	// navbar tab AND nav-tab on hover
+
+.list-group-item
+	// List items. Most notably, the deck lists on the Create Game
+	// page are list groups
+
+.list-group-item.list-group-item-danger
+	// Error messages. If you define the color of .list-group-item,
+	// you should define the error message color to override it.
+	// The default bootstrap color for this class is #A94442
+
+.list-group-item.list-group-item-success
+	// Success messages. If you define the color of .list-group-item,
+	// you should define the success message color to override it.
+	// The default bootstrap color for this class is #3C763D
+
+.list-group-item.list-group-item-info
+	// Informational messages. If you define the color of .list-group-item,
+	// you should define the info message color to override it.
+	// The default bootstrap color for this class is #31708F
+
+.control-label
+	// Label for form input
+
+.form-control
+
+.form-control[disabled],
+.form-control[readonly],
+fieldset[disabled] .form-control
+
+.checkbox
+
+.help-block
+	// Text under the form-control
+
+.has-error .help-block,
+.has-error .control-label
+	// Text surrounding a form-control when the input contains an error
+
+.has-success .help-block,
+.has-success .control-label
+	// Text surrounding a form-control when the input has been validated
+
+.popover-content
+	// Content of the popovers in which form feedback are given. For example,
+	// on the new user registration page, enter an invalid username and click
+	// on the password field.
+
+.popover-title
+	// Title of feedback popovers
+
+.no_transform
+	// If you want to do some sort of text-transform on the form-controls,
+	// this class is provided to prevent it from affecting inputs on the
+	// config page since it is important that that information be entered
+	// exactly correctly.
+	text-transform: none
+
+.btn-primary
+
+.btn-default
+
+.btn-default:active,
+.btn-default.active
+	// "Pressed" toggle button. For example, the selected card toggle button
+	// in the "Add Cards" tab in the Deck Editor
+
+.btn-group .btn:not(:first-child)
+	// If you do not like the default behavior of double borders between
+	// grouped buttons (one from each button)
+	border-left-width: 0px
+
+.dropdown-menu > li > a
+
+.card_text
+
+#footer li
+	// The left most footer link is size 0 by default. You can use
+	// border-left here to style the divider between footer links
+	border-left: 
+
+#footer .flex_container
+	// Footer container (do not change #footer)
+
+.panel-default
+	// Panels are used in serveral places to organize content. For example,
+	// in the Create Game page, the "Room Name" and "Room Password" fields
+	// are in their own panel.
+
+.jumbotron p
+	// Right now I think this is actually only used in the config page, but
+	// you might need to set the text color if another change has made it
+	// unreadable
+
+// This allows things to be changed for smartphones only
+@media (max-width:768px)
+	h1
+		// Especially if you use a large font, you may want to make
+		// it a little smaller on small screens
+		font-size: 
+
+	.navbar
+		// If you decided to make the navbar transparent, it should not
+		// be fully transparent on smartphone screens or it will look
+		// weird
+		background: rgba(, , , 0.2)
