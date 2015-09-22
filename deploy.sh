@@ -133,7 +133,10 @@ fi
 
 if [[ -d "$DEPLOYMENT_TARGET/public/stylesheets" ]]
 then
+  echo "Deleting cached stylesheets..."
   rm -rf "$DEPLOYMENT_TARGET/public/stylesheets/*" > /dev/null
+else
+  echo "Skipping deletion of cached stylesheets because $DEPLOYMENT_TARGET/public/stylesheets is not a directory"
 fi
 
 echo "Finished successfully."
