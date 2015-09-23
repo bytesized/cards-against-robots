@@ -17,7 +17,7 @@ border_radius()
 	display            : block
 	border_radius      : 5px
 	border             : 1px solid black
-	width              : card_width
+	width              : 100%
 	height             : card_height
 	padding            : card_padding
 	position           : relative
@@ -70,3 +70,13 @@ card_icon_top_margin = 5px
 	right            : 0
 	margin-left      : auto
 	margin-right     : auto
+
+// For card panels, we will steal the margin from the cards and use it for the card panel's
+// border, padding, and margin
+.card_panel
+	border: 2px solid #C0C0C0
+	border_radius(4px)
+	padding: 1px
+	margin: (card_margin - 3)
+.card_panel .card
+	margin: 0px;

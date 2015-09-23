@@ -100,32 +100,33 @@ block content
 						h3 View Deck
 						p Coming Soon!
 			#add_card-tab.tab-pane.fade.in.active
-				.col-xs-12.col-sm-8
-					.form-horizontal
-						.form-group
-							label.control-label.col-xs-12.col-sm-2 Card Text
-							.col-xs-12.col-sm-10
-								input#add_card-text_input.form-control(type='text', placeholder='Card Text', maxlength=config.field_sizes.card_text)
-						.form-group
-							label.control-label.col-xs-4.col-sm-2 Quantity
-							.col-xs-8.col-sm-4
-								input#add_card-quantity_input.form-control(type='text', placeholder='Quantity', value='1')
-						.form-group
-							.col-xs-12.col-sm-6.col-sm-offset-2.col-md-4
-								.btn-group.btn-group-justified(data-toggle='buttons')
-									label#white_button.btn.btn-default.btn-lg
-										input(type='radio', name='add_card-color_radio', value='white', checked='checked')
-										| White
-									label#black_button.btn.btn-default.btn-lg
-										input(type='radio', name='add_card-color_radio', value='black')
-										| Black
-						.form-group
-							.col-xs-12.col-sm-6.col-sm-offset-2
-								button#add_card-button.btn.btn-primary.btn-lg(autocomplete='off')
-									span(style='margin-left: 25px;margin-right: 25px;') Add
-									span.glyphicon.glyphicon-circle-arrow-right
-				.hidden-xs.col-sm-4
-					#add_card-preview.card.card_white
+				.row
+					.col-xs-12.col-md-9.col-lg-4_5ths
+						.form-horizontal
+							.form-group
+								label.control-label.col-xs-12.col-sm-2 Card Text
+								.col-xs-12.col-sm-10
+									input#add_card-text_input.form-control(type='text', placeholder='Card Text', maxlength=config.field_sizes.card_text)
+							.form-group
+								label.control-label.col-xs-4.col-sm-2 Quantity
+								.col-xs-8.col-sm-4
+									input#add_card-quantity_input.form-control(type='text', placeholder='Quantity', value='1')
+							.form-group
+								.col-xs-12.col-sm-6.col-sm-offset-2.col-md-4
+									.btn-group.btn-group-justified(data-toggle='buttons')
+										label#white_button.btn.btn-default.btn-lg
+											input(type='radio', name='add_card-color_radio', value='white', checked='checked')
+											| White
+										label#black_button.btn.btn-default.btn-lg
+											input(type='radio', name='add_card-color_radio', value='black')
+											| Black
+							.form-group
+								.col-xs-12.col-sm-6.col-sm-offset-2
+									button#add_card-button.btn.btn-primary.btn-lg(autocomplete='off')
+										span(style='margin-left: 25px;margin-right: 25px;') Add
+										span.glyphicon.glyphicon-circle-arrow-right
+					.hidden-xs.hidden-sm.col-md-3.col-lg-5ths
+						#add_card-preview.card.card_white
 			#browse_cards-tab.tab-pane.fade
 				.row
 					.col-xs-12
