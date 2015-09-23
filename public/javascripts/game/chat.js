@@ -5,12 +5,14 @@ var chat = {};
 chat.button_selector = '#chat-button';
 chat.input_selector = '#chat-input';
 chat.window_selector = '#chat-window';
+chat.tab_selector = '#chat-tab';
 
 $(document).ready(function()
 {
 	chat.button = $(chat.button_selector);
 	chat.input = $(chat.input_selector);
 	chat.window = $(chat.window_selector);
+	chat.tab = $(chat.tab_selector);
 
 	chat.input.keyup(function(event)
 	{
@@ -22,11 +24,20 @@ $(document).ready(function()
 	chat.send_message = function()
 	{
 		var text = chat.input.val();
+		if (text == '')
+			return;
+
 		chat.input.val('');
 
 		room_socket.emit('chat', text);
 	};
 	chat.button.on('click.chat', chat.send_message);
+
+	chat.scroll_bottom = function()
+	{
+		chat.window.scrollTop(chat.window[0].scrollHeight);
+	};
+	chat.tab.on('shown.bs.tab', chat.scroll_bottom);
 
 	chat.receive_message = function(msg)
 	{
@@ -37,7 +48,7 @@ $(document).ready(function()
 		else if (msg.type === 'html_notification')
 			chat.window.append('<p>' + msg.text + '</p>');
 
-		chat.window.scrollTop(chat.window[0].scrollHeight);
+		chat.scroll_bottom();
 	};
 	room_socket.on('chat', function(msg)
 	{

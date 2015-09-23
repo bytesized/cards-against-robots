@@ -88,9 +88,9 @@ block content
 								span#player-must_play_count #{room.player_list.length - 1}
 							ul.nav.nav-tabs
 								li.active
-									a(data-toggle="tab" href='#chat') Chat
+									a#chat-tab(data-toggle="tab", href='#chat') Chat
 								li
-									a(data-toggle="tab" href='#score') Score
+									a(data-toggle="tab", href='#score') Score
 						div(style='height: calc(100% - 42px)')
 							.panel.panel-default(style='margin-bottom: 0px; height: 100%;')
 								.panel-body.tab-content(style='height: 100%;')
@@ -112,7 +112,7 @@ block content
 														i #{msg.text}
 												if msg.type === 'html_notification'
 													p !{msg.text}
-									#score.tab-pane.fade.hard_wrap(style='overflow-y: scroll;')
+									#score.tab-pane.fade.hard_wrap(style='overflow-y: auto;')
 										ul.list-unstyled
 											each player_id in room.player_list
 												- player = room.players[player_id];
