@@ -87,8 +87,8 @@ block content
 								| /
 								span#player-must_play_count #{room.player_list.length - 1}
 							ul.nav.nav-tabs
-								li.active
-									a#chat-tab(data-toggle="tab", href='#chat') Chat
+								li#chat-tab.active
+									a(data-toggle="tab", href='#chat') Chat
 								li
 									a(data-toggle="tab", href='#score') Score
 						div(style='height: calc(100% - 42px)')

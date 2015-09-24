@@ -925,7 +925,7 @@ var choose_czar_card = function(player_id, user_id)
 		return replacement;
 	});
 	notify_string += '&quot;' + completed_text + '&quot;</i>';
-	var msg = {type: 'html_notification', text: notify_string};
+	var msg = {type: 'html_notification', text: notify_string, no_notify: true};
 	room.chat.push(msg);
 
 	// Don't bother resetting the timer here, both of the following functions do it anyways
