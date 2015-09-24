@@ -25,6 +25,11 @@ timeout.expires_in = function(milliseconds)
 	}
 };
 
+timeout.reset = function()
+{
+	timeout.expires_in(config.player_timeout);
+}
+
 // Only warns you if you are the host
 timeout.warn = function()
 {
@@ -44,8 +49,14 @@ timeout.warn = function()
 
 room_socket.on('reset_timer', function()
 {
-	timeout.expires_in(config.player_timeout);
+	timeout.reset();
 });
+
+player.on_count_change(function(count, increased)
+{
+	if (increased)
+		timeout.reset();
+})
 
 room_socket.on('timeout_expired', function()
 {

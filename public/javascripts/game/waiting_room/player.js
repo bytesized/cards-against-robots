@@ -73,7 +73,7 @@ $(document).ready(function()
 		button.on('click.player', player.kick);
 		player.add_tooltips(player_slot.find('.' + player.kick_button_class));
 
-		player.notify_count_change();
+		player.notify_count_change(true);
 	};
 	room_socket.on('player_join', function(data)
 	{
@@ -109,7 +109,7 @@ $(document).ready(function()
 		player_slot.remove();
 		player.list.append(player_slot);
 
-		player.notify_count_change();
+		player.notify_count_change(false);
 
 		if (data.new_host)
 			player.set_host(data.new_host);
@@ -184,17 +184,17 @@ $(document).ready(function()
 		}).length;
 	};
 
-	// Calls the given function with the new player count as an argument whenever
-	// the player count changes
+	// Calls the given function with the new player count, and count_increased as
+	// an arguments whenever the player count changes
 	player.on_count_change = function(fn)
 	{
 		player.count_change_fns.push(fn);
 	};
 
-	player.notify_count_change = function()
+	player.notify_count_change = function(increased)
 	{
 		var count = player.count();
 		for (var i = 0; i < player.count_change_fns.length; i++)
-			player.count_change_fns[i](count);
+			player.count_change_fns[i](count, increased);
 	};
 });

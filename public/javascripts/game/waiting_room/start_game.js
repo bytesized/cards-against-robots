@@ -7,7 +7,7 @@ $(document).ready(function()
 {
 	start_game.button = $(start_game.button_selector);
 
-	start_game.update_button = function(count)
+	start_game.update_button = function(count, increased)
 	{
 		if (typeof count === 'undefined')
 			count = player.count();
