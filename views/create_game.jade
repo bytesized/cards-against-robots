@@ -22,7 +22,6 @@ block scripts
 	script(src='/javascripts/create_game/deck_list.js')
 	script(src='/javascripts/create_game/selected_decks.js')
 	script
-		//- Eventually, this will load default decks instead of nothing
 		| selected_decks.init(!{JSON.stringify(auto_load_decks)});
 	script(src='/javascripts/create_game/deck_row_signals.js')
 	script(src='/javascripts/create_game/deck_row_manager.js')
