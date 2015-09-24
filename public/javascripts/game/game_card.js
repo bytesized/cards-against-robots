@@ -302,6 +302,14 @@ $(document).ready(function()
 
 		$(game_card.czar_card_group_class).addClass('disable_all');
 
+		target.append(
+			'<div class=\'centered_absolute\'>' +
+				'<h3 style=\'margin: 0px\'><span class=\'label label-default\'>' +
+					'<span class=\'glyphicon glyphicon-transfer\'></span> Submitting' +
+				'</span></h3>' +
+			'</div>'
+			);
+
 		room_socket.emit('choose_czar_card', card_object.player_id);
 	};
 	if (player.czar === current_user.id)
