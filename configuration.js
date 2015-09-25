@@ -2,6 +2,7 @@
 var fs = require('fs');
 var path = require('path');
 var object_attribute = require(path.normalize(path.join(__dirname, 'common', 'object_attribute')));
+var secret = require(path.normalize(path.join(__dirname, 'common', 'secret')));
 
 // The configuration itself. Will be set when reload() is called
 var config_object;
@@ -44,6 +45,22 @@ var set_default_config = function()
 	config_object.card.padding = 5;
 };
 
+// This function allows for new versions of the program to operate with old versions of the config
+// by generating acceptable new values for missing (but required) values
+var check_required = function()
+{
+	var changed = false;
+
+	if (!config_object.session_secret)
+	{
+		changed = true;
+		config_object.session_secret = secret.generate(256, true).toString();
+	}
+
+	if (changed && config_object.properties.is_configured)
+		save_sync();
+};
+
 // Load configuration if it exists
 var reload = function()
 {
@@ -63,6 +80,7 @@ var reload = function()
 			throw error;
 		}
 	}
+
 	config_object.properties = {
 		filename      : filename,
 		is_configured : is_configured
@@ -73,6 +91,8 @@ var reload = function()
 		reload    : reload,
 		save_sync : save_sync
 	};
+
+	check_required();
 };
 reload();
 

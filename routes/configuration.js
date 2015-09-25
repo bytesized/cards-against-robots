@@ -12,6 +12,7 @@ var user = require(path.normalize(path.join(__dirname, '..', 'db', 'user')));
 var object_attribute = require(path.normalize(path.join(__dirname, '..', 'common', 'object_attribute')));
 var card = require(path.normalize(path.join(__dirname, '..', 'db', 'card')));
 var deck = require(path.normalize(path.join(__dirname, '..', 'db', 'deck')));
+var secret = require(path.normalize(path.join(__dirname, '..', 'common', 'secret')));
 
 var states = {
 	unconfigured: 'unconfigured',
@@ -121,6 +122,17 @@ var config_fields =
 				return false;
 		},
 		is_checkbox: true
+	},
+	{
+		name: 'session_secret',
+		form_name: 'session_secret',
+		sanitize: function(req, name)
+		{
+			if (req.body[name] !== '')
+				return req.body[name];
+			else
+				return secret.generate(256, true).toString();
+		}
 	},
 	{
 		name: 'invitations_required',

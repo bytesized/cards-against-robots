@@ -20,6 +20,7 @@ block content
 	//- Omit MYSQL password
 	- if (typeof form_data.mysql.connection_limit === 'undefined')  form_data.mysql.connection_limit = '100';
 	- if (typeof form_data.mysql.ssl === 'undefined')               form_data.mysql.ssl              = false;
+	- if (typeof form_data.session_secret === 'undefined')          form_data.session_secret         = '';
 	- if (typeof form_data.invitations_required === 'undefined')    form_data.invitations_required   = false;
 	- if (!form_data.field_sizes) form_data.field_sizes = {};
 	- if (typeof form_data.field_sizes.token === 'undefined')       form_data.field_sizes.token      = '50';
@@ -138,6 +139,14 @@ block content
 			.col-xs-10
 				input.form-control.no_transform(type='checkbox', style='width: auto;', id='mysql_ssl_checkbox', name='mysql_ssl', checked=form_data.mysql.ssl, disabled=inputs_disabled)
 				span.help-block If checked, a PFX key will be loaded from keys/mysql.pfx and used to encrypt the MYSQL connection
+		.form-group(class=input_status.session_secret)
+			label.control-label.col-xs-2(for='session_secret_input') Session Secret
+			.col-xs-10
+				input.form-control.no_transform(type='text', id='session_secret_input', name='session_secret', placeholder='Secret', value=form_data.session_secret, readonly=inputs_disabled)
+				span.help-block
+					| A secret used to sign session ID cookies. If you leave this field empty, a secure secret will be generated for you. 
+					| A specific secret should probably only be specified if you want more security than the randomly generated secret will 
+					| provide or if you need this secret to match an existing one in use by another server.
 		.form-group(class=input_status.invitations_required)
 			label.control-label.col-xs-2(for='invitations_required_checkbox') Require Invitations
 			.col-xs-10

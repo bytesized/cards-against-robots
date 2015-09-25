@@ -22,4 +22,4 @@ As Cards Against Humanity&trade; uses the [Creative Commons BY-NC-SA 2.0 license
 - There is currently no way to change password
 - Currently, the standard decks are automatically added to the list of decks to play with in the "Create Game" page. The only way to change what decks are added like this is to manually edit configuration file. 
 - There is currently no way (other than manual SQL commands) to lock users, delete users, and promote/demote users to/from Administrator.
-- Currently, connection.session() is being used, which is not designed for a production environment as it will leak memory and will only work within a single process. This must be changed ASAP, especially if the site sees much usage.
+- Room data is currently stored in memory. This needs to be changed to be stored in the database
