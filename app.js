@@ -13,6 +13,7 @@ module.exports = function(app, server)
 	Promise.promisifyAll(require("mysql/lib/Pool").prototype);
 	Promise.promisifyAll(require('bcryptjs'));
 
+	var fs = require('fs');
 	var favicon = require('serve-favicon');
 	var express = require('express');
 	var logger = require('morgan');
@@ -31,6 +32,7 @@ module.exports = function(app, server)
 	app_config.config_routes = require(path.join(__dirname, 'config', 'config_routes'));
 	app_config.flash = require(path.join(__dirname, 'config', 'flash'));
 	app_config.configuration = require(path.join(__dirname, 'config', 'configuration'));
+
 	app_config.session_middleware = require(path.join(__dirname, 'config', 'session_middleware'));
 	app_config.force_domain = require(path.join(__dirname, 'config', 'force_domain'));
 	// Some modules should be initialized when the server starts, but aren't actually needed
@@ -45,7 +47,9 @@ module.exports = function(app, server)
 	app.set('view engine', 'jade');
 
 	// uncomment after placing your favicon in /public
-	//app.use(favicon(path.join(__dirname, 'public/favicon.ico')));
+	var favicon_path = path.join(__dirname, 'public/favicon.ico')
+	if (fs.existsSync(favicon_path))
+		app.use(favicon(favicon_path));
 	app.use(logger('dev'));
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({ extended: false }));
