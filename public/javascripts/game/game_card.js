@@ -300,7 +300,7 @@ $(document).ready(function()
 		if (!card_object)
 			return;
 
-		$(game_card.czar_card_group_class).addClass('disable_all');
+		$(game_card.czar_card_group_selector).addClass('disable_all');
 
 		target.append(
 			'<div class=\'centered_absolute\'>' +
